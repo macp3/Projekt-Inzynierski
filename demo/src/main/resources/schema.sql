@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Paź 05, 2025 at 03:30 PM
+-- Generation Time: Paź 05, 2025 at 09:23 PM
 -- Wersja serwera: 10.4.32-MariaDB
 -- Wersja PHP: 8.2.12
 
@@ -110,7 +110,7 @@ CREATE TABLE `exercises` (
   `description` varchar(100) NOT NULL,
   `type` varchar(50) NOT NULL,
   `difficulty` int(11) NOT NULL,
-  `number_of_sets` int(11) NOT NULL,
+  `numberOfSets` int(11) NOT NULL,
   `intensivity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -164,7 +164,7 @@ CREATE TABLE `notifications` (
   `author_id` int(11) NOT NULL,
   `name` varchar(30) NOT NULL,
   `description` varchar(100) NOT NULL,
-  `recipients` enum('premium','non_premium') NOT NULL,
+  `recipients` enum('premium','non_premium','all') NOT NULL,
   `sending_time` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -214,15 +214,15 @@ CREATE TABLE `reported_meals` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla tabeli `training`
+-- Struktura tabeli dla tabeli `trainings`
 --
 
-CREATE TABLE `training` (
+CREATE TABLE `trainings` (
   `id` int(11) NOT NULL,
   `training_id` int(11) NOT NULL,
   `author_id` int(11) NOT NULL,
-  `excercise_id` int(11) NOT NULL,
-  `day_of_excercise` int(11) NOT NULL
+  `exercise_id` int(11) NOT NULL,
+  `day_of_exercise` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -371,13 +371,13 @@ ALTER TABLE `reported_meals`
   ADD KEY `meal_id` (`meal_id`);
 
 --
--- Indeksy dla tabeli `training`
+-- Indeksy dla tabeli `trainings`
 --
-ALTER TABLE `training`
+ALTER TABLE `trainings`
   ADD PRIMARY KEY (`id`),
   ADD KEY `training_id` (`training_id`),
   ADD KEY `author_id` (`author_id`),
-  ADD KEY `excercise_id` (`excercise_id`);
+  ADD KEY `excercise_id` (`exercise_id`);
 
 --
 -- Indeksy dla tabeli `trainings_info`
@@ -477,9 +477,9 @@ ALTER TABLE `reported_meals`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `training`
+-- AUTO_INCREMENT for table `trainings`
 --
-ALTER TABLE `training`
+ALTER TABLE `trainings`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -578,19 +578,19 @@ ALTER TABLE `reported_meals`
   ADD CONSTRAINT `reported_meals_ibfk_2` FOREIGN KEY (`meal_id`) REFERENCES `essential_food` (`id`);
 
 --
--- Constraints for table `training`
+-- Constraints for table `trainings`
 --
-ALTER TABLE `training`
-  ADD CONSTRAINT `training_ibfk_1` FOREIGN KEY (`excercise_id`) REFERENCES `exercises` (`id`),
-  ADD CONSTRAINT `training_ibfk_2` FOREIGN KEY (`author_id`) REFERENCES `admins` (`id`),
-  ADD CONSTRAINT `training_ibfk_3` FOREIGN KEY (`training_id`) REFERENCES `trainings_info` (`id`);
+ALTER TABLE `trainings`
+  ADD CONSTRAINT `trainings_ibfk_1` FOREIGN KEY (`exercise_id`) REFERENCES `exercises` (`id`),
+  ADD CONSTRAINT `trainings_ibfk_2` FOREIGN KEY (`author_id`) REFERENCES `admins` (`id`),
+  ADD CONSTRAINT `trainings_ibfk_3` FOREIGN KEY (`training_id`) REFERENCES `trainings_info` (`id`);
 
 --
 -- Constraints for table `user_trainings`
 --
 ALTER TABLE `user_trainings`
   ADD CONSTRAINT `user_trainings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `user_trainings_ibfk_2` FOREIGN KEY (`training_id`) REFERENCES `training` (`id`);
+  ADD CONSTRAINT `user_trainings_ibfk_2` FOREIGN KEY (`training_id`) REFERENCES `trainings` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

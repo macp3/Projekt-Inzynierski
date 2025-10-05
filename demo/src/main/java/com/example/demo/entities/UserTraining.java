@@ -1,0 +1,21 @@
+package com.example.demo.entities;
+
+import jakarta.persistence.*;
+
+import java.util.Date;
+
+@Entity
+@Table(name = "user_trainings")
+public class UserTraining
+{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
+    //czy tutaj kluczem glownym nie powinno byc po prostu pole "id" zamiast "user_id"?
+    //bo tutaj klucz glowny ma auto inkrementacje i w momencie gdy user sobie przypisze (zmieni obecny na) kolejny trening to zinkrementuje nam sie user_id a nie cos inego a tak nie powinno byc bo w tej tabeli w tym momencie mozemy miec user_id równy 5 a faktycznie zarejestrowanych tylko dwoch uzytkownikow xd
+    //help
+    private int userId;
+    @Column(name = "training_id")
+    private int trainingId;
+    private Date timestamp;
+}
