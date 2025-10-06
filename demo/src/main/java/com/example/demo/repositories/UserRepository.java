@@ -17,6 +17,7 @@ import com.example.demo.entities.enums.Status;
 public interface UserRepository extends JpaRepository<User, Integer> {
 
     boolean existsByEmail(String email);
+    boolean existsById(int id);
 
     Optional<User> findByEmail(String email);
 
@@ -25,7 +26,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     void changePassword(int userId, String password);
 
     @Modifying
-    @Query("UPDATE User u SET u.password = :password WHERE u.id = :userId")
+    @Query("UPDATE User u SET u.prefferedDiet = :preferredDiet WHERE u.id = :userId")
     void changePrefferedDiet(int userId, String prefferedDiet);
 
     @Modifying
