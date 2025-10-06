@@ -19,4 +19,37 @@ public class ReportedMeal
     private int mealId;
     @NotNull
     private String content;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getReportingId() {
+        return reportingId;
+    }
+
+    public void setReportingId(int reportingId) {
+        this.reportingId = reportingId;
+    }
+
+    public int getMealId() {
+        return mealId;
+    }
+
+    public void setMealId(int mealId) {
+        this.mealId = mealId;
+    }
+
+    @NotNull
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(@NotNull String content) {
+        this.content = content;
+    }
 }

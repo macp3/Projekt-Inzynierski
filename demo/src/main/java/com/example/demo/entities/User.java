@@ -44,5 +44,100 @@ public class User
     @NotNull
     private int streak;
 
+    public int getId() {
+        return id;
+    }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @NotNull
+    public String getName() {
+        return name;
+    }
+
+    public void setName(@NotNull String name) {
+        this.name = name;
+    }
+
+    @NotNull
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(@NotNull String surname) {
+        this.surname = surname;
+    }
+
+    @NotNull
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(@NotNull String email) {
+        this.email = email;
+    }
+
+    @NotNull
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(@NotNull String login) {
+        this.login = login;
+    }
+
+    @NotNull
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(@NotNull String password) {
+        this.password = password;
+    }
+
+    @Nullable
+    public BufferedImage getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(@Nullable BufferedImage profilePicture) {
+        this.profilePicture = profilePicture;
+    }
+
+    @Nullable
+    public Date getPremiumExpiration() {
+        return premiumExpiration;
+    }
+
+    public void setPremiumExpiration(@Nullable Date premiumExpiration) {
+        this.premiumExpiration = premiumExpiration;
+    }
+
+    @NotNull
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(@NotNull Status status) {
+        this.status = status;
+    }
+
+    @Nullable
+    public String getPrefferedDiet() {
+        return prefferedDiet;
+    }
+
+    public void setPrefferedDiet(@Nullable String prefferedDiet) {
+        this.prefferedDiet = prefferedDiet;
+    }
+
+    public int getStreak() {
+        return streak;
+    }
+
+    public void setStreak(int streak) {
+        this.streak = streak;
+    }
 }

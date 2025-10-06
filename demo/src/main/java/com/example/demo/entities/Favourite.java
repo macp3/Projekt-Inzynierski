@@ -21,4 +21,36 @@ public class Favourite
     @Column(name = "meal_api_id")
     @Nullable
     private int mealApiId;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public int getMealId() {
+        return mealId;
+    }
+
+    public void setMealId(int mealId) {
+        this.mealId = mealId;
+    }
+
+    public int getMealApiId() {
+        return mealApiId;
+    }
+
+    public void setMealApiId(int mealApiId) {
+        this.mealApiId = mealApiId;
+    }
 }

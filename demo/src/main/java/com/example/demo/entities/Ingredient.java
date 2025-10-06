@@ -23,4 +23,45 @@ public class Ingredient
     private int essentialApiId;
     @NotNull
     private float amount;
+
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getMealId() {
+        return mealId;
+    }
+
+    public void setMealId(int mealId) {
+        this.mealId = mealId;
+    }
+
+    public int getEssentialId() {
+        return essentialId;
+    }
+
+    public void setEssentialId(int essentialId) {
+        this.essentialId = essentialId;
+    }
+
+    public int getEssentialApiId() {
+        return essentialApiId;
+    }
+
+    public void setEssentialApiId(int essentialApiId) {
+        this.essentialApiId = essentialApiId;
+    }
+
+    public float getAmount() {
+        return amount;
+    }
+
+    public void setAmount(float amount) {
+        this.amount = amount;
+    }
 }

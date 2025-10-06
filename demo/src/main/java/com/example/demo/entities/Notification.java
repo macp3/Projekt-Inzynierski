@@ -27,4 +27,55 @@ public class Notification
     @Column(name = "sending_time")
     private Date sendingTime;
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(int authorId) {
+        this.authorId = authorId;
+    }
+
+    @NotNull
+    public String getName() {
+        return name;
+    }
+
+    public void setName(@NotNull String name) {
+        this.name = name;
+    }
+
+    @NotNull
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(@NotNull String description) {
+        this.description = description;
+    }
+
+    @NotNull
+    public Recipients getRecipients() {
+        return recipients;
+    }
+
+    public void setRecipients(@NotNull Recipients recipients) {
+        this.recipients = recipients;
+    }
+
+    @NotNull
+    public Date getSendingTime() {
+        return sendingTime;
+    }
+
+    public void setSendingTime(@NotNull Date sendingTime) {
+        this.sendingTime = sendingTime;
+    }
 }

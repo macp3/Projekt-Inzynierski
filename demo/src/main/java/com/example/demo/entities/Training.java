@@ -23,4 +23,44 @@ public class Training
     @NotNull
     @Column(name = "day_of_exercise")
     private int dayOfExercise;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getTrainingId() {
+        return trainingId;
+    }
+
+    public void setTrainingId(int trainingId) {
+        this.trainingId = trainingId;
+    }
+
+    public int getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(int authorId) {
+        this.authorId = authorId;
+    }
+
+    public int getExerciseId() {
+        return exerciseId;
+    }
+
+    public void setExerciseId(int exerciseId) {
+        this.exerciseId = exerciseId;
+    }
+
+    public int getDayOfExercise() {
+        return dayOfExercise;
+    }
+
+    public void setDayOfExercise(int dayOfExercise) {
+        this.dayOfExercise = dayOfExercise;
+    }
 }

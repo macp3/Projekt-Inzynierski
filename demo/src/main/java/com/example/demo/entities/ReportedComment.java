@@ -19,4 +19,37 @@ public class ReportedComment
     private int commentId;
     @NotNull
     private String content;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getReportingId() {
+        return reportingId;
+    }
+
+    public void setReportingId(int reportingId) {
+        this.reportingId = reportingId;
+    }
+
+    public int getCommentId() {
+        return commentId;
+    }
+
+    public void setCommentId(int commentId) {
+        this.commentId = commentId;
+    }
+
+    @NotNull
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(@NotNull String content) {
+        this.content = content;
+    }
 }

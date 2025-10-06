@@ -22,4 +22,29 @@ public class UserTraining
     private int trainingId;
     @NotNull
     private Date timestamp;
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public int getTrainingId() {
+        return trainingId;
+    }
+
+    public void setTrainingId(int trainingId) {
+        this.trainingId = trainingId;
+    }
+
+    @NotNull
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(@NotNull Date timestamp) {
+        this.timestamp = timestamp;
+    }
 }

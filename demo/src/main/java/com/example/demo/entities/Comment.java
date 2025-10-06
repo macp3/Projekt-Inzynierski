@@ -19,4 +19,37 @@ public class Comment
     @NotNull
     @Column (name = "author_id")
     private int mealId;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(int authorId) {
+        this.authorId = authorId;
+    }
+
+    @NotNull
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(@NotNull String content) {
+        this.content = content;
+    }
+
+    public int getMealId() {
+        return mealId;
+    }
+
+    public void setMealId(int mealId) {
+        this.mealId = mealId;
+    }
 }
