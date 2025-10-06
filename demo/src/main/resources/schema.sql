@@ -249,10 +249,10 @@ CREATE TABLE `users` (
   `surname` varchar(30) NOT NULL,
   `email` varchar(40) NOT NULL,
   `login` varchar(40) NOT NULL,
-  `password` varchar(40) NOT NULL,
+  `password` varchar(500) NOT NULL,
   `profile_picture` blob DEFAULT NULL,
-  `premium-expiration` date DEFAULT NULL,
-  `status` enum('banned','active') NOT NULL,
+  `premium_expiration` date DEFAULT NULL,
+  `status` enum('banned','active', 'inactive') NOT NULL,
   `preffered_diet` varchar(40) DEFAULT NULL,
   `streak` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

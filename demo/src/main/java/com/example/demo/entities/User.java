@@ -1,23 +1,31 @@
 package com.example.demo.entities;
 
-import com.example.demo.entities.enums.Status;
-import jakarta.annotation.Nullable;
-import jakarta.persistence.*;
+import java.util.Date;
+
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.image.BufferedImage;
-import java.util.Date;
+import com.example.demo.entities.enums.Status;
+
+import jakarta.annotation.Nullable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
-public class User
-{
+public class User {
+
     @Id
     @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @NotNull
-    private  String name;
+    private String name;
     @NotNull
     private String surname;
     @NotNull
@@ -31,7 +39,7 @@ public class User
 
     //nad tym bedzie sie trzeba zastnowic jak zrobic image w sql - narazie zostawiam bez adnotacji
     @Nullable
-    private BufferedImage profilePicture;
+    private byte[] profilePicture;
     @Column(name = "premium_expiration")
     @Nullable
     private Date premiumExpiration;
@@ -98,11 +106,11 @@ public class User
     }
 
     @Nullable
-    public BufferedImage getProfilePicture() {
+    public byte[] getProfilePicture() {
         return profilePicture;
     }
 
-    public void setProfilePicture(@Nullable BufferedImage profilePicture) {
+    public void setProfilePicture(@Nullable byte[] profilePicture) {
         this.profilePicture = profilePicture;
     }
 

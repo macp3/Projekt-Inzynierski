@@ -3,7 +3,7 @@ package com.example.demo.entities;
 import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.image.BufferedImage;
+//import java.awt.image.BufferedImage;
 
 @Entity
 @Table(name="badges")
@@ -20,7 +20,7 @@ public class Badge
     private String badge;
     @Column(name = "badge_logo")
     @NotNull
-    private BufferedImage badgeLogo;
+    private byte[] badgeLogo;
 
     public int getId() {
         return id;
@@ -48,11 +48,11 @@ public class Badge
     }
 
     @NotNull
-    public BufferedImage getBadgeLogo() {
+    public byte[] getBadgeLogo() {
         return badgeLogo;
     }
 
-    public void setBadgeLogo(@NotNull BufferedImage badgeLogo) {
+    public void setBadgeLogo(@NotNull byte[] badgeLogo) {
         this.badgeLogo = badgeLogo;
     }
 }

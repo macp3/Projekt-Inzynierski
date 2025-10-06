@@ -17,7 +17,7 @@ public class Comment
     @NotNull
     private String content;
     @NotNull
-    @Column (name = "author_id")
+    @Column (name = "meal_id")
     private int mealId;
 
     public int getId() {
