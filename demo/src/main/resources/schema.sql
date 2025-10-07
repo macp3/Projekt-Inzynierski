@@ -62,6 +62,7 @@ CREATE TABLE `body_parameters` (
   `goal_weight` float NOT NULL,
   `daily_activity_factor` float NOT NULL,
   `daily_activity_training_factor` float NOT NULL,
+  `weekly_weight_change_tempo` float NOT NULL,
   `calorie_limit` float NOT NULL,
   `protein_limit` float NOT NULL,
   `fat_limit` float NOT NULL,
