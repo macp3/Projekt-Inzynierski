@@ -23,9 +23,15 @@ public class BodyParameters
     private float weight;
     @NotNull
     private int age;
-    @Column(name = "sport_level")
+    @Column(name = "daily_activity_factor")
     @NotNull
-    private int sportLevel;
+    private float dailyActivityFactor;
+    @Column(name = "daily_activity_training_factor")
+    @NotNull
+    private float dailyActivityTrainingFactor;
+    @Column(name = "weekly_weight_change_tempo")
+    @NotNull
+    private float weeklyWeightChangeTempo;
     @Column(name = "goal_weight")
     @NotNull
     private float goalWeight;
@@ -83,12 +89,20 @@ public class BodyParameters
         this.age = age;
     }
 
-    public int getSportLevel() {
-        return sportLevel;
+    public float getDailyActivityFactor() {
+        return dailyActivityFactor;
     }
 
-    public void setSportLevel(int sportLevel) {
-        this.sportLevel = sportLevel;
+    public void setDailyActivityFactor(float dailyActivityFactor) {
+        this.dailyActivityFactor = dailyActivityFactor;
+    }
+
+    public float getDailyActivityTrainingFactor() {
+        return dailyActivityTrainingFactor;
+    }
+
+    public void setDailyActivityTrainingFactor(float dailyActivityTrainingFactor) {
+        this.dailyActivityTrainingFactor = dailyActivityTrainingFactor;
     }
 
     public float getGoalWeight() {
@@ -129,5 +143,13 @@ public class BodyParameters
 
     public void setCarbohydratesLimit(float carbohydratesLimit) {
         this.carbohydratesLimit = carbohydratesLimit;
+    }
+
+    public float getWeeklyWeightChangeTempo() {
+        return weeklyWeightChangeTempo;
+    }
+
+    public void setWeeklyWeightChangeTempo(float weeklyWeightChangeTempo) {
+        this.weeklyWeightChangeTempo = weeklyWeightChangeTempo;
     }
 }

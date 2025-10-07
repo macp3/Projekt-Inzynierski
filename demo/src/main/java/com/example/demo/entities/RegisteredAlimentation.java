@@ -4,6 +4,7 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -27,7 +28,7 @@ public class RegisteredAlimentation
     @Nullable
     private int mealId;
     @NotNull
-    private Date timestamp;
+    private LocalDate timestamp;
     @NotNull
     private float weight;
     @NotNull
@@ -74,11 +75,11 @@ public class RegisteredAlimentation
     }
 
     @NotNull
-    public Date getTimestamp() {
+    public LocalDate getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(@NotNull Date timestamp) {
+    public void setTimestamp(@NotNull LocalDate timestamp) {
         this.timestamp = timestamp;
     }
 

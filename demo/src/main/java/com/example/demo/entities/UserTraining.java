@@ -3,6 +3,7 @@ package com.example.demo.entities;
 import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -21,7 +22,7 @@ public class UserTraining
     @NotNull
     private int trainingId;
     @NotNull
-    private Date timestamp;
+    private LocalDate timestamp;
 
     public int getUserId() {
         return userId;
@@ -40,11 +41,11 @@ public class UserTraining
     }
 
     @NotNull
-    public Date getTimestamp() {
+    public LocalDate getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(@NotNull Date timestamp) {
+    public void setTimestamp(@NotNull LocalDate timestamp) {
         this.timestamp = timestamp;
     }
 }

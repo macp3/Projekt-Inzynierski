@@ -4,6 +4,7 @@ import com.example.demo.entities.enums.Recipients;
 import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -25,7 +26,7 @@ public class Notification
     private Recipients recipients;
     @NotNull
     @Column(name = "sending_time")
-    private Date sendingTime;
+    private LocalDate sendingTime;
 
     public int getId() {
         return id;
@@ -71,11 +72,11 @@ public class Notification
     }
 
     @NotNull
-    public Date getSendingTime() {
+    public LocalDate getSendingTime() {
         return sendingTime;
     }
 
-    public void setSendingTime(@NotNull Date sendingTime) {
+    public void setSendingTime(@NotNull LocalDate sendingTime) {
         this.sendingTime = sendingTime;
     }
 }

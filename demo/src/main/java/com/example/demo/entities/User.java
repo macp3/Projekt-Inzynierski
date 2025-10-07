@@ -1,5 +1,6 @@
 package com.example.demo.entities;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import org.jetbrains.annotations.NotNull;
@@ -37,12 +38,12 @@ public class User {
     @NotNull
     private String password;
 
-    //nad tym bedzie sie trzeba zastnowic jak zrobic image w sql - narazie zostawiam bez adnotacji
+    @Column(name = "profile_picture")
     @Nullable
     private byte[] profilePicture;
     @Column(name = "premium_expiration")
     @Nullable
-    private Date premiumExpiration;
+    private LocalDate premiumExpiration;
     @NotNull
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -115,11 +116,11 @@ public class User {
     }
 
     @Nullable
-    public Date getPremiumExpiration() {
+    public LocalDate getPremiumExpiration() {
         return premiumExpiration;
     }
 
-    public void setPremiumExpiration(@Nullable Date premiumExpiration) {
+    public void setPremiumExpiration(@Nullable LocalDate premiumExpiration) {
         this.premiumExpiration = premiumExpiration;
     }
 
