@@ -1,16 +1,16 @@
 package com.example.demo.services;
 
-import com.example.demo.entities.User;
-import com.example.demo.entities.enums.Sex;
-import com.example.demo.entities.enums.Status;
-import org.springframework.stereotype.Service;
-
-import com.example.demo.repositories.UserRepository;
-
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import com.example.demo.entities.User;
+import com.example.demo.entities.enums.Sex;
+import com.example.demo.entities.enums.Status;
+import com.example.demo.repositories.UserRepository;
 
 @Service
 public class UserService {
@@ -21,13 +21,11 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public List<User> getAllUsers()
-    {
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    public Optional<User> getUserById(int id)
-    {
+    public Optional<User> getUserById(int id) {
         return userRepository.findById(id);
     }
 
@@ -53,7 +51,8 @@ public class UserService {
     }
 
     //do naprawy w strukturze bazy danych (String -> enum)
-    public void changePrefferedDiet(int userId, String prefferedDiet){}
+    public void changePrefferedDiet(int userId, String prefferedDiet) {
+    }
 
     //do rozbudowania:
     //po pierwsze pole daily_activity_factor na podstawie ktorego bedziemy obliczac limity
@@ -61,8 +60,7 @@ public class UserService {
     //po trzecie mozliwosc edytowania ww. daily_activity_factor
     //po czwarte pole weight_change_tempo (0 - 1kg na tydzien) 0 = deficyt 0kcal | 1kg/tydzien = deficyt 100kcal itd. i to tez edytowalne
     //TAK DZIALA FITATU
-    public void changeBodyParameters(int userId, Sex sex, float height, float weight, int age, int sportLevel, float goalWeight, float calorieLimit, float proteinLimit, float fatLimit, float carbohydratesLimit)
-    {
+    public void changeBodyParameters(int userId, Sex sex, float height, float weight, int age, int sportLevel, float goalWeight, float calorieLimit, float proteinLimit, float fatLimit, float carbohydratesLimit) {
         if (userId <= 0) {
             System.out.println("UserID must be greater than zero");
             return;
@@ -75,44 +73,37 @@ public class UserService {
             return;
         }
 
-        if(sex == null)
-        {
+        if (sex == null) {
             System.out.println("Unknown sex");
             return;
         }
 
-        if(height < 0 || weight < 0 || age < 0)
-        {
+        if (height < 0 || weight < 0 || age < 0) {
             System.out.println("Height, weight and age must be greater than zero");
             return;
         }
 
-        if(sportLevel > 3 || sportLevel < 1)
-        {
+        if (sportLevel > 3 || sportLevel < 1) {
             System.out.println("Your sport level must be 1, 2 or 3");
             return;
         }
 
-        if(goalWeight < 0)
-        {
+        if (goalWeight < 0) {
             System.out.println("Your goal weight must be greater than zero");
             return;
         }
 
-        if(calorieLimit < 0 || proteinLimit < 0 || fatLimit < 0 || carbohydratesLimit < 0)
-        {
+        if (calorieLimit < 0 || proteinLimit < 0 || fatLimit < 0 || carbohydratesLimit < 0) {
             System.out.println("Macronutrients must be greater than zero");
             return;
         }
 
         //tutaj oblicz zapotrzebowanie i limity makroskladnikow
-
         User user = optionalUser.get();
         userRepository.changeBodyParameters(userId, sex, height, weight, age, sportLevel, goalWeight, calorieLimit, proteinLimit, fatLimit, carbohydratesLimit);
     }
 
-    public void updateStreak(int userId, int streak)
-    {
+    public void updateStreak(int userId, int streak) {
         if (userId <= 0) {
             System.out.println("UserID must be greater than zero");
             return;
@@ -124,11 +115,11 @@ public class UserService {
             return;
         }
         User user = optionalUser.get();
-        userRepository.updateStreak(userId, streak);
+        user.setStreak(streak);
+        userRepository.save(user);
     }
 
-    public void updateStatus(int userId, Status status)
-    {
+    public void updateStatus(int userId, Status status) {
         if (userId <= 0) {
             System.out.println("UserID must be greater than zero");
             return;
@@ -140,8 +131,7 @@ public class UserService {
             return;
         }
 
-        if(status == null)
-        {
+        if (status == null) {
             System.out.println("Specify the user's new status");
             return;
         }
@@ -150,8 +140,7 @@ public class UserService {
         userRepository.updateStatus(userId, status);
     }
 
-    public void updatePremiumExpiration(int userId, Date date)
-    {
+    public void updatePremiumExpiration(int userId, Date date) {
         if (userId <= 0) {
             System.out.println("UserID must be greater than zero");
             return;
@@ -166,7 +155,6 @@ public class UserService {
         //zmien wszystkie Date na LocalDate w encjach - bedzie latwiej
         //przyrownaj premiumExpirationDate do teraz
         LocalDate now = LocalDate.now();
-
 
         User user = optionalUser.get();
         userRepository.updatePremiumExpiration(userId, date);
