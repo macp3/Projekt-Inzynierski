@@ -111,4 +111,12 @@ public class EssentialFood {
     public void setDefaultWeight(float defaultWeight) {
         this.defaultWeight = defaultWeight;
     }
+
+    public String getServingSizeUnit() {
+        return servingSizeUnit;
+    }
+
+    public void setServingSizeUnit(String servingSizeUnit) {
+        this.servingSizeUnit = servingSizeUnit;
+    }
 }
