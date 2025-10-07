@@ -1,12 +1,18 @@
 package com.example.demo.entities;
 
-import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "essential_food")
-public class EssentialFood
-{
+public class EssentialFood {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull
@@ -26,6 +32,8 @@ public class EssentialFood
     private float fat;
     @NotNull
     private float carbohydrates;
+    @Column(name = "serving_size_unit")
+    private String servingSizeUnit;
     @NotNull
     @Column(name = "default_weight")
     private float defaultWeight;
