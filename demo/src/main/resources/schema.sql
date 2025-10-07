@@ -97,7 +97,8 @@ CREATE TABLE `essential_food` (
   `protein` float NOT NULL,
   `fat` float NOT NULL,
   `carbohydrates` float NOT NULL,
-  `default_weight` float NOT NULL
+  `default_weight` float NOT NULL,
+  `serving_size_unit` varchar(50)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
