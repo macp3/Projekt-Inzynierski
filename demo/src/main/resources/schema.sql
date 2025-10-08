@@ -85,6 +85,17 @@ CREATE TABLE `comments` (
 -- --------------------------------------------------------
 
 --
+-- Struktura tabeli dla tabeli `diet_types`
+--
+
+CREATE TABLE `diet_types` (
+  `id` int(11) NOT NULL,
+  `name` enum('balanced','keto', 'low_carb', 'high_protein', 'low_fat', 'vegan', 'vegetarian', 'gluten_free', 'lactose_free') NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Struktura tabeli dla tabeli `essential_food`
 --
 
@@ -156,6 +167,18 @@ CREATE TABLE `meals` (
   `author_id` int(11) NOT NULL,
   `description` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Struktura tabeli dla tabeli `meal_diet_types`
+--
+
+CREATE TABLE `meal_diet_types` (
+  `id` int(11) NOT NULL,
+  `meal_id` int(11) NOT NULL,
+  `diet_type_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
 
 -- --------------------------------------------------------
 
@@ -307,6 +330,12 @@ ALTER TABLE `comments`
   ADD KEY `meal_id` (`meal_id`);
 
 --
+-- Indeksy dla tabeli `diet_types`
+--
+ALTER TABLE `diet_types`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indeksy dla tabeli `essential_food`
 --
 ALTER TABLE `essential_food`
@@ -341,6 +370,14 @@ ALTER TABLE `ingredients`
 ALTER TABLE `meals`
   ADD PRIMARY KEY (`id`),
   ADD KEY `author_id` (`author_id`);
+
+--
+-- Indeksy dla tabeli `meal_diet_types`
+--
+ALTER TABLE `meal_diet_types`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `meal_id` (`meal_id`),
+  ADD KEY `diet_type_id` (`diet_type_id`);
 
 --
 -- Indeksy dla tabeli `notifications`
@@ -552,6 +589,13 @@ ALTER TABLE `ingredients`
 --
 ALTER TABLE `meals`
   ADD CONSTRAINT `meals_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `meal_diet_types`
+--
+ALTER TABLE `meal_diet_types`
+  ADD CONSTRAINT `meal_diet_types_meal_fk` FOREIGN KEY (`meal_id`) REFERENCES `meals`(`id`),
+  ADD CONSTRAINT `meal_diet_types_diet_fk` FOREIGN KEY (`diet_type_id`) REFERENCES `diet_types`(`id`);
 
 --
 -- Constraints for table `notifications`

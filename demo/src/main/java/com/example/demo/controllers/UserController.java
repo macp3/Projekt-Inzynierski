@@ -3,6 +3,7 @@ package com.example.demo.controllers;
 import com.example.demo.entities.User;
 import com.example.demo.entities.enums.Sex;
 import com.example.demo.entities.enums.Status;
+import com.example.demo.services.JwtService;
 import com.example.demo.services.UserService;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final JwtService jwtService;
     @ResponseBody
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers()
@@ -29,11 +31,27 @@ public class UserController {
         return ResponseEntity.ok(allUsers);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUserInfo(@PathVariable int userId)
+    @GetMapping("/profile")
+    public ResponseEntity<User> getProfileInfo(@RequestHeader("Authorization") String authHeader)
     {
-        Optional<User> user = userService.getUserById(userId);
-        return user.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+
+        User user = userService.getUserByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return ResponseEntity.ok(user);
+    }
+
+    //funkcja wylacznie dla admina
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserInfo(@RequestHeader("Authorization") String authHeader)
+    {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+
+        User user = userService.getUserByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return ResponseEntity.ok(user);
     }
 
     @PutMapping("/{id}/changePassword")
