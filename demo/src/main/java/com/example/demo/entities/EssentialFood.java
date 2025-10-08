@@ -18,6 +18,7 @@ public class EssentialFood {
     @NotNull
     private int id;
     @NotNull
+    @Column(unique = true)
     private String name;
     @NotNull
     @Column(name = "author_id")
@@ -34,9 +35,10 @@ public class EssentialFood {
     private float carbohydrates;
     @Column(name = "serving_size_unit")
     private String servingSizeUnit;
-    @NotNull
     @Column(name = "default_weight")
     private float defaultWeight;
+    @Column(name = "brand_name")
+    private String brandName;
 
     public int getId() {
         return id;
@@ -118,5 +120,13 @@ public class EssentialFood {
 
     public void setServingSizeUnit(String servingSizeUnit) {
         this.servingSizeUnit = servingSizeUnit;
+    }
+
+    public String getBrandName() {
+        return brandName;
+    }
+
+    public void setBrandName(String brandName) {
+        this.brandName = brandName;
     }
 }
