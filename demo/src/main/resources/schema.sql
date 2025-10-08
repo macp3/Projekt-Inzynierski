@@ -90,15 +90,16 @@ CREATE TABLE `comments` (
 
 CREATE TABLE `essential_food` (
   `id` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL,
+  `name` varchar(50) NOT NULL UNIQUE,
   `author_id` int(11) NOT NULL,
   `description` varchar(100) NOT NULL,
   `calories` float NOT NULL,
   `protein` float NOT NULL,
   `fat` float NOT NULL,
   `carbohydrates` float NOT NULL,
-  `default_weight` float NOT NULL,
-  `serving_size_unit` varchar(50)
+  `default_weight` float,
+  `serving_size_unit` varchar(50),
+  `brand_name` varchar(50)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

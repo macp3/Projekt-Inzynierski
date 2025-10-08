@@ -13,4 +13,5 @@ public class ApiFoodResponse {
     private float fat;
     private int default_weight;
     private String servingSizeUnit;
+    private String brandName;
 }

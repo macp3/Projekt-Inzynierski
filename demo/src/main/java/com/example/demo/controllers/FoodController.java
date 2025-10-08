@@ -2,26 +2,61 @@ package com.example.demo.controllers;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.ApiFoodResponse;
-import com.example.demo.services.ExternalApiService;
+import com.example.demo.entities.EssentialFood;
+import com.example.demo.entities.User;
+import com.example.demo.services.FoodService;
+import com.example.demo.services.JwtService;
+import com.example.demo.services.UserService;
 
 @RestController
 @RequestMapping("/food")
 public class FoodController {
 
-    private final ExternalApiService ExternalApiService;
+    private final FoodService foodService;
+    private final UserService userService;
+    private final JwtService jwtService;
 
-    public FoodController(ExternalApiService ExternalApiService) {
-        this.ExternalApiService = ExternalApiService;
+    public FoodController(FoodService foodService, UserService userService, JwtService jwtService) {
+        this.foodService = foodService;
+        this.userService = userService;
+        this.jwtService = jwtService;
     }
 
     @GetMapping("/api")
     public List<ApiFoodResponse> getFoodFromApi(@RequestParam String query) {
-        return ExternalApiService.getFoodFromApi(query);
+        return foodService.getFoodFromApi(query);
+    }
+
+    @PostMapping("/add")
+    public ResponseEntity<?> addEssentialFood(@RequestBody EssentialFood food, @RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
+
+            User currentUser = userService.getUserByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            EssentialFood savedFood = foodService.addEssentialFood(food, currentUser);
+            return ResponseEntity.ok(savedFood);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<EssentialFood>> searchEssentialFood(@RequestParam String query) {
+        List<EssentialFood> results = foodService.searchEssentialFood(query);
+        return ResponseEntity.ok(results);
     }
 }

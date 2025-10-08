@@ -32,6 +32,10 @@ public class UserService {
         return userRepository.findById(id);
     }
 
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     public void changePassword(int userId, String password) {
         if (userId <= 0) {
             System.out.println("UserID must be greater than zero");
