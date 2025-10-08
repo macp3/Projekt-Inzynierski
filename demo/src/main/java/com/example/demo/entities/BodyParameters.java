@@ -13,46 +13,47 @@ public class BodyParameters
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     @NotNull
-    private int userId;
+    private Integer userId;
     @Enumerated(EnumType.STRING)
     @NotNull
     private Sex sex;
     @NotNull
-    private float height;
+    private Float height;
     @NotNull
-    private float weight;
+    private Float weight;
     @NotNull
-    private int age;
+    private Integer age;
     @Column(name = "daily_activity_factor")
     @NotNull
-    private float dailyActivityFactor;
+    private Float dailyActivityFactor;
     @Column(name = "daily_activity_training_factor")
     @NotNull
-    private float dailyActivityTrainingFactor;
+    private Float dailyActivityTrainingFactor;
     @Column(name = "weekly_weight_change_tempo")
     @NotNull
-    private float weeklyWeightChangeTempo;
+    private Float weeklyWeightChangeTempo;
     @Column(name = "goal_weight")
     @NotNull
-    private float goalWeight;
+    private Float goalWeight;
     @Column(name = "calorie_limit")
     @NotNull
-    private float calorieLimit;
+    private Float calorieLimit;
     @Column(name = "protein_limit")
     @NotNull
-    private float proteinLimit;
+    private Float proteinLimit;
     @Column(name = "fat_limit")
     @NotNull
-    private float fatLimit;
+    private Float fatLimit;
     @Column(name = "carbohydrates_limit")
     @NotNull
-    private float carbohydratesLimit;
+    private Float carbohydratesLimit;
 
-    public int getUserId() {
+    @NotNull
+    public Integer getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(@NotNull Integer userId) {
         this.userId = userId;
     }
 
@@ -65,91 +66,102 @@ public class BodyParameters
         this.sex = sex;
     }
 
-    public float getHeight() {
+    @NotNull
+    public Float getHeight() {
         return height;
     }
 
-    public void setHeight(float height) {
+    public void setHeight(@NotNull Float height) {
         this.height = height;
     }
 
-    public float getWeight() {
+    @NotNull
+    public Float getWeight() {
         return weight;
     }
 
-    public void setWeight(float weight) {
+    public void setWeight(@NotNull Float weight) {
         this.weight = weight;
     }
 
-    public int getAge() {
+    @NotNull
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(@NotNull Integer age) {
         this.age = age;
     }
 
-    public float getDailyActivityFactor() {
+    @NotNull
+    public Float getDailyActivityFactor() {
         return dailyActivityFactor;
     }
 
-    public void setDailyActivityFactor(float dailyActivityFactor) {
+    public void setDailyActivityFactor(@NotNull Float dailyActivityFactor) {
         this.dailyActivityFactor = dailyActivityFactor;
     }
 
-    public float getDailyActivityTrainingFactor() {
+    @NotNull
+    public Float getDailyActivityTrainingFactor() {
         return dailyActivityTrainingFactor;
     }
 
-    public void setDailyActivityTrainingFactor(float dailyActivityTrainingFactor) {
+    public void setDailyActivityTrainingFactor(@NotNull Float dailyActivityTrainingFactor) {
         this.dailyActivityTrainingFactor = dailyActivityTrainingFactor;
     }
 
-    public float getGoalWeight() {
-        return goalWeight;
-    }
-
-    public void setGoalWeight(float goalWeight) {
-        this.goalWeight = goalWeight;
-    }
-
-    public float getCalorieLimit() {
-        return calorieLimit;
-    }
-
-    public void setCalorieLimit(float calorieLimit) {
-        this.calorieLimit = calorieLimit;
-    }
-
-    public float getProteinLimit() {
-        return proteinLimit;
-    }
-
-    public void setProteinLimit(float proteinLimit) {
-        this.proteinLimit = proteinLimit;
-    }
-
-    public float getFatLimit() {
-        return fatLimit;
-    }
-
-    public void setFatLimit(float fatLimit) {
-        this.fatLimit = fatLimit;
-    }
-
-    public float getCarbohydratesLimit() {
-        return carbohydratesLimit;
-    }
-
-    public void setCarbohydratesLimit(float carbohydratesLimit) {
-        this.carbohydratesLimit = carbohydratesLimit;
-    }
-
-    public float getWeeklyWeightChangeTempo() {
+    @NotNull
+    public Float getWeeklyWeightChangeTempo() {
         return weeklyWeightChangeTempo;
     }
 
-    public void setWeeklyWeightChangeTempo(float weeklyWeightChangeTempo) {
+    public void setWeeklyWeightChangeTempo(@NotNull Float weeklyWeightChangeTempo) {
         this.weeklyWeightChangeTempo = weeklyWeightChangeTempo;
+    }
+
+    @NotNull
+    public Float getGoalWeight() {
+        return goalWeight;
+    }
+
+    public void setGoalWeight(@NotNull Float goalWeight) {
+        this.goalWeight = goalWeight;
+    }
+
+    @NotNull
+    public Float getCalorieLimit() {
+        return calorieLimit;
+    }
+
+    public void setCalorieLimit(@NotNull Float calorieLimit) {
+        this.calorieLimit = calorieLimit;
+    }
+
+    @NotNull
+    public Float getProteinLimit() {
+        return proteinLimit;
+    }
+
+    public void setProteinLimit(@NotNull Float proteinLimit) {
+        this.proteinLimit = proteinLimit;
+    }
+
+    @NotNull
+    public Float getFatLimit() {
+        return fatLimit;
+    }
+
+    public void setFatLimit(@NotNull Float fatLimit) {
+        this.fatLimit = fatLimit;
+    }
+
+    @NotNull
+    public Float getCarbohydratesLimit() {
+        return carbohydratesLimit;
+    }
+
+    public void setCarbohydratesLimit(@NotNull Float carbohydratesLimit) {
+        this.carbohydratesLimit = carbohydratesLimit;
     }
 }
