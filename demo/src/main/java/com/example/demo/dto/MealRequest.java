@@ -1,11 +1,9 @@
 package com.example.demo.dto;
 
-import com.example.demo.entities.Ingredient;
-
 import java.util.List;
 
-public class MealRequest
-{
+public class MealRequest {
+
     private int authorId;
     private String name;
     private String description;

@@ -102,6 +102,72 @@ public class FoodService {
 
     }
 
+    public ApiFoodResponse getFoodFromApiById(int fdcId) {
+        String url = String.format("%s/food/%d?api_key=%s", baseUrl, fdcId, apiFoodDatabaseKey);
+
+        Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+        if (response == null) {
+            throw new RuntimeException("Brak danych dla FDC ID: " + fdcId);
+        }
+
+        ApiFoodResponse dto = new ApiFoodResponse();
+        dto.setName((String) response.get("description"));
+        dto.setBrandName((String) response.getOrDefault("brandName", null));
+        dto.setServingSizeUnit((String) response.getOrDefault("servingSizeUnit", "piece"));
+
+        Object servingSizeObj = response.get("servingSize");
+        if (servingSizeObj instanceof Number servingSizeNum) {
+            dto.setDefault_weight(servingSizeNum.intValue());
+        } else {
+            dto.setDefault_weight(1);
+        }
+
+        Map<String, Object> labelNutrients = (Map<String, Object>) response.get("labelNutrients");
+        if (labelNutrients != null) {
+            dto.setCalorie((int) extractLabelValue(labelNutrients, "calories"));
+            dto.setProtein((float) extractLabelValue(labelNutrients, "protein"));
+            dto.setCarbohydrates((float) extractLabelValue(labelNutrients, "carbohydrates"));
+            dto.setSugar((float) extractLabelValue(labelNutrients, "sugars"));
+            dto.setFat((float) extractLabelValue(labelNutrients, "fat"));
+        } else {
+            List<Map<String, Object>> nutrients = (List<Map<String, Object>>) response.get("foodNutrients");
+            if (nutrients != null) {
+                for (Map<String, Object> n : nutrients) {
+                    Map<String, Object> nutrient = (Map<String, Object>) n.get("nutrient");
+                    if (nutrient == null) {
+                        continue;
+                    }
+
+                    String name = (String) nutrient.get("name");
+                    double value = ((Number) Optional.ofNullable(n.get("amount")).orElse(0)).doubleValue();
+
+                    switch (name) {
+                        case "Energy" ->
+                            dto.setCalorie((int) value);
+                        case "Protein" ->
+                            dto.setProtein((float) value);
+                        case "Carbohydrate, by difference" ->
+                            dto.setCarbohydrates((float) value);
+                        case "Total Sugars" ->
+                            dto.setSugar((float) value);
+                        case "Total lipid (fat)" ->
+                            dto.setFat((float) value);
+                    }
+                }
+            }
+        }
+
+        return dto;
+    }
+
+    private double extractLabelValue(Map<String, Object> labelNutrients, String key) {
+        Map<String, Object> nutrient = (Map<String, Object>) labelNutrients.get(key);
+        if (nutrient != null && nutrient.get("value") instanceof Number num) {
+            return num.doubleValue();
+        }
+        return 0;
+    }
+
     public EssentialFood addEssentialFood(EssentialFood food, User currentUser) {
 
         food.setAuthorId(currentUser.getId());

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -32,9 +33,14 @@ public class FoodController {
         this.jwtService = jwtService;
     }
 
-    @GetMapping("/api")
+    @GetMapping("/api/search")
     public List<ApiFoodResponse> getFoodFromApi(@RequestParam String query) {
         return foodService.getFoodFromApi(query);
+    }
+
+    @GetMapping("/api/{id}")
+    public ApiFoodResponse getFoodFromApiById(@PathVariable("id") int id) {
+        return foodService.getFoodFromApiById(id);
     }
 
     @PostMapping("/add")

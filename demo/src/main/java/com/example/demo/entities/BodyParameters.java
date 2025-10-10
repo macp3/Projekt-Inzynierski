@@ -1,14 +1,22 @@
 package com.example.demo.entities;
 
-import com.example.demo.entities.enums.Sex;
-import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import com.example.demo.entities.enums.Sex;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "body_parameters")
-public class BodyParameters
-{
+public class BodyParameters {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
