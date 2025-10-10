@@ -1,12 +1,18 @@
 package com.example.demo.entities;
 
-import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 @Entity
-@Table(name="admins")
-public class Admin
-{
+@Table(name = "admins")
+public class Admin {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull
@@ -18,7 +24,7 @@ public class Admin
     @Column(unique = true)
     @NotNull
     private String email;
-    @NotNull
+    @Column(nullable = false, length = 200)
     private String password;
 
     @NotNull

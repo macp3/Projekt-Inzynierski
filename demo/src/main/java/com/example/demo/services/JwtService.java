@@ -13,11 +13,12 @@ public class JwtService {
 
     private static final String SECRET_KEY = "supersecretkey123supersecretkey123";
 
-    public static String generateToken(String email) {
+    public String generateToken(String email, String accountType) {
         return Jwts.builder()
                 .setSubject(email)
+                .claim("type", accountType)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 3)) // 3days
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 3))
                 .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -29,5 +30,14 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    public String extractAccountType(String token) {
+        return (String) Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY.getBytes())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("type");
     }
 }
