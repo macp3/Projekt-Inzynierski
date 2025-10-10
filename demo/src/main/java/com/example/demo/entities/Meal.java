@@ -3,6 +3,9 @@ package com.example.demo.entities;
 import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "meals")
 public class Meal
@@ -15,7 +18,28 @@ public class Meal
     @Column(name = "author_id")
     private int authorId;
     @NotNull
+    private String name;
+    @NotNull
     private String description;
+    @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Ingredient> ingredients = new ArrayList<>();
+
+    public Meal()
+    {
+
+    }
+
+    public Meal(int authorId, @NotNull String name, @NotNull String description) {
+        this.authorId = authorId;
+        this.name = name;
+        this.description = description;
+    }
+
+    public void addIngredient(Ingredient ingredient)
+    {
+        ingredients.add(ingredient);
+        ingredient.setMeal(this);
+    }
 
     public int getId() {
         return id;
@@ -40,5 +64,14 @@ public class Meal
 
     public void setDescription(@NotNull String description) {
         this.description = description;
+    }
+
+    @NotNull
+    public String getName() {
+        return name;
+    }
+
+    public void setName(@NotNull String name) {
+        this.name = name;
     }
 }

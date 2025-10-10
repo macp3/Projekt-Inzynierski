@@ -3,6 +3,7 @@ package com.example.demo.entities;
 import java.time.LocalDate;
 import java.util.Date;
 
+import com.example.demo.entities.enums.DietTypes;
 import org.jetbrains.annotations.NotNull;
 
 import com.example.demo.entities.enums.Status;
@@ -48,8 +49,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Status status;
     @Column(name = "preffered_diet")
+    @Enumerated(EnumType.STRING)
     @Nullable
-    private String prefferedDiet;
+    private DietTypes prefferedDiet;
     @NotNull
     private int streak;
 
@@ -134,11 +136,11 @@ public class User {
     }
 
     @Nullable
-    public String getPrefferedDiet() {
+    public DietTypes getPrefferedDiet() {
         return prefferedDiet;
     }
 
-    public void setPrefferedDiet(@Nullable String prefferedDiet) {
+    public void setPrefferedDiet(@Nullable DietTypes prefferedDiet) {
         this.prefferedDiet = prefferedDiet;
     }
 

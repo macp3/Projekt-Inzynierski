@@ -6,24 +6,37 @@ import org.jetbrains.annotations.NotNull;
 
 @Entity
 @Table(name = "ingredients")
-public class Ingredient
-{
+public class Ingredient {
     @Id
     @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column(name = "meal_id")
-    @Nullable
-    private int mealId;
-    @Column(name = "essential_id")
-    @Nullable
-    private int essentialId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "meal_id")
+    private Meal meal;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "essential_id")
+    private EssentialFood essentialFood;
     @Column(name = "essential_api_id")
     @Nullable
-    private int essentialApiId;
+    private Integer essentialApiId;
     @NotNull
     private float amount;
+    @NotNull
+    @Column(name = "default_unit")
+    private String defaultUnit;
 
+    public Ingredient() {
+
+    }
+
+    public Ingredient(Meal meal, EssentialFood essentialFood, @Nullable Integer essentialApiId, float amount, @NotNull String defaultUnit) {
+        this.meal = meal;
+        this.essentialFood = essentialFood;
+        this.essentialApiId = essentialApiId;
+        this.amount = amount;
+        this.defaultUnit = defaultUnit;
+    }
 
     public int getId() {
         return id;
@@ -33,27 +46,28 @@ public class Ingredient
         this.id = id;
     }
 
-    public int getMealId() {
-        return mealId;
+    public Meal getMeal() {
+        return meal;
     }
 
-    public void setMealId(int mealId) {
-        this.mealId = mealId;
+    public void setMeal(Meal meal) {
+        this.meal = meal;
     }
 
-    public int getEssentialId() {
-        return essentialId;
+    public EssentialFood getEssentialFood() {
+        return essentialFood;
     }
 
-    public void setEssentialId(int essentialId) {
-        this.essentialId = essentialId;
+    public void setEssentialFood(EssentialFood essentialFood) {
+        this.essentialFood = essentialFood;
     }
 
-    public int getEssentialApiId() {
+    @Nullable
+    public Integer getEssentialApiId() {
         return essentialApiId;
     }
 
-    public void setEssentialApiId(int essentialApiId) {
+    public void setEssentialApiId(@Nullable Integer essentialApiId) {
         this.essentialApiId = essentialApiId;
     }
 
@@ -63,5 +77,14 @@ public class Ingredient
 
     public void setAmount(float amount) {
         this.amount = amount;
+    }
+
+    @NotNull
+    public String getDefaultUnit() {
+        return defaultUnit;
+    }
+
+    public void setDefaultUnit(@NotNull String defaultUnit) {
+        this.defaultUnit = defaultUnit;
     }
 }

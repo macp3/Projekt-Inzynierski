@@ -1,9 +1,12 @@
 package com.example.demo.services;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.demo.entities.DietType;
+import com.example.demo.entities.enums.DietTypes;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entities.BodyParameters;
@@ -18,6 +21,22 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BodyParametersRepository bodyParametersRepository;
+
+    private User validateUserExistance(int userId)
+    {
+        if (userId <= 0) {
+            System.out.println("UserID must be greater than zero");
+            return null;
+        }
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (optionalUser.isEmpty()) {
+            System.out.println("Couldn't find the user with provided ID");
+            return null;
+        }
+        return optionalUser.get();
+    }
 
     public UserService(UserRepository userRepository, BodyParametersRepository bodyParametersRepository) {
         this.userRepository = userRepository;
@@ -37,19 +56,10 @@ public class UserService {
     }
 
     public boolean changePassword(int userId, String password) {
-        if (userId <= 0) {
-            System.out.println("UserID must be greater than zero");
+        User user = validateUserExistance(userId);
+        if(user == null)
             return false;
-        }
 
-        Optional<User> optionalUser = userRepository.findById(userId);
-
-        if (optionalUser.isEmpty()) {
-            System.out.println("Couldn't find the user with provided ID");
-            return false;
-        }
-
-        User user = optionalUser.get();
         if (password == null || user.getPassword().equals(password)) {
             System.out.println("New password cannot be the same as the current password");
             return false;
@@ -60,27 +70,31 @@ public class UserService {
         return true;
     }
 
-    //do naprawy w strukturze bazy danych (String -> enum)
-    public void changePrefferedDiet(int userId, String prefferedDiet) {
+    public boolean changePrefferedDiet(int userId, DietTypes prefferedDiet)
+    {
+        User user = validateUserExistance(userId);
+        if(user == null)
+            return false;
+
+        boolean exists = Arrays.asList(DietTypes.values()).contains(prefferedDiet);
+        if(prefferedDiet == null || !exists)
+        {
+            System.out.println("There is no such diet type");
+            return false;
+        }
+        user.setPrefferedDiet(prefferedDiet);
+        return true;
     }
 
     //do rozbudowania:
     //po drugie pole estimated_time zeby nie przekraczac deficytu/nadwyzki 1000kcal (bo to niezdrowe)
     //TAK DZIALA FITATU
-    public boolean changeBodyParameters(Integer userId, Sex sex, Float height, Float weight, Integer age, Float dailyActivityFactor, Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo, Float goalWeight) {
-        if (userId <= 0) {
-            System.out.println("UserID must be greater than zero");
+    public boolean changeBodyParameters(Integer userId, Sex sex, Float height, Float weight, Integer age, Float dailyActivityFactor, Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo, Float goalWeight)
+    {
+        User user = validateUserExistance(userId);
+        if(user == null)
             return false;
-        }
-
-        Optional<User> optionalUser = userRepository.findById(userId);
-
-        if (optionalUser.isEmpty()) {
-            System.out.println("Couldn't find the user with provided ID");
-            return false;
-        }
         else {
-            User user = optionalUser.get();
             Optional<BodyParameters> optionalBodyParameters = bodyParametersRepository.findById(user.getId());
             if (optionalBodyParameters.isEmpty()) {
                 System.out.println("Couldn't access user's body parameters");
@@ -164,41 +178,19 @@ public class UserService {
     }
 
     public boolean updateStreak(int userId, int streak) {
-        if (userId <= 0) {
-            System.out.println("UserID must be greater than zero");
+        User user = validateUserExistance(userId);
+        if(user == null)
             return false;
-        }
 
-        Optional<User> optionalUser = userRepository.findById(userId);
-        if (optionalUser.isEmpty()) {
-            System.out.println("Couldn't find the user with provided ID");
-            return false;
-        }
-        User user = optionalUser.get();
         user.setStreak(streak);
-
         userRepository.save(user);
         return true;
     }
 
     public boolean updateStatus(int userId, Status status) {
-        if (userId <= 0) {
-            System.out.println("UserID must be greater than zero");
+        User user = validateUserExistance(userId);
+        if(user == null)
             return false;
-        }
-
-        Optional<User> optionalUser = userRepository.findById(userId);
-        if (optionalUser.isEmpty()) {
-            System.out.println("Couldn't find the user with provided ID");
-            return false;
-        }
-
-        if (status == null) {
-            System.out.println("Specify the user's new status");
-            return false;
-        }
-
-        User user = optionalUser.get();
         user.setStatus(status);
 
         userRepository.save(user);
@@ -206,21 +198,13 @@ public class UserService {
     }
 
     public boolean updatePremiumExpiration(int userId, LocalDate date) {
-        if (userId <= 0) {
-            System.out.println("UserID must be greater than zero");
+        User user = validateUserExistance(userId);
+        if(user == null)
             return false;
-        }
-
-        Optional<User> optionalUser = userRepository.findById(userId);
-        if (optionalUser.isEmpty()) {
-            System.out.println("Couldn't find the user with provided ID");
-            return false;
-        }
 
         //zmien wszystkie Date na LocalDate w encjach - bedzie latwiej
         //przyrownaj premiumExpirationDate do teraz
         LocalDate now = LocalDate.now();
-        User user = optionalUser.get();
 
         if (user.getPremiumExpiration() != null && user.getPremiumExpiration().isBefore(now)) {
             System.out.println("Specified premium expiration date is before now");
@@ -233,4 +217,12 @@ public class UserService {
     }
 
     //delete user
+    public boolean deleteUser(int userId)
+    {
+        User user = validateUserExistance(userId);
+        if(user == null)
+            return false;
+        userRepository.delete(user);
+        return true;
+    }
 }
