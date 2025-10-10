@@ -24,6 +24,7 @@ public class AuthController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
@@ -52,7 +53,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
 
-        String token = JwtService.generateToken(user.getEmail());
+        String token = jwtService.generateToken(user.getEmail(), "USER");
         return ResponseEntity.ok(token);
     }
 
