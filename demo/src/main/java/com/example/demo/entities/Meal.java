@@ -74,4 +74,12 @@ public class Meal
     public void setName(@NotNull String name) {
         this.name = name;
     }
+
+    public List<Ingredient> getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(List<Ingredient> ingredients) {
+        this.ingredients = ingredients;
+    }
 }

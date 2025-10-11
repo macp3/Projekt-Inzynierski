@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import com.example.demo.entities.DietType;
 import com.example.demo.entities.enums.DietTypes;
+import com.example.demo.security.JwtAuthFilter;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entities.BodyParameters;
@@ -25,15 +26,13 @@ public class UserService {
     private User validateUserExistance(int userId)
     {
         if (userId <= 0) {
-            System.out.println("UserID must be greater than zero");
-            return null;
+            throw new IllegalArgumentException("UserID must be greater than zero");
         }
 
         Optional<User> optionalUser = userRepository.findById(userId);
 
         if (optionalUser.isEmpty()) {
-            System.out.println("Couldn't find the user with provided ID");
-            return null;
+            throw new IllegalArgumentException("Couldn't find the user with provided ID");
         }
         return optionalUser.get();
     }
@@ -58,11 +57,10 @@ public class UserService {
     public boolean changePassword(int userId, String password) {
         User user = validateUserExistance(userId);
         if(user == null)
-            return false;
+            throw new IllegalArgumentException("User not found");
 
         if (password == null || user.getPassword().equals(password)) {
-            System.out.println("New password cannot be the same as the current password");
-            return false;
+            throw new IllegalArgumentException("New password cannot be the same as the current password");
         }
         user.setPassword(password);
         userRepository.save(user);
@@ -74,13 +72,12 @@ public class UserService {
     {
         User user = validateUserExistance(userId);
         if(user == null)
-            return false;
+            throw new IllegalArgumentException("User not found");
 
         boolean exists = Arrays.asList(DietTypes.values()).contains(prefferedDiet);
         if(prefferedDiet == null || !exists)
         {
-            System.out.println("There is no such diet type");
-            return false;
+            throw new IllegalArgumentException("There is no such diet type");
         }
         user.setPrefferedDiet(prefferedDiet);
         return true;
@@ -97,8 +94,7 @@ public class UserService {
         else {
             Optional<BodyParameters> optionalBodyParameters = bodyParametersRepository.findById(user.getId());
             if (optionalBodyParameters.isEmpty()) {
-                System.out.println("Couldn't access user's body parameters");
-                return false;
+                throw new IllegalArgumentException("Couldn't access user's body parameters");
             }
             else {
                 BodyParameters userBodyParameters = optionalBodyParameters.get();
@@ -177,38 +173,40 @@ public class UserService {
         return true;
     }
 
-    public boolean updateStreak(int userId, int streak) {
+    //admin
+    public boolean updateStreak(int userId, int streak)
+    {
+        
         User user = validateUserExistance(userId);
         if(user == null)
-            return false;
+            throw new IllegalArgumentException("User not found");
 
         user.setStreak(streak);
         userRepository.save(user);
         return true;
     }
 
+    //admin
     public boolean updateStatus(int userId, Status status) {
         User user = validateUserExistance(userId);
         if(user == null)
-            return false;
+            throw new IllegalArgumentException("User not found");
         user.setStatus(status);
 
         userRepository.save(user);
         return true;
     }
 
+    //admin
     public boolean updatePremiumExpiration(int userId, LocalDate date) {
         User user = validateUserExistance(userId);
         if(user == null)
-            return false;
+            throw new IllegalArgumentException("User not found");
 
-        //zmien wszystkie Date na LocalDate w encjach - bedzie latwiej
-        //przyrownaj premiumExpirationDate do teraz
         LocalDate now = LocalDate.now();
 
         if (user.getPremiumExpiration() != null && user.getPremiumExpiration().isBefore(now)) {
-            System.out.println("Specified premium expiration date is before now");
-            return false;
+            throw new IllegalArgumentException("Specified premium expiration date is before now");
         }
         user.setPremiumExpiration(date);
 
@@ -216,12 +214,12 @@ public class UserService {
         return true;
     }
 
-    //delete user
+    //admin
     public boolean deleteUser(int userId)
     {
         User user = validateUserExistance(userId);
         if(user == null)
-            return false;
+            throw new IllegalArgumentException("User not found");
         userRepository.delete(user);
         return true;
     }
