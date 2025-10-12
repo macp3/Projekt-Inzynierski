@@ -12,6 +12,8 @@ public class EssentialFoodResponse {
     private float fat;
     private float carbohydrates;
     private String brandName;
+    private float defaultWeight;
+    private String servingSizeUnit;
 
     // konstruktor
     public EssentialFoodResponse(EssentialFood food) {
@@ -23,6 +25,8 @@ public class EssentialFoodResponse {
         this.fat = food.getFat();
         this.carbohydrates = food.getCarbohydrates();
         this.brandName = food.getBrandName();
+        this.defaultWeight = food.getDefaultWeight();
+        this.servingSizeUnit = food.getServingSizeUnit();
     }
 
     public int getId() {
@@ -87,5 +91,21 @@ public class EssentialFoodResponse {
 
     public void setBrandName(String brandName) {
         this.brandName = brandName;
+    }
+
+    public float getDefaultWeight() {
+        return defaultWeight;
+    }
+
+    public void setDefaultWeight(float defaultWeight) {
+        this.defaultWeight = defaultWeight;
+    }
+
+    public String getServingSizeUnit() {
+        return servingSizeUnit;
+    }
+
+    public void setServingSizeUnit(String servingSizeUnit) {
+        this.servingSizeUnit = servingSizeUnit;
     }
 }

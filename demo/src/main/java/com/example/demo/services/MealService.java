@@ -3,8 +3,6 @@ package com.example.demo.services;
 import java.util.List;
 import java.util.Optional;
 
-import com.example.demo.entities.User;
-import org.hibernate.type.descriptor.java.BooleanPrimitiveArrayJavaType;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.EssentialFoodResponse;
@@ -15,6 +13,7 @@ import com.example.demo.dto.MealResponse;
 import com.example.demo.entities.EssentialFood;
 import com.example.demo.entities.Ingredient;
 import com.example.demo.entities.Meal;
+import com.example.demo.entities.User;
 import com.example.demo.repositories.FoodRepository;
 import com.example.demo.repositories.IngredientRepository;
 import com.example.demo.repositories.MealRepository;
@@ -68,7 +67,6 @@ public class MealService {
         }
 
         //dodac mechanizm sprawdzania czy meal o podanej nazwie stnieje juz w bazie - wymagana unikalna nazwa
-
         if (request.getDescription() == null || "".equals(request.getDescription())) {
             throw new IllegalArgumentException("Description must not be empty");
         }
@@ -83,7 +81,8 @@ public class MealService {
             EssentialFood essentialFood = null;
             Integer essentialApiId = null;
 
-            System.out.println(ir.getEssentialFoodId() + " " + ir.getEssentialApiId());
+            Float amount = null;
+            Integer pieces = null;
 
             if (ir.getEssentialFoodId() != null) {
                 essentialFood = foodRepository.findById(ir.getEssentialFoodId()).orElseThrow(() -> new IllegalArgumentException("Food not found"));
@@ -93,7 +92,15 @@ public class MealService {
                 throw new IllegalArgumentException("Food must have either essential id or API id");
             }
 
-            Ingredient ingredient = new Ingredient(meal, essentialFood, essentialApiId, ir.getAmount(), ir.getDefaultUnit());
+            if (ir.getAmount() != null) {
+                amount = ir.getAmount();
+            } else if (ir.getPieces() != null) {
+                pieces = ir.getPieces();
+            } else {
+                throw new IllegalArgumentException("Food must have either pieces or amount");
+            }
+
+            Ingredient ingredient = new Ingredient(meal, essentialFood, essentialApiId, amount, pieces);
             meal.addIngredient(ingredient);
         }
 
@@ -113,7 +120,7 @@ public class MealService {
                     IngredientResponse dto = new IngredientResponse();
                     dto.setId(ingredient.getId());
                     dto.setAmount(ingredient.getAmount());
-                    dto.setDefaultUnit(ingredient.getDefaultUnit());
+                    dto.setPieces(ingredient.getPieces());
 
                     if (ingredient.getEssentialApiId() != null) {
                         dto.setEssentialApiId(ingredient.getEssentialApiId());
@@ -136,23 +143,25 @@ public class MealService {
     }
 
     //edit meal
-    public boolean editMealByUser(int mealId, MealRequest request, int userId)
-    {
+    public boolean editMealByUser(int mealId, MealRequest request, int userId) {
         Meal meal = validateMealExistance(mealId);
-        if (!userRepository.existsById(userId))
-        {
+        if (!userRepository.existsById(userId)) {
             throw new IllegalArgumentException("User with this ID doesn't exist");
         }
 
-        if(userId != request.getAuthorId())
+        if (userId != request.getAuthorId()) {
             throw new IllegalArgumentException("You are not allowed to edit this meal");
+        }
 
-        if(request.getName() == null || request.getName().isBlank())
+        if (request.getName() == null || request.getName().isBlank()) {
             throw new IllegalArgumentException("Meal's name must not be empty");
-        if(request.getDescription() == null || request.getName().isBlank())
+        }
+        if (request.getDescription() == null || request.getName().isBlank()) {
             throw new IllegalArgumentException("Meal's description must not be empty");
-        if(request.getIngredients() == null || request.getIngredients().isEmpty())
+        }
+        if (request.getIngredients() == null || request.getIngredients().isEmpty()) {
             throw new IllegalArgumentException("The meal has to have at least 1 ingredient");
+        }
 
         meal.setName(request.getName());
         meal.setDescription(request.getDescription());
@@ -161,21 +170,30 @@ public class MealService {
         //nie mozna set na null bo hibernate wywali blad
         meal.getIngredients().clear();
 
-        for(IngredientRequest ir : request.getIngredients())
-        {
+        for (IngredientRequest ir : request.getIngredients()) {
             EssentialFood essentialFood = null;
             Integer essentialApiId = null;
 
+            Float amout = null;
+            Integer pieces = null;
+
             if (ir.getEssentialFoodId() != null) {
-                essentialFood = foodRepository.findById(ir.getEssentialFoodId())
-                        .orElseThrow(() -> new IllegalArgumentException("Food not found"));
+                essentialFood = foodRepository.findById(ir.getEssentialFoodId()).orElseThrow(() -> new IllegalArgumentException("Food not found"));
             } else if (ir.getEssentialApiId() != null) {
                 essentialApiId = ir.getEssentialApiId();
             } else {
-                throw new IllegalArgumentException("Each ingredient must have either essentialFoodId or essentialApiId");
+                throw new IllegalArgumentException("Food must have either essential id or API id");
             }
 
-            Ingredient ingredient = new Ingredient(meal, essentialFood, essentialApiId, ir.getAmount(), ir.getDefaultUnit());
+            if (ir.getAmount() != null) {
+                amout = ir.getAmount();
+            } else if (ir.getPieces() != null) {
+                pieces = ir.getPieces();
+            } else {
+                throw new IllegalArgumentException("Food must have either pieces or amount");
+            }
+
+            Ingredient ingredient = new Ingredient(meal, essentialFood, essentialApiId, amout, pieces);
             meal.addIngredient(ingredient);
         }
 
@@ -185,17 +203,18 @@ public class MealService {
     }
 
     //delete meal
-    public boolean deleteMealByUser(int mealId, int userId)
-    {
+    public boolean deleteMealByUser(int mealId, int userId) {
         Optional<User> optionalUser = userRepository.findById(userId);
-        if(optionalUser.isEmpty())
+        if (optionalUser.isEmpty()) {
             throw new IllegalArgumentException("There is no user with specified ID");
+        }
 
         User user = optionalUser.get();
         Meal meal = validateMealExistance(mealId);
 
-        if(user.getId() != meal.getAuthorId())
+        if (user.getId() != meal.getAuthorId()) {
             throw new IllegalArgumentException("This user is not authorized to delete this meal");
+        }
 
         mealRepository.delete(meal);
         System.out.println("Meal successfully deleted");
@@ -214,8 +233,7 @@ public class MealService {
         return mealRepository.findByNameContainingIgnoreCase(name);
     }
 
-    public Meal getMealById(int mealId)
-    {
+    public Meal getMealById(int mealId) {
         return mealRepository.findById(mealId).orElseThrow(() -> new IllegalArgumentException("This meal doesn't exist"));
     }
 }

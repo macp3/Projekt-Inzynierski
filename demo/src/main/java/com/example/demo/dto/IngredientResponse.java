@@ -8,8 +8,8 @@ import lombok.Data;
 public class IngredientResponse {
 
     private int id;
-    private float amount;
-    private String defaultUnit;
+    private Float amount;
+    private Integer pieces;
     private Integer essentialApiId;
     private EssentialFoodResponse essentialFood;
 
@@ -19,7 +19,7 @@ public class IngredientResponse {
     public IngredientResponse(Ingredient ingredient) {
         this.id = ingredient.getId();
         this.amount = ingredient.getAmount();
-        this.defaultUnit = ingredient.getDefaultUnit();
+        this.pieces = ingredient.getPieces();
         this.essentialApiId = ingredient.getEssentialApiId();
         this.essentialFood = new EssentialFoodResponse(ingredient.getEssentialFood());
     }

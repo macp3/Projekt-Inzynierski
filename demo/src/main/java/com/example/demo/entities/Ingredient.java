@@ -1,12 +1,22 @@
 package com.example.demo.entities;
 
-import jakarta.annotation.Nullable;
-import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
+
+import jakarta.annotation.Nullable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "ingredients")
 public class Ingredient {
+
     @Id
     @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,22 +30,21 @@ public class Ingredient {
     @Column(name = "essential_api_id")
     @Nullable
     private Integer essentialApiId;
-    @NotNull
-    private float amount;
-    @NotNull
-    @Column(name = "default_unit")
-    private String defaultUnit;
+    @Nullable
+    private Float amount;
+    @Nullable
+    private Integer pieces;
 
     public Ingredient() {
 
     }
 
-    public Ingredient(Meal meal, EssentialFood essentialFood, @Nullable Integer essentialApiId, float amount, @NotNull String defaultUnit) {
+    public Ingredient(Meal meal, EssentialFood essentialFood, @Nullable Integer essentialApiId, Float amount, Integer pieces) {
         this.meal = meal;
         this.essentialFood = essentialFood;
         this.essentialApiId = essentialApiId;
         this.amount = amount;
-        this.defaultUnit = defaultUnit;
+        this.pieces = pieces;
     }
 
     public int getId() {
@@ -71,20 +80,19 @@ public class Ingredient {
         this.essentialApiId = essentialApiId;
     }
 
-    public float getAmount() {
+    public Float getAmount() {
         return amount;
     }
 
-    public void setAmount(float amount) {
+    public void setAmount(Float amount) {
         this.amount = amount;
     }
 
-    @NotNull
-    public String getDefaultUnit() {
-        return defaultUnit;
+    public Integer getPieces() {
+        return pieces;
     }
 
-    public void setDefaultUnit(@NotNull String defaultUnit) {
-        this.defaultUnit = defaultUnit;
+    public void setPieces(Integer pieces) {
+        this.pieces = pieces;
     }
 }

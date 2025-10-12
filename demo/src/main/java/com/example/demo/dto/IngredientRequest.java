@@ -1,10 +1,11 @@
 package com.example.demo.dto;
 
-public class IngredientRequest
-{
+public class IngredientRequest {
+
     private Integer essentialFoodId;
     private Integer essentialApiId;
-    private float amount;
+    private Float amount;
+    private Integer pieces;
     private String defaultUnit;
 
     public Integer getEssentialFoodId() {
@@ -23,11 +24,11 @@ public class IngredientRequest
         this.essentialApiId = essentialApiId;
     }
 
-    public float getAmount() {
+    public Float getAmount() {
         return amount;
     }
 
-    public void setAmount(float amount) {
+    public void setAmount(Float amount) {
         this.amount = amount;
     }
 
@@ -37,5 +38,13 @@ public class IngredientRequest
 
     public void setDefaultUnit(String defaultUnit) {
         this.defaultUnit = defaultUnit;
+    }
+
+    public Integer getPieces() {
+        return pieces;
+    }
+
+    public void setPieces(int pieces) {
+        this.pieces = pieces;
     }
 }
