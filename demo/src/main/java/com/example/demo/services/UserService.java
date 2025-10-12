@@ -46,8 +46,9 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Optional<User> getUserById(int id) {
-        return userRepository.findById(id);
+    public User getUserById(int id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
     public Optional<User> getUserByEmail(String email) {

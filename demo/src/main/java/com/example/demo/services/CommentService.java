@@ -51,7 +51,6 @@ public class CommentService
         if(request.getContent() == null || request.getContent().isBlank())
             throw new IllegalArgumentException("Content must not be empty");
 
-        //Sprawdzamy poprawnie czy user już komentował
         if(commentRepository.existsByMealIdAndAuthorId(meal.getId(), author.getId())) {
             throw new IllegalArgumentException("You have already commented this meal");
         }
@@ -62,15 +61,10 @@ public class CommentService
         comment.setContent(request.getContent());
         commentRepository.save(comment);
 
-        return new CommentResponse(
-                comment.getId(),
-                author.getId(),
-                comment.getContent(),
-                meal.getId()
-        );
+        return new CommentResponse(comment.getId(), author.getId(), comment.getContent(), meal.getId());
     }
 
-    public boolean editComment(int authorId, int commentId, String content)
+    public CommentResponse editComment(int authorId, int commentId, String content)
     {
         User user = userRepository.findById(authorId)
                 .orElseThrow(() -> new IllegalArgumentException("There is no user with specified ID"));
@@ -83,12 +77,13 @@ public class CommentService
         if(content == null || content.isBlank())
             throw new IllegalArgumentException("Content must not be empty");
 
-        comment.setContent(content);
+        CommentResponse response = new CommentResponse(commentId, authorId, content, comment.getMealId());
+        comment.setContent(response.getContent());
         commentRepository.save(comment);
-        return true;
+        return response;
     }
 
-    public boolean deleteCommentByUser(int authorId, int commentId)
+    public void deleteCommentByUser(int authorId, int commentId)
     {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
@@ -97,7 +92,6 @@ public class CommentService
             throw new IllegalArgumentException("You are not authorized to delete this comment");
 
         commentRepository.delete(comment);
-        return true;
     }
 
     //xddddd ale glupota
@@ -128,5 +122,11 @@ public class CommentService
     {
         return commentRepository.findByMealIdAndAuthorId(mealId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("This user has no registered comment for this meal"));
+    }
+
+    public Comment getCommentById(int commentId)
+    {
+        return commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("There is no comment with specified ID"));
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -45,23 +46,20 @@ public class CommentController
     public ResponseEntity<CommentResponse> addCommentToMeal(@RequestBody CommentRequest request, @RequestHeader("Authorization") String authHeader)
     {
         User user = authorizeUser(authHeader);
-        Meal meal = mealService.findMealById(request.getMealId());
+        Meal meal = mealService.getMealById(request.getMealId());
 
         CommentResponse response = commentService.addCommentToMeal(user.getId(), request);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/edit")
-    public ResponseEntity<String> editCommentByUser(@RequestParam int mealId, @RequestParam int commentId, @RequestParam String content, @RequestHeader("Authorization") String authHeader)
+    public ResponseEntity<CommentResponse> editCommentByUser(@RequestBody CommentRequest request, @RequestHeader("Authorization") String authHeader)
     {
         User user = authorizeUser(authHeader);
-        Comment comment = commentService.getUserMealComment(mealId, user.getId());
+        Comment comment = commentService.getUserMealComment(request.getMealId(), user.getId());
 
-        boolean success = commentService.editComment(user.getId(), comment.getId(), content);
-        if(success)
-            return ResponseEntity.ok("Comment edited successfully");
-        else
-            return ResponseEntity.badRequest().body("Comment not edited (invalid data)");
+        CommentResponse cr = commentService.editComment(user.getId(), comment.getId(), request.getContent());
+        return ResponseEntity.ok(cr);
     }
 
     @GetMapping("/my")
@@ -73,8 +71,8 @@ public class CommentController
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteCommentByUser(
             @RequestParam int commentId,
-            @RequestHeader("Authorization") String authHeader) {
-
+            @RequestHeader("Authorization") String authHeader)
+    {
         User user = authorizeUser(authHeader);
         commentService.deleteCommentByUser(user.getId(), commentId);
 
@@ -84,9 +82,13 @@ public class CommentController
     @GetMapping("/meal/{mealId}")
     public ResponseEntity<List<CommentResponse>> getAllCommentsForMeal(@PathVariable int mealId) {
         List<Comment> comments = commentService.getAllMealComments(mealId);
-        List<CommentResponse> response = comments.stream()
-                .map(c -> new CommentResponse(c.getId(), c.getAuthorId(), c.getContent(), c.getMealId()))
-                .toList();
+        List<CommentResponse> response = new ArrayList<>();
+
+        for(Comment c : comments)
+        {
+            CommentResponse cr = new CommentResponse(c.getId(), c.getAuthorId(), c.getContent(), c.getMealId());
+            response.add(cr);
+        }
         return ResponseEntity.ok(response);
     }
 }
