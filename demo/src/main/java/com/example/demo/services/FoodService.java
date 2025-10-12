@@ -20,7 +20,7 @@ public class FoodService {
 
     private final RestTemplate restTemplate;
     private final String apiFoodDatabaseKey;
-    private final String baseUrl = "https://api.nal.usda.gov/fdc/v1";
+    private final String baseUrl = "https://platform.fatsecret.com/rest";
 
     private final FoodRepository foodRepository;
 
@@ -30,28 +30,6 @@ public class FoodService {
         this.foodRepository = foodRepository;
     }
 
-    //Sorting function for unrelevant results (not used)
-    // private static int countNullLikeValues(ApiFoodResponse food) {
-    //     int nullCount = 0;
-    //     if (food.getBrandName() == null) {
-    //         nullCount++;
-    //     }
-    //     if (food.getDefault_weight() == 1) {
-    //         nullCount++;
-    //     }
-    //     if ("piece".equals(food.getServingSizeUnit())) {
-    //         nullCount++;
-    //     }
-    //     return nullCount;
-    // }
-    // private static List<ApiFoodResponse> sortByNullCount(List<ApiFoodResponse> foods) {
-    //     return foods.stream()
-    //             .sorted(Comparator
-    //                     .comparing((ApiFoodResponse f) -> !f.getName().toLowerCase().contains(", raw"))
-    //                     .thenComparingInt(FoodService::countNullLikeValues)
-    //             )
-    //             .collect(Collectors.toList());
-    // }
     public List<ApiFoodResponse> getFoodFromApi(String query) {
         String url = String.format("%s/foods/search?query=%s&api_key=%s", baseUrl, query, apiFoodDatabaseKey);
 

@@ -1,9 +1,9 @@
 package com.example.demo.controllers;
 
-import com.example.demo.entities.ReportedComment;
-import com.example.demo.entities.ReportedMeal;
 import com.example.demo.entities.User;
+import com.example.demo.entities.enums.Status;
 import com.example.demo.services.*;
+import io.jsonwebtoken.Jwt;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,9 +37,9 @@ public class AdminController {
         return "Witaj, ADMIN!";
     }
 
+    //nowe
     @GetMapping("/user/{userId}")
-    public ResponseEntity<User> getUserInfo(@RequestHeader("Authorization") String authHeader, @PathVariable int userId)
-    {
+    public ResponseEntity<User> getUserInfo(@RequestHeader("Authorization") String authHeader, @PathVariable int userId) {
         User user = userService.getUserById(userId);
         return ResponseEntity.ok(user);
     }

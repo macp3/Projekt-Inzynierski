@@ -28,7 +28,7 @@ CREATE TABLE `admins` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `login` varchar(40) NOT NULL UNIQUE,
   `email` varchar(40) NOT NULL UNIQUE,
-  `password` varchar(40) NOT NULL,
+  `password` varchar(300) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -107,10 +107,8 @@ CREATE TABLE `essential_food` (
   `default_weight` float DEFAULT NULL,
   `serving_size_unit` varchar(50) DEFAULT NULL,
   `brand_name` varchar(50) DEFAULT NULL,
-  `diet_type_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  CONSTRAINT `essential_food_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
-  CONSTRAINT `essential_food_diet_fk` FOREIGN KEY (`diet_type_id`) REFERENCES `diet_types`(`id`) ON DELETE SET NULL
+  CONSTRAINT `essential_food_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -145,8 +143,8 @@ CREATE TABLE `ingredients` (
   `meal_id` int(11) DEFAULT NULL,
   `essential_id` int(11) DEFAULT NULL,
   `essential_api_id` int(11) DEFAULT NULL,
-  `amount` float NOT NULL,
-  `default_unit` varchar(40) NOT NULL,
+  `amount` float DEFAULT NULL,
+  `pieces` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `ingredients_ibfk_1` FOREIGN KEY (`meal_id`) REFERENCES `meals`(`id`) ON DELETE CASCADE,
   CONSTRAINT `ingredients_ibfk_2` FOREIGN KEY (`essential_id`) REFERENCES `essential_food`(`id`) ON DELETE CASCADE
