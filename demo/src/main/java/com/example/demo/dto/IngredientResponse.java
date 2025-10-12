@@ -10,7 +10,7 @@ public class IngredientResponse {
     private int id;
     private Float amount;
     private Integer pieces;
-    private Integer essentialApiId;
+    private ApiFoodResponseDetailed essentialApi;
     private EssentialFoodResponse essentialFood;
 
     public IngredientResponse() {
@@ -20,7 +20,7 @@ public class IngredientResponse {
         this.id = ingredient.getId();
         this.amount = ingredient.getAmount();
         this.pieces = ingredient.getPieces();
-        this.essentialApiId = ingredient.getEssentialApiId();
+        this.essentialApi = null;
         this.essentialFood = new EssentialFoodResponse(ingredient.getEssentialFood());
     }
 }

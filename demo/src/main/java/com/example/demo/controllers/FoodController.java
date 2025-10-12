@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.ApiFoodResponse;
+import com.example.demo.dto.ApiFoodResponseDetailed;
 import com.example.demo.entities.EssentialFood;
 import com.example.demo.entities.User;
 import com.example.demo.services.FoodService;
@@ -39,7 +40,7 @@ public class FoodController {
     }
 
     @GetMapping("/api/{id}")
-    public ApiFoodResponse getFoodFromApiById(@PathVariable("id") int id) {
+    public ApiFoodResponseDetailed getFoodFromApiById(@PathVariable("id") int id) {
         return foodService.getFoodFromApiById(id);
     }
 
