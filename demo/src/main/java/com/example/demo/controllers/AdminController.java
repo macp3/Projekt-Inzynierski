@@ -1,11 +1,14 @@
 package com.example.demo.controllers;
 
+import com.example.demo.entities.ReportedComment;
+import com.example.demo.entities.ReportedMeal;
 import com.example.demo.entities.User;
-import com.example.demo.entities.enums.Status;
 import com.example.demo.services.*;
-import io.jsonwebtoken.Jwt;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
@@ -34,8 +37,7 @@ public class AdminController {
         return "Witaj, ADMIN!";
     }
 
-    //nowe
-    @GetMapping("/user/{id}")
+    @GetMapping("/user/{userId}")
     public ResponseEntity<User> getUserInfo(@RequestHeader("Authorization") String authHeader, @PathVariable int userId)
     {
         User user = userService.getUserById(userId);
@@ -43,7 +45,7 @@ public class AdminController {
     }
 
     //doi naprawy - updatowanie streaka: albo +1 albo wyzerowac
-    @GetMapping("/{userId}/updateStreak")
+    /*@GetMapping("/{userId}/updateStreak")
     public ResponseEntity<User>updateStreak(@PathVariable int userId, @RequestParam int streak)
     {
 
@@ -52,5 +54,42 @@ public class AdminController {
         user.setStreak(streak);
         userService.updateStreak(userId, streak);
         return ResponseEntity.ok(user);
+    }*/
+
+    //admin
+    @PutMapping("/user/{userId}/info/expirationDate")
+    public ResponseEntity<User> updateExpirationDate(int userId, @RequestParam LocalDate date)
+    {
+        User user = userService.getUserById(userId);
+        userService.updatePremiumExpiration(user.getId(), date);
+        return ResponseEntity.ok(user);
+    }
+
+    //admin
+    @ResponseBody
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers()
+    {
+        List<User> allUsers = userService.getAllUsers();
+        return ResponseEntity.ok(allUsers);
+    }
+
+    //admin
+    @GetMapping("reports/meals/user/{userId}")
+    public ResponseEntity<List<ReportedMeal>> getAllMealReportsByUser(@PathVariable int userId)
+    {
+        User user = userService.getUserById(userId);
+        List<ReportedMeal> reports = reportedMealService.getAllReportsByUser(userId);
+        return ResponseEntity.ok(reports);
+    }
+
+    //admin
+    @GetMapping("reports/comments/user/{userId}")
+    public ResponseEntity<List<ReportedComment>> getAllCommentReportsByUser(@PathVariable int userId)
+    {
+        User user = userService.getUserById(userId);
+        List<ReportedComment> reports = reportedCommentService.getAllReportsByUser(userId);
+
+        return ResponseEntity.ok(reports);
     }
 }

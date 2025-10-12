@@ -49,8 +49,7 @@ public class FoodController {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtService.extractEmail(token);
 
-            User currentUser = userService.getUserByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+            User currentUser = userService.getUserByEmail(email);
 
             EssentialFood savedFood = foodService.addEssentialFood(food, currentUser);
             return ResponseEntity.ok(savedFood);

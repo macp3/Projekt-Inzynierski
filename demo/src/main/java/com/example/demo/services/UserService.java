@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.demo.dto.BodyParametersResponse;
 import com.example.demo.entities.DietType;
 import com.example.demo.entities.enums.DietTypes;
 import com.example.demo.security.JwtAuthFilter;
@@ -23,58 +24,25 @@ public class UserService {
     private final UserRepository userRepository;
     private final BodyParametersRepository bodyParametersRepository;
 
-    private User validateUserExistance(int userId)
-    {
-        if (userId <= 0) {
-            throw new IllegalArgumentException("UserID must be greater than zero");
-        }
-
-        Optional<User> optionalUser = userRepository.findById(userId);
-
-        if (optionalUser.isEmpty()) {
-            throw new IllegalArgumentException("Couldn't find the user with provided ID");
-        }
-        return optionalUser.get();
-    }
-
     public UserService(UserRepository userRepository, BodyParametersRepository bodyParametersRepository) {
         this.userRepository = userRepository;
         this.bodyParametersRepository = bodyParametersRepository;
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
+    public User changePassword(int userId, String password) {
+        User user = getUserById(userId);
 
-    public User getUserById(int id)
-    {
-       User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
-        return user;
-    }
-
-    public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
-    public boolean changePassword(int userId, String password) {
-        User user = validateUserExistance(userId);
-        if(user == null)
-            throw new IllegalArgumentException("User not found");
-
-        if (password == null || user.getPassword().equals(password)) {
-            throw new IllegalArgumentException("New password cannot be the same as the current password");
+        if (password == null || password.isBlank()|| user.getPassword().equals(password)) {
+            throw new IllegalArgumentException("New password cannot be empty or the same as the current password");
         }
         user.setPassword(password);
         userRepository.save(user);
-        System.out.println("Password succesfully changed");
-        return true;
+        return user;
     }
 
-    public boolean changePrefferedDiet(int userId, DietTypes prefferedDiet)
+    public User changePrefferedDiet(int userId, DietTypes prefferedDiet)
     {
-        User user = validateUserExistance(userId);
-        if(user == null)
-            throw new IllegalArgumentException("User not found");
+        User user = getUserById(userId);
 
         boolean exists = Arrays.asList(DietTypes.values()).contains(prefferedDiet);
         if(prefferedDiet == null || !exists)
@@ -82,101 +50,89 @@ public class UserService {
             throw new IllegalArgumentException("There is no such diet type");
         }
         user.setPrefferedDiet(prefferedDiet);
-        return true;
+        userRepository.save(user);
+        return user;
     }
 
     //do rozbudowania:
     //po drugie pole estimated_time zeby nie przekraczac deficytu/nadwyzki 1000kcal (bo to niezdrowe)
     //TAK DZIALA FITATU
-    public boolean changeBodyParameters(Integer userId, Sex sex, Float height, Float weight, Integer age, Float dailyActivityFactor, Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo, Float goalWeight)
-    {
-        User user = validateUserExistance(userId);
-        if(user == null)
-            return false;
-        else {
-            Optional<BodyParameters> optionalBodyParameters = bodyParametersRepository.findById(user.getId());
-            if (optionalBodyParameters.isEmpty()) {
-                throw new IllegalArgumentException("Couldn't access user's body parameters");
-            }
-            else {
-                BodyParameters userBodyParameters = optionalBodyParameters.get();
+    public BodyParametersResponse changeBodyParameters(Integer userId, Sex sex, Float height, Float weight, Integer age, Float dailyActivityFactor, Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo, Float goalWeight) {
+        User user = getUserById(userId);
+        BodyParameters bodyParameters = bodyParametersRepository.findById(user.getId()).orElseThrow(() -> new IllegalArgumentException("This user has no body parameters specified"));
 
-
-                if (sex == null) {
-                    sex = userBodyParameters.getSex();
-                }
-
-                if (height <= 0 || weight <= 0 || age <= 0) {
-                    height = userBodyParameters.getHeight();
-                    weight = userBodyParameters.getWeight();
-                    age = userBodyParameters.getAge();
-                }
-
-                if (goalWeight <= 0) {
-                    goalWeight = userBodyParameters.getGoalWeight();
-                }
-
-                if (weeklyWeightChangeTempo < 0 || weeklyWeightChangeTempo > 1) {
-                    weeklyWeightChangeTempo = userBodyParameters.getWeeklyWeightChangeTempo();
-                }
-
-                float formula = 0;
-                if (sex == Sex.male) {
-                    formula = (float) ((10 * weight) + (6.25 * height) - (5 * age) + 5);
-                } else if (sex == Sex.female) {
-                    formula = (float) ((10 * weight) + (6.25 * height) - (5 * age) - 161);
-                }
-
-                float caloricZero = 0;
-                if ((dailyActivityFactor < 0.65 || dailyActivityFactor > 1.2) || (dailyActivityTrainingFactor < 0.65 || dailyActivityTrainingFactor > 1.2)) {
-                    caloricZero = formula * (dailyActivityFactor + dailyActivityTrainingFactor);
-                }
-
-                float calorieLimit = caloricZero;
-                float proteinLimit = 0;
-                float fatLimit = 0;
-                float carbohydratesLimit = 0;
-                if (goalWeight > weight) {
-                    calorieLimit = caloricZero + weeklyWeightChangeTempo * 1000;
-                    proteinLimit = (float) 0.2 * calorieLimit;
-                    fatLimit = (float) 0.25 * calorieLimit;
-                    carbohydratesLimit = (float) 0.55 * calorieLimit;
-                } else if (goalWeight < weight) {
-                    calorieLimit = caloricZero - weeklyWeightChangeTempo * 1000;
-                    proteinLimit = (float) 0.25 * calorieLimit;
-                    fatLimit = (float) 0.2 * calorieLimit;
-                    carbohydratesLimit = (float) 0.55 * calorieLimit;
-                } else {
-                    calorieLimit = caloricZero;
-                    proteinLimit = (float) 0.2 * calorieLimit;
-                    fatLimit = (float) 0.25 * calorieLimit;
-                    carbohydratesLimit = (float) 0.55 * calorieLimit;
-                }
-
-
-                BodyParameters bodyParameters = optionalBodyParameters.get();
-                bodyParameters.setSex(sex);
-                bodyParameters.setHeight(height);
-                bodyParameters.setWeight(weight);
-                bodyParameters.setAge(age);
-                bodyParameters.setDailyActivityFactor(dailyActivityFactor);
-                bodyParameters.setDailyActivityTrainingFactor(dailyActivityTrainingFactor);
-                bodyParameters.setWeeklyWeightChangeTempo(weeklyWeightChangeTempo);
-                bodyParameters.setGoalWeight(goalWeight);
-                bodyParameters.setCalorieLimit(calorieLimit);
-                bodyParameters.setProteinLimit(proteinLimit);
-                bodyParameters.setFatLimit(fatLimit);
-                bodyParameters.setCarbohydratesLimit(carbohydratesLimit);
-
-
-                bodyParametersRepository.save(bodyParameters);
-            }
+        if (sex == null) {
+            sex = bodyParameters.getSex();
         }
-        return true;
+        if (height <= 0)
+            height = bodyParameters.getHeight();
+        if (weight <= 0)
+            weight = bodyParameters.getWeight();
+        if (age <= 0)
+            age = bodyParameters.getAge();
+        if (goalWeight <= 0)
+            goalWeight = bodyParameters.getGoalWeight();
+        if (weeklyWeightChangeTempo < 0 || weeklyWeightChangeTempo > 1)
+            weeklyWeightChangeTempo = bodyParameters.getWeeklyWeightChangeTempo();
+
+
+        float formula = 0;
+        if (sex == Sex.male)
+            formula = (float) ((10 * weight) + (6.25 * height) - (5 * age) + 5);
+        else if (sex == Sex.female)
+            formula = (float) ((10 * weight) + (6.25 * height) - (5 * age) - 161);
+
+        float caloricZero = 0;
+        if (dailyActivityFactor < 0.65 || dailyActivityFactor > 1.2) {
+            dailyActivityFactor = bodyParameters.getDailyActivityFactor();
+        }
+        if (dailyActivityTrainingFactor < 0.65 || dailyActivityTrainingFactor > 1.2) {
+            dailyActivityTrainingFactor = bodyParameters.getDailyActivityTrainingFactor();
+        }
+
+        caloricZero = formula * (dailyActivityFactor + dailyActivityTrainingFactor);
+
+        float calorieLimit = caloricZero;
+        float proteinLimit = 0;
+        float fatLimit = 0;
+        float carbohydratesLimit = 0;
+        if (goalWeight > weight) {
+            calorieLimit = caloricZero + weeklyWeightChangeTempo * 1000;
+            proteinLimit = (float) 0.2 * calorieLimit;
+            fatLimit = (float) 0.25 * calorieLimit;
+            carbohydratesLimit = (float) 0.55 * calorieLimit;
+        } else if (goalWeight < weight) {
+            calorieLimit = caloricZero - weeklyWeightChangeTempo * 1000;
+            proteinLimit = (float) 0.25 * calorieLimit;
+            fatLimit = (float) 0.2 * calorieLimit;
+            carbohydratesLimit = (float) 0.55 * calorieLimit;
+        } else {
+            calorieLimit = caloricZero;
+            proteinLimit = (float) 0.2 * calorieLimit;
+            fatLimit = (float) 0.25 * calorieLimit;
+            carbohydratesLimit = (float) 0.55 * calorieLimit;
+        }
+
+        bodyParameters.setSex(sex);
+        bodyParameters.setHeight(height);
+        bodyParameters.setWeight(weight);
+        bodyParameters.setAge(age);
+        bodyParameters.setDailyActivityFactor(dailyActivityFactor);
+        bodyParameters.setDailyActivityTrainingFactor(dailyActivityTrainingFactor);
+        bodyParameters.setWeeklyWeightChangeTempo(weeklyWeightChangeTempo);
+        bodyParameters.setGoalWeight(goalWeight);
+        bodyParameters.setCalorieLimit(calorieLimit);
+        bodyParameters.setProteinLimit(proteinLimit);
+        bodyParameters.setFatLimit(fatLimit);
+        bodyParameters.setCarbohydratesLimit(carbohydratesLimit);
+
+        bodyParametersRepository.save(bodyParameters);
+
+        return new BodyParametersResponse(user.getId(), bodyParameters.getSex(), bodyParameters.getHeight(), bodyParameters.getWeight(), bodyParameters.getAge(), bodyParameters.getDailyActivityFactor(), bodyParameters.getDailyActivityTrainingFactor(), bodyParameters.getWeeklyWeightChangeTempo(), bodyParameters.getGoalWeight(), bodyParameters.getCalorieLimit(), bodyParameters.getProteinLimit(), bodyParameters.getFatLimit(), bodyParameters.getCarbohydratesLimit());
     }
 
     //admin
-    public boolean updateStreak(int userId, int streak)
+    /*public boolean updateStreak(int userId, int streak)
     {
         
         User user = validateUserExistance(userId);
@@ -186,43 +142,57 @@ public class UserService {
         user.setStreak(streak);
         userRepository.save(user);
         return true;
-    }
+    }*/
 
     //admin
-    public boolean updateStatus(int userId, Status status) {
-        User user = validateUserExistance(userId);
-        if(user == null)
-            throw new IllegalArgumentException("User not found");
+    public User updateStatus(int userId, Status status) {
+        User user = getUserById(userId);
         user.setStatus(status);
 
         userRepository.save(user);
-        return true;
+        return user;
     }
 
     //admin
-    public boolean updatePremiumExpiration(int userId, LocalDate date) {
-        User user = validateUserExistance(userId);
-        if(user == null)
-            throw new IllegalArgumentException("User not found");
+    public User updatePremiumExpiration(int userId, LocalDate date) {
+        User user = getUserById(userId);
 
         LocalDate now = LocalDate.now();
 
         if (user.getPremiumExpiration() != null && user.getPremiumExpiration().isBefore(now)) {
             throw new IllegalArgumentException("Specified premium expiration date is before now");
         }
-        user.setPremiumExpiration(date);
 
+        user.setPremiumExpiration(date);
         userRepository.save(user);
-        return true;
+        return user;
     }
 
     //admin
-    public boolean deleteUser(int userId)
+    public void deleteUser(int userId)
     {
-        User user = validateUserExistance(userId);
-        if(user == null)
-            throw new IllegalArgumentException("User not found");
+        User user = getUserById(userId);
         userRepository.delete(user);
-        return true;
+        System.out.println("User deleted successfully");
     }
+
+    public User getUserById(int id)
+    {
+        return userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public BodyParameters getUserBodyParameters(int userId)
+    {
+        User user = getUserById(userId);
+        return bodyParametersRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("There is no body parameters for this user"));
+    }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
+
 }

@@ -35,8 +35,7 @@ public class ReportedCommentController
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
 
-        User user = userService.getUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userService.getUserByEmail(email);
         return user;
     }
 
@@ -48,16 +47,6 @@ public class ReportedCommentController
 
         ReportedCommentResponse response = reportedCommentService.reportComment(request.getCommentId(), user.getId(), request.getContent());
         return ResponseEntity.ok(response);
-    }
-
-    //admin
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ReportedComment>> getAllReportsByUser(@PathVariable int userId)
-    {
-        User user = userService.getUserById(userId);
-        List<ReportedComment> reports = reportedCommentService.getAllReportsByUser(userId);
-
-        return ResponseEntity.ok(reports);
     }
 
     @GetMapping("/comment/{commentId}")

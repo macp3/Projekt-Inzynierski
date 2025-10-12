@@ -36,8 +36,7 @@ public class MealController {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
 
-        User user = userService.getUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userService.getUserByEmail(email);
         return user;
     }
 
@@ -52,7 +51,6 @@ public class MealController {
             return ResponseEntity.ok("Meal successfully created");
     }
 
-    //zamienic to na request body i podejscie dto ale narazie tego nie zrtobie
     @PutMapping("/my/edit")
     public ResponseEntity<String> editMealByUser(@RequestParam int mealId, @RequestBody MealRequest request,  @RequestHeader("Authorization") String authHeader)
     {

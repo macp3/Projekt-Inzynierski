@@ -37,8 +37,7 @@ public class CommentController
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
 
-        User user = userService.getUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userService.getUserByEmail(email);
         return user;
     }
 
