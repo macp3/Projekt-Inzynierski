@@ -46,7 +46,7 @@ public class UserController {
     }
 
     //funkcja wylacznie dla admina
-    @GetMapping("/{id}")
+    /*@GetMapping("/{id}")
     public ResponseEntity<User> getUserInfo(@RequestHeader("Authorization") String authHeader)
     {
         String token = authHeader.replace("Bearer ", "");
@@ -55,7 +55,7 @@ public class UserController {
         User user = userService.getUserByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return ResponseEntity.ok(user);
-    }
+    }*/
 
     @PutMapping("/changePassword")
     public ResponseEntity<String> changePassword(@RequestHeader("Authorization") String authHeader, @RequestParam String password)
