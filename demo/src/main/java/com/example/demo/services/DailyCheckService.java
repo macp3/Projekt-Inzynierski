@@ -36,7 +36,7 @@ public class DailyCheckService {
      * Uruchamia się codziennie o północy czasu polskiego. CRON: sekunda,
      * minuta, godzina, dzień miesiąca, miesiąc, dzień tygodnia
      */
-    @Scheduled(cron = "* * * * * *", zone = "Europe/Warsaw")
+    @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Warsaw")
     public void checkCaloriesForAllUsers() {
         LocalDate yesterday = LocalDate.now();//.minusDays(1);
         List<User> users = userRepository.findAll();

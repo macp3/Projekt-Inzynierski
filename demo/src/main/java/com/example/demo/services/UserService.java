@@ -3,16 +3,13 @@ package com.example.demo.services;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
-import com.example.demo.dto.BodyParametersResponse;
-import com.example.demo.entities.DietType;
-import com.example.demo.entities.enums.DietTypes;
-import com.example.demo.security.JwtAuthFilter;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.dto.BodyParametersResponse;
 import com.example.demo.entities.BodyParameters;
 import com.example.demo.entities.User;
+import com.example.demo.entities.enums.DietTypes;
 import com.example.demo.entities.enums.Sex;
 import com.example.demo.entities.enums.Status;
 import com.example.demo.repositories.BodyParametersRepository;
@@ -32,7 +29,7 @@ public class UserService {
     public User changePassword(int userId, String password) {
         User user = getUserById(userId);
 
-        if (password == null || password.isBlank()|| user.getPassword().equals(password)) {
+        if (password == null || password.isBlank() || user.getPassword().equals(password)) {
             throw new IllegalArgumentException("New password cannot be empty or the same as the current password");
         }
         user.setPassword(password);
@@ -40,13 +37,11 @@ public class UserService {
         return user;
     }
 
-    public User changePrefferedDiet(int userId, DietTypes prefferedDiet)
-    {
+    public User changePrefferedDiet(int userId, DietTypes prefferedDiet) {
         User user = getUserById(userId);
 
         boolean exists = Arrays.asList(DietTypes.values()).contains(prefferedDiet);
-        if(prefferedDiet == null || !exists)
-        {
+        if (prefferedDiet == null || !exists) {
             throw new IllegalArgumentException("There is no such diet type");
         }
         user.setPrefferedDiet(prefferedDiet);
@@ -64,23 +59,28 @@ public class UserService {
         if (sex == null) {
             sex = bodyParameters.getSex();
         }
-        if (height <= 0)
+        if (height <= 0) {
             height = bodyParameters.getHeight();
-        if (weight <= 0)
+        }
+        if (weight <= 0) {
             weight = bodyParameters.getWeight();
-        if (age <= 0)
+        }
+        if (age <= 0) {
             age = bodyParameters.getAge();
-        if (goalWeight <= 0)
+        }
+        if (goalWeight <= 0) {
             goalWeight = bodyParameters.getGoalWeight();
-        if (weeklyWeightChangeTempo < 0 || weeklyWeightChangeTempo > 1)
+        }
+        if (weeklyWeightChangeTempo < 0 || weeklyWeightChangeTempo > 1) {
             weeklyWeightChangeTempo = bodyParameters.getWeeklyWeightChangeTempo();
-
+        }
 
         float formula = 0;
-        if (sex == Sex.male)
+        if (sex == Sex.male) {
             formula = (float) ((10 * weight) + (6.25 * height) - (5 * age) + 5);
-        else if (sex == Sex.female)
+        } else if (sex == Sex.female) {
             formula = (float) ((10 * weight) + (6.25 * height) - (5 * age) - 161);
+        }
 
         float caloricZero = 0;
         if (dailyActivityFactor < 0.65 || dailyActivityFactor > 1.2) {
@@ -132,17 +132,17 @@ public class UserService {
     }
 
     //admin
-    /*public boolean updateStreak(int userId, int streak)
-    {
-        
-        User user = validateUserExistance(userId);
-        if(user == null)
+    public boolean updateStreak(int userId, int streak) {
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
             throw new IllegalArgumentException("User not found");
+        }
 
         user.setStreak(streak);
         userRepository.save(user);
         return true;
-    }*/
+    }
 
     //admin
     public User updateStatus(int userId, Status status) {
@@ -169,15 +169,13 @@ public class UserService {
     }
 
     //admin
-    public void deleteUser(int userId)
-    {
+    public void deleteUser(int userId) {
         User user = getUserById(userId);
         userRepository.delete(user);
         System.out.println("User deleted successfully");
     }
 
-    public User getUserById(int id)
-    {
+    public User getUserById(int id) {
         return userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
@@ -185,8 +183,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public BodyParameters getUserBodyParameters(int userId)
-    {
+    public BodyParameters getUserBodyParameters(int userId) {
         User user = getUserById(userId);
         return bodyParametersRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("There is no body parameters for this user"));
     }
