@@ -1,44 +1,59 @@
 package com.example.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
 
+import jakarta.persistence.*;
+
 @Entity
 @Table(name = "trainings_info")
-public class TrainingInfo
-{
+public class TrainingInfo {
+
     @Id
-    @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    @NotNull
+    private Integer id;
+
+    @Column(nullable = false, length = 30)
     private String name;
-    @NotNull
+
+    @Column(nullable = false, length = 100)
     private String description;
 
-    public int getId() {
+    @Column(name = "duration_time", nullable = false)
+    private Integer durationTime;
+
+    // Gettery i settery
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    @NotNull
     public String getName() {
         return name;
     }
 
-    public void setName(@NotNull String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
-    @NotNull
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(@NotNull String description) {
+    public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getDurationTime() {
+        return durationTime;
+    }
+
+    public void setDurationTime(Integer durationTime) {
+        this.durationTime = durationTime;
     }
 }

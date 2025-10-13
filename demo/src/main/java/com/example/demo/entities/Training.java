@@ -1,66 +1,71 @@
 package com.example.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
+import java.util.ArrayList;
+import java.util.List;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "trainings")
-public class Training
-{
-    @Id
-    @NotNull
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    @NotNull
-    @Column(name = "training_id")
-    private int trainingId;
-    @NotNull
-    @Column(name = "author_id")
-    private int authorId;
-    @NotNull
-    @Column(name = "exercise_id")
-    private int exerciseId;
-    @NotNull
-    @Column(name = "day_of_exercise")
-    private int dayOfExercise;
+public class Training {
 
-    public int getId() {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(name = "training_id", nullable = false)
+    private Integer trainingId;
+
+    @Column(name = "author_id", nullable = false)
+    private Integer authorId;
+
+    @Column(name = "exercise_id", nullable = false)
+    private Integer exerciseId;
+
+    @Column(name = "day_of_exercise", nullable = false)
+    private Integer dayOfExercise;
+
+    // Gettery i settery
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public int getTrainingId() {
+    public Integer getTrainingId() {
         return trainingId;
     }
 
-    public void setTrainingId(int trainingId) {
+    public void setTrainingId(Integer trainingId) {
         this.trainingId = trainingId;
     }
 
-    public int getAuthorId() {
+    public Integer getAuthorId() {
         return authorId;
     }
 
-    public void setAuthorId(int authorId) {
+    public void setAuthorId(Integer authorId) {
         this.authorId = authorId;
     }
 
-    public int getExerciseId() {
+    public Integer getExerciseId() {
         return exerciseId;
     }
 
-    public void setExerciseId(int exerciseId) {
+    public void setExerciseId(Integer exerciseId) {
         this.exerciseId = exerciseId;
     }
 
-    public int getDayOfExercise() {
+    public Integer getDayOfExercise() {
         return dayOfExercise;
     }
 
-    public void setDayOfExercise(int dayOfExercise) {
+    public void setDayOfExercise(Integer dayOfExercise) {
         this.dayOfExercise = dayOfExercise;
     }
 }

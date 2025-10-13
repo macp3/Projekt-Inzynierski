@@ -243,8 +243,8 @@ CREATE TABLE `exercises` (
   `description` varchar(100) NOT NULL,
   `type` varchar(50) NOT NULL,
   `difficulty` int(11) NOT NULL,
-  `numberOfSets` int(11) NOT NULL,
-  `intensivity` int(11) NOT NULL,
+  `number_of_sets` int(11) NOT NULL,
+  `repetitions_per_set` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -255,6 +255,7 @@ CREATE TABLE `trainings_info` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(30) NOT NULL,
   `description` varchar(100) NOT NULL,
+  `duration_time` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
