@@ -61,6 +61,20 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @PutMapping("/changeParameters")
+    public ResponseEntity<BodyParametersResponse> changeBodyParameters(@RequestHeader("Authorization") String authHeader, BodyParametersRequest request)
+    {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+
+        User user = userService.getUserByEmail(email);
+        BodyParameters parameters = userService.getUserBodyParameters(user.getId());
+
+        BodyParametersResponse response =
+                userService.changeBodyParameters(user.getId(), request.getSex(), request.getHeight(), request.getWeight(), request.getAge(), request.getDailyActivityFactor(), request.getDailyActivityTrainingFactor(), request.getWeeklyWeightChangeTempo(), request.getGoalWeight());
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping("/changePrefferedDiet")
     public ResponseEntity<User> changePrefferedDiet(@RequestHeader("Authorization") String authHeader, DietTypes prefferedDiet)
     {
@@ -73,17 +87,4 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @PutMapping("/changeParameters")
-    public ResponseEntity<BodyParametersResponse> changeBodyParameters(@RequestHeader("Authorization") String authHeader, BodyParametersRequest request)
-    {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
-
-        User user = userService.getUserByEmail(email);
-        BodyParameters parameters = userService.getUserBodyParameters(user.getId());
-
-        BodyParametersResponse response =
-        userService.changeBodyParameters(user.getId(), request.getSex(), request.getHeight(), request.getWeight(), request.getAge(), request.getDailyActivityFactor(), request.getDailyActivityTrainingFactor(), request.getWeeklyWeightChangeTempo(), request.getGoalWeight());
-        return ResponseEntity.ok(response);
-    }
 }
