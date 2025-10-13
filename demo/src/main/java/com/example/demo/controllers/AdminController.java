@@ -1,21 +1,14 @@
 package com.example.demo.controllers;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.example.demo.entities.User;
-import com.example.demo.services.CommentService;
-import com.example.demo.services.FoodService;
-import com.example.demo.services.JwtService;
-import com.example.demo.services.MealService;
-import com.example.demo.services.ReportedCommentService;
-import com.example.demo.services.ReportedMealService;
-import com.example.demo.services.UserService;
+import com.example.demo.entities.enums.Status;
+import com.example.demo.services.*;
+import io.jsonwebtoken.Jwt;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
@@ -52,13 +45,51 @@ public class AdminController {
     }
 
     //doi naprawy - updatowanie streaka: albo +1 albo wyzerowac
-    @GetMapping("/{userId}/updateStreak")
-    public ResponseEntity<User> updateStreak(@PathVariable int userId, @RequestParam int streak) {
+    /*@GetMapping("/{userId}/updateStreak")
+    public ResponseEntity<User>updateStreak(@PathVariable int userId, @RequestParam int streak)
+    {
 
         User user = userService.getUserById(userId);
 
         user.setStreak(streak);
         userService.updateStreak(userId, streak);
         return ResponseEntity.ok(user);
+    }*/
+
+    //admin
+    @PutMapping("/user/{userId}/info/expirationDate")
+    public ResponseEntity<User> updateExpirationDate(int userId, @RequestParam LocalDate date)
+    {
+        User user = userService.getUserById(userId);
+        userService.updatePremiumExpiration(user.getId(), date);
+        return ResponseEntity.ok(user);
+    }
+
+    //admin
+    @ResponseBody
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers()
+    {
+        List<User> allUsers = userService.getAllUsers();
+        return ResponseEntity.ok(allUsers);
+    }
+
+    //admin
+    @GetMapping("reports/meals/user/{userId}")
+    public ResponseEntity<List<ReportedMeal>> getAllMealReportsByUser(@PathVariable int userId)
+    {
+        User user = userService.getUserById(userId);
+        List<ReportedMeal> reports = reportedMealService.getAllReportsByUser(userId);
+        return ResponseEntity.ok(reports);
+    }
+
+    //admin
+    @GetMapping("reports/comments/user/{userId}")
+    public ResponseEntity<List<ReportedComment>> getAllCommentReportsByUser(@PathVariable int userId)
+    {
+        User user = userService.getUserById(userId);
+        List<ReportedComment> reports = reportedCommentService.getAllReportsByUser(userId);
+
+        return ResponseEntity.ok(reports);
     }
 }

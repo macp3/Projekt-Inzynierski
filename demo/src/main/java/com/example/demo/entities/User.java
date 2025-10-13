@@ -151,4 +151,5 @@ public class User {
     public void setStreak(int streak) {
         this.streak = streak;
     }
+
 }

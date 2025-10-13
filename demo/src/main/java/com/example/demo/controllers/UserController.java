@@ -1,6 +1,5 @@
 package com.example.demo.controllers;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -12,10 +11,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.example.demo.dto.BodyParametersRequest;
+import com.example.demo.dto.BodyParametersResponse;
+import com.example.demo.entities.BodyParameters;
 import com.example.demo.entities.User;
 import com.example.demo.entities.enums.DietTypes;
-import com.example.demo.entities.enums.Sex;
-import com.example.demo.entities.enums.Status;
 import com.example.demo.services.JwtService;
 import com.example.demo.services.UserService;
 
@@ -42,8 +42,7 @@ public class UserController {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
 
-        User user = userService.getUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userService.getUserByEmail(email);
         return ResponseEntity.ok(user);
     }
 
@@ -59,83 +58,37 @@ public class UserController {
         return ResponseEntity.ok(user);
     }*/
     @PutMapping("/changePassword")
-    public ResponseEntity<String> changePassword(@RequestHeader("Authorization") String authHeader, @RequestParam String password) {
+    public ResponseEntity<User> changePassword(@RequestHeader("Authorization") String authHeader, @RequestParam String password) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
 
-        User user = userService.getUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        boolean success = userService.changePassword(user.getId(), password);
-        if (success) {
-            return ResponseEntity.ok("Password successfully changed"); 
-        }else {
-            return ResponseEntity.badRequest().body("Password not changed (invalid data or same as current");
-        }
-    }
-
-    @PutMapping("/changePrefferedDiet")
-    public ResponseEntity<String> changePrefferedDiet(@RequestHeader("Authorization") String authHeader, DietTypes prefferedDiet) {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
-
-        User user = userService.getUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        boolean success = userService.changePrefferedDiet(user.getId(), prefferedDiet);
-        if (success) {
-            return ResponseEntity.ok("Preffered diet successfully changed"); 
-        }else {
-            return ResponseEntity.badRequest().body("Preffered diet not changed (invalid data");
-        }
+        User user = userService.getUserByEmail(email);
+        userService.changePassword(user.getId(), password);
+        return ResponseEntity.ok(user);
     }
 
     @PutMapping("/changeParameters")
-    public ResponseEntity<String> changeBodyParameters(@RequestHeader("Authorization") String authHeader, @RequestParam Sex sex, @RequestParam Float height, @RequestParam Float weight, @RequestParam Integer age, @RequestParam Float dailyActivityFactor, @RequestParam Float dailyActivityTrainingFactor, @RequestParam Float weeklyWeightChangeTempo, @RequestParam Float goalWeight) {
+    public ResponseEntity<BodyParametersResponse> changeBodyParameters(@RequestHeader("Authorization") String authHeader, BodyParametersRequest request) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
 
-        User user = userService.getUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userService.getUserByEmail(email);
+        BodyParameters parameters = userService.getUserBodyParameters(user.getId());
 
-        boolean success = userService.changeBodyParameters(user.getId(), sex, height, weight, age, dailyActivityFactor, dailyActivityTrainingFactor, weeklyWeightChangeTempo, goalWeight);
-        if (success) {
-            return ResponseEntity.ok("Body parameters successfully changed"); 
-        }else {
-            return ResponseEntity.badRequest().body("Body parameters not changed (invalid data");
-        }
+        BodyParametersResponse response
+                = userService.changeBodyParameters(user.getId(), request.getSex(), request.getHeight(), request.getWeight(), request.getAge(), request.getDailyActivityFactor(), request.getDailyActivityTrainingFactor(), request.getWeeklyWeightChangeTempo(), request.getGoalWeight());
+        return ResponseEntity.ok(response);
     }
 
-    //admin
-    @PutMapping("/{id}/info/streak")
-    public ResponseEntity<String> updateStreak(int userId, int streak) {
-        boolean success = userService.updateStreak(userId, streak);
-        if (success) {
-            return ResponseEntity.ok("User's streak updated"); 
-        }else {
-            return ResponseEntity.badRequest().body("User's streak not updated (invalid data)");
-        }
+    @PutMapping("/changePrefferedDiet")
+    public ResponseEntity<User> changePrefferedDiet(@RequestHeader("Authorization") String authHeader, DietTypes prefferedDiet) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+
+        User user = userService.getUserByEmail(email);
+
+        userService.changePrefferedDiet(user.getId(), prefferedDiet);
+        return ResponseEntity.ok(user);
     }
 
-    //admin
-    @PutMapping("/{id}/info/status")
-    public ResponseEntity<String> updateStatus(int userId, Status status) {
-        boolean success = userService.updateStatus(userId, status);
-        if (success) {
-            return ResponseEntity.ok("User's status updated"); 
-        }else {
-            return ResponseEntity.badRequest().body("User's status not updated (invalid data)");
-        }
-    }
-
-    //admin
-    @PutMapping("/{id}/info/expirationDate")
-    public ResponseEntity<String> updateExpirationDate(int userId, LocalDate date) {
-        boolean success = userService.updatePremiumExpiration(userId, date);
-        if (success) {
-            return ResponseEntity.ok("User's premium expiration date updated"); 
-        }else {
-            return ResponseEntity.badRequest().body("User's premium expiration date not updated (specified date is before now)");
-        }
-    }
 }

@@ -32,8 +32,7 @@ public class ReportedMealController
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
 
-        User user = userService.getUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userService.getUserByEmail(email);
         return user;
     }
 
@@ -45,15 +44,6 @@ public class ReportedMealController
 
         ReportedMealResponse response = reportedMealService.reportMeal(request.getMealId(), user.getId(), request.getContent());
         return ResponseEntity.ok(response);
-    }
-
-    //admin
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ReportedMeal>> getAllReportsByUser(@PathVariable int userId)
-    {
-        User user = userService.getUserById(userId);
-        List<ReportedMeal> reports = reportedMealService.getAllReportsByUser(userId);
-        return ResponseEntity.ok(reports);
     }
 
     @GetMapping("/meal/{mealId}")
