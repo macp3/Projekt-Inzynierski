@@ -1,11 +1,14 @@
 package com.example.demo.repositories;
 
-import com.example.demo.entities.BodyParameters;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface BodyParametersRepository extends JpaRepository<BodyParameters, Integer>
-{
+import com.example.demo.entities.BodyParameters;
 
+@Repository
+public interface BodyParametersRepository extends JpaRepository<BodyParameters, Integer> {
+
+    Optional<BodyParameters> findByUserId(int userId);
 }

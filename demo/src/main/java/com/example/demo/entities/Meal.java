@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.example.demo.dto.ApiFoodResponseDetailed;
+import com.example.demo.services.FoodService;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -92,5 +94,35 @@ public class Meal {
 
     public void setIngredients(List<Ingredient> ingredients) {
         this.ingredients = ingredients;
+    }
+
+    public float getTotalCalories(FoodService foodService) {
+        float total = 0f;
+
+        for (Ingredient ingredient : ingredients) {
+            float ingredientCalories = 0f;
+
+            if (ingredient.getEssentialFood() != null) {
+                ingredientCalories = ingredient.getEssentialFood().getCalories();
+                if (ingredient.getAmount() != null) {
+                    ingredientCalories *= (ingredient.getAmount() / ingredient.getEssentialFood().getDefaultWeight());
+                } else if (ingredient.getPieces() != null) {
+                    ingredientCalories *= ingredient.getPieces();
+                }
+            } else if (ingredient.getEssentialApiId() != null) {
+                ApiFoodResponseDetailed apiFood = foodService.getFoodFromApiById(ingredient.getEssentialApiId());
+                ingredientCalories = apiFood.getCalorie();
+
+                if (ingredient.getAmount() != null) {
+                    ingredientCalories *= (ingredient.getAmount() / apiFood.getDefaultWeight());
+                } else if (ingredient.getPieces() != null) {
+                    ingredientCalories *= ingredient.getPieces();
+                }
+            }
+
+            total += ingredientCalories;
+        }
+
+        return total;
     }
 }

@@ -74,7 +74,7 @@ public class RegisteredAlimentationController {
             entry.setMealApiId(dto.getMealApiId());
         }
 
-        if (dto.getAmount() != null) {
+        if (dto.getAmount() != null && dto.getMealId() == null) {
             entry.setAmount(dto.getAmount());
         } else if (dto.getPieces() != null) {
             entry.setPieces(dto.getPieces());
