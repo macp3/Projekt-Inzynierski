@@ -1,45 +1,102 @@
 package com.example.demo.entities;
 
-import jakarta.annotation.Nullable;
-import jakarta.persistence.*;
-import org.jetbrains.annotations.NotNull;
-
 import java.time.LocalDate;
-import java.util.Date;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "registered_alimentation")
-public class RegisteredAlimentation
-{
+public class RegisteredAlimentation {
+
     @Id
-    @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    @NotNull
+    private Integer id;
+
     @Column(name = "user_id")
     private int userId;
-    @NotNull
-    @Column(name = "essential_id")
-    private int essentialId;
-    @Column(name = "meal_api_id")
-    @Nullable
-    private int mealApiId;
-    @Column(name = "meal_id")
-    @Nullable
-    private int mealId;
-    @NotNull
-    private LocalDate timestamp;
-    @NotNull
-    private float weight;
-    @NotNull
-    private int amount;
 
-    public int getId() {
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "essential_id")
+    private EssentialFood essentialFood;
+
+    @Column(name = "meal_api_id")
+    private Integer mealApiId;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "meal_id")
+    private Meal meal;
+
+    @Column(name = "timestamp", nullable = false)
+    private LocalDate timestamp;
+
+    @Column(name = "amount")
+    private Float amount;
+
+    @Column(name = "pieces")
+    private Integer pieces;
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
+    }
+
+    public EssentialFood getEssentialFood() {
+        return essentialFood;
+    }
+
+    public void setEssentialFood(EssentialFood essentialFood) {
+        this.essentialFood = essentialFood;
+    }
+
+    public Integer getMealApiId() {
+        return mealApiId;
+    }
+
+    public void setMealApiId(Integer mealApiId) {
+        this.mealApiId = mealApiId;
+    }
+
+    public Meal getMeal() {
+        return meal;
+    }
+
+    public void setMeal(Meal meal) {
+        this.meal = meal;
+    }
+
+    public LocalDate getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDate timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public Float getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Float amount) {
+        this.amount = amount;
+    }
+
+    public Integer getPieces() {
+        return pieces;
+    }
+
+    public void setPieces(Integer pieces) {
+        this.pieces = pieces;
     }
 
     public int getUserId() {
@@ -48,54 +105,5 @@ public class RegisteredAlimentation
 
     public void setUserId(int userId) {
         this.userId = userId;
-    }
-
-    public int getEssentialId() {
-        return essentialId;
-    }
-
-    public void setEssentialId(int essentialId) {
-        this.essentialId = essentialId;
-    }
-
-    public int getMealApiId() {
-        return mealApiId;
-    }
-
-    public void setMealApiId(int mealApiId) {
-        this.mealApiId = mealApiId;
-    }
-
-    public int getMealId() {
-        return mealId;
-    }
-
-    public void setMealId(int mealId) {
-        this.mealId = mealId;
-    }
-
-    @NotNull
-    public LocalDate getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(@NotNull LocalDate timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public float getWeight() {
-        return weight;
-    }
-
-    public void setWeight(float weight) {
-        this.weight = weight;
-    }
-
-    public int getAmount() {
-        return amount;
-    }
-
-    public void setAmount(int amount) {
-        this.amount = amount;
     }
 }

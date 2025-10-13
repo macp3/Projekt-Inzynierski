@@ -125,6 +125,7 @@ public class MealService {
                     dto.setPieces(ingredient.getPieces());
 
                     if (ingredient.getEssentialApiId() != null) {
+                        System.out.println(foodService.getFoodFromApiById(ingredient.getEssentialApiId()));
                         dto.setEssentialApi(foodService.getFoodFromApiById(ingredient.getEssentialApiId()));
                     } else if (ingredient.getEssentialFood() != null) {
                         dto.setEssentialFood(new EssentialFoodResponse(ingredient.getEssentialFood()));

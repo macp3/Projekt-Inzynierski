@@ -9,7 +9,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -27,15 +26,15 @@ import com.example.demo.repositories.FoodRepository;
 public class FoodService {
 
     private final RestTemplate restTemplate;
-    private final String apiFoodDatabaseKey;
     private final String baseUrl = "https://platform.fatsecret.com/rest";
+    private final FatSecretAuthService authService;
 
     private final FoodRepository foodRepository;
 
-    public FoodService(@Value("${API_FOOD_DATABASE_KEY}") String apiFoodDatabaseKey, FoodRepository foodRepository) {
+    public FoodService(FoodRepository foodRepository, FatSecretAuthService authService) {
         this.restTemplate = new RestTemplate();
-        this.apiFoodDatabaseKey = apiFoodDatabaseKey;
         this.foodRepository = foodRepository;
+        this.authService = authService;
     }
 
     private int parseIntSafe(Object value, int defaultValue) {
@@ -67,6 +66,7 @@ public class FoodService {
     }
 
     public List<ApiFoodResponse> getFoodFromApi(String query) {
+        String apiFoodDatabaseKey = authService.getAccessToken();
         String url = String.format(
                 "%s/rest/foods/search/v1?method=foods.search&search_expression=%s&format=json",
                 baseUrl,
@@ -110,6 +110,7 @@ public class FoodService {
     }
 
     public ApiFoodResponseDetailed getFoodFromApiById(long foodId) {
+        String apiFoodDatabaseKey = authService.getAccessToken();
         String url = String.format(
                 "%s/rest/food/v5?method=food.get.v5&food_id=%d&format=json",
                 baseUrl, foodId

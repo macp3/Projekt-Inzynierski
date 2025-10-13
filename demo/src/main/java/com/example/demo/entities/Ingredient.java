@@ -2,6 +2,8 @@ package com.example.demo.entities;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,6 +25,7 @@ public class Ingredient {
     private int id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meal_id")
+    @JsonBackReference
     private Meal meal;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "essential_id")
