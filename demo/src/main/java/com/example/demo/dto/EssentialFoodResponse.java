@@ -15,7 +15,6 @@ public class EssentialFoodResponse {
     private float defaultWeight;
     private String servingSizeUnit;
 
-    // konstruktor
     public EssentialFoodResponse(EssentialFood food) {
         this.id = food.getId();
         this.name = food.getName();

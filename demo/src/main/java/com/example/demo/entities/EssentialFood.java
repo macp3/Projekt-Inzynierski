@@ -2,6 +2,8 @@ package com.example.demo.entities;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,6 +13,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "essential_food")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class EssentialFood {
 
     @Id

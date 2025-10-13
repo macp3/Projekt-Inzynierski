@@ -28,12 +28,14 @@ public class MealService {
     private final MealRepository mealRepository;
     private final IngredientRepository ingredientRepository;
     private final FoodRepository foodRepository;
+    private final FoodService foodService;
 
-    public MealService(UserRepository userRepository, FoodRepository foodRepository, MealRepository mealRepository, IngredientRepository ingredientRepository) {
+    public MealService(UserRepository userRepository, FoodRepository foodRepository, MealRepository mealRepository, IngredientRepository ingredientRepository, FoodService foodService) {
         this.userRepository = userRepository;
         this.mealRepository = mealRepository;
         this.ingredientRepository = ingredientRepository;
         this.foodRepository = foodRepository;
+        this.foodService = foodService;
     }
 
     private Meal validateMealExistance(int mealId) {
@@ -123,7 +125,8 @@ public class MealService {
                     dto.setPieces(ingredient.getPieces());
 
                     if (ingredient.getEssentialApiId() != null) {
-                        dto.setEssentialApiId(ingredient.getEssentialApiId());
+                        System.out.println(foodService.getFoodFromApiById(ingredient.getEssentialApiId()));
+                        dto.setEssentialApi(foodService.getFoodFromApiById(ingredient.getEssentialApiId()));
                     } else if (ingredient.getEssentialFood() != null) {
                         dto.setEssentialFood(new EssentialFoodResponse(ingredient.getEssentialFood()));
                     }
