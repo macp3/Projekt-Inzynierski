@@ -1,5 +1,17 @@
 package com.example.demo.controllers;
 
+<<<<<<< HEAD
+=======
+import com.example.demo.dto.ExerciseRequest;
+import com.example.demo.dto.TrainingRequest;
+import com.example.demo.entities.*;
+import com.example.demo.repositories.AdminRepository;
+import com.example.demo.services.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+>>>>>>> 7d1f913e3c3cd2a7597561c24331fb68a5e8d618
 import java.time.LocalDate;
 import java.util.List;
 
@@ -28,12 +40,14 @@ import com.example.demo.services.UserService;
 @RequestMapping("/admin")
 public class AdminController {
 
+    private final AdminRepository adminRepository;
     private final UserService userService;
     private final MealService mealService;
     private final CommentService commentService;
     private final ReportedMealService reportedMealService;
     private final ReportedCommentService reportedCommentService;
     private final FoodService foodService;
+    private final TrainingService trainingService;
     private final JwtService jwtService;
 
     public AdminController(UserService userService, MealService mealService, CommentService commentService, ReportedMealService reportedMealService, ReportedCommentService reportedCommentService, FoodService foodService, JwtService jwtService) {
