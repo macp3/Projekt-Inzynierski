@@ -1,7 +1,7 @@
 package com.example.demo.dto;
 
-public class ReportedMealResponse
-{
+public class ReportedMealResponse {
+
     private int id;
     private int reportingId;
     private int mealId;

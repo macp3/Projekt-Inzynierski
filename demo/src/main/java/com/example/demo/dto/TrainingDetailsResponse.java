@@ -1,16 +1,17 @@
 package com.example.demo.dto;
 
+import java.util.List;
+
 import com.example.demo.entities.Exercise;
 import com.example.demo.entities.TrainingInfo;
 
-import java.util.List;
+public class TrainingDetailsResponse {
 
-public class TrainingDetailsResponse
-{
     private TrainingInfo trainingInfo;
     private List<ExerciseWithDay> exercises;
 
     public static class ExerciseWithDay {
+
         private int dayOfExercise;
         private Exercise exercise;
 

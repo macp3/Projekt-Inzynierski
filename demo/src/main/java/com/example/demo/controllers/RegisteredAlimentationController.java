@@ -39,7 +39,6 @@ public class RegisteredAlimentationController {
     private final RegisteredAlimentationRepository repository;
     private final JwtService jwtService;
     private final FoodService foodService;
-    private final MealService mealService;
 
     public RegisteredAlimentationController(FoodRepository foodRepository, JwtService jwtService, MealRepository mealRepository, RegisteredAlimentationRepository repository, UserRepository userRepository, FoodService foodService, MealService mealService) {
         this.foodRepository = foodRepository;
@@ -48,7 +47,6 @@ public class RegisteredAlimentationController {
         this.repository = repository;
         this.userRepository = userRepository;
         this.foodService = foodService;
-        this.mealService = mealService;
     }
 
     @PostMapping("/add")

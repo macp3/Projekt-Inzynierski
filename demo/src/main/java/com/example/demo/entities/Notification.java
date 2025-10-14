@@ -1,16 +1,22 @@
 package com.example.demo.entities;
 
-import com.example.demo.entities.enums.Recipients;
-import jakarta.persistence.*;
+import java.time.LocalDate;
+
 import org.jetbrains.annotations.NotNull;
 
-import java.time.LocalDate;
-import java.util.Date;
+import com.example.demo.entities.enums.Recipients;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "notifications")
-public class Notification
-{
+public class Notification {
+
     @Id
     @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)

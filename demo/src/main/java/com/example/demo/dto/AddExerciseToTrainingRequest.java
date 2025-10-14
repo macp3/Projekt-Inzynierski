@@ -1,7 +1,7 @@
 package com.example.demo.dto;
 
-public class AddExerciseToTrainingRequest
-{
+public class AddExerciseToTrainingRequest {
+
     private int exerciseId;
     private int trainingId;
     private int dayOfExercise;

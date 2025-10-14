@@ -1,5 +1,10 @@
 package com.example.demo.services;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
 import com.example.demo.dto.ReportedMealResponse;
 import com.example.demo.entities.Meal;
 import com.example.demo.entities.ReportedMeal;
@@ -8,14 +13,10 @@ import com.example.demo.repositories.CommentRepository;
 import com.example.demo.repositories.MealRepository;
 import com.example.demo.repositories.ReportedMealRepository;
 import com.example.demo.repositories.UserRepository;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
-public class ReportedMealService
-{
+public class ReportedMealService {
+
     private final UserRepository userRepository;
     private final MealRepository mealRepository;
     private final CommentRepository commentRepository;
@@ -42,15 +43,16 @@ public class ReportedMealService
         return optionalMeal.get();
     }
 
-    public ReportedMealResponse reportMeal(int mealId, int userId, String content)
-    {
+    public ReportedMealResponse reportMeal(int mealId, int userId, String content) {
         Meal meal = validateMealExistance(mealId);
-        User user = userRepository.findById(userId).orElseThrow(() ->new IllegalArgumentException("User not found"));
-        if(content == null || content.isBlank())
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("Content must not be empty");
+        }
         reportedMealRepository.findByMealIdAndReportingId(mealId, userId)
                 .ifPresent(x -> {
-                    throw new IllegalArgumentException("You have already reported this meal");}
+                    throw new IllegalArgumentException("You have already reported this meal");
+                }
                 );
 
         ReportedMeal reportedMeal = new ReportedMeal();
@@ -63,8 +65,7 @@ public class ReportedMealService
     }
 
     //admin
-    public List<ReportedMeal> getAllReportsByUser(int userId)
-    {
+    public List<ReportedMeal> getAllReportsByUser(int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("There is no user with specified ID"));
         List<ReportedMeal> rm = reportedMealRepository.findByReportingId(userId)
@@ -73,8 +74,7 @@ public class ReportedMealService
     }
 
     //admin
-    public List<ReportedMeal> getAllReportsByMeal(int mealId)
-    {
+    public List<ReportedMeal> getAllReportsByMeal(int mealId) {
         List<ReportedMeal> rm = reportedMealRepository.findByMealId(mealId)
                 .orElseThrow(() -> new IllegalArgumentException("This user have not reported any meal yet"));
         return rm;

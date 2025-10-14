@@ -1,7 +1,7 @@
 package com.example.demo.dto;
 
-public class ReportedMealRequest
-{
+public class ReportedMealRequest {
+
     private int mealId;
     private String content;
 

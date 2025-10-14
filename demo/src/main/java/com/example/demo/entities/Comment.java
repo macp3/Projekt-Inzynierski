@@ -1,23 +1,29 @@
 package com.example.demo.entities;
 
-import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 @Entity
-@Table (name = "comments")
-public class Comment
-{
+@Table(name = "comments")
+public class Comment {
+
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull
     private int id;
     @NotNull
-    @Column (name = "author_id")
+    @Column(name = "author_id")
     private int authorId;
     @NotNull
     private String content;
     @NotNull
-    @Column (name = "meal_id")
+    @Column(name = "meal_id")
     private int mealId;
 
     public int getId() {

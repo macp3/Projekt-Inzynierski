@@ -1,11 +1,10 @@
 package com.example.demo.entities;
 
 import java.time.LocalDate;
-import java.util.Date;
 
-import com.example.demo.entities.enums.DietTypes;
 import org.jetbrains.annotations.NotNull;
 
+import com.example.demo.entities.enums.DietTypes;
 import com.example.demo.entities.enums.Status;
 
 import jakarta.annotation.Nullable;

@@ -1,7 +1,7 @@
 package com.example.demo.dto;
 
-public class ReportedCommentRequest
-{
+public class ReportedCommentRequest {
+
     private int commentId;
     private String content;
 

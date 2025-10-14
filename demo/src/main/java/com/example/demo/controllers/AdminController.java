@@ -3,14 +3,29 @@ package com.example.demo.controllers;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.demo.dto.AddExerciseToTrainingRequest;
 import com.example.demo.dto.ExerciseRequest;
 import com.example.demo.dto.TrainingDetailsResponse;
-import com.example.demo.entities.*;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import com.example.demo.dto.TrainingRequest;
+import com.example.demo.entities.Admin;
+import com.example.demo.entities.Exercise;
+import com.example.demo.entities.ReportedComment;
+import com.example.demo.entities.ReportedMeal;
+import com.example.demo.entities.Training;
+import com.example.demo.entities.TrainingInfo;
+import com.example.demo.entities.User;
 import com.example.demo.repositories.AdminRepository;
 import com.example.demo.services.CommentService;
 import com.example.demo.services.FoodService;
@@ -27,22 +42,16 @@ public class AdminController {
 
     private final AdminRepository adminRepository;
     private final UserService userService;
-    private final MealService mealService;
-    private final CommentService commentService;
     private final ReportedMealService reportedMealService;
     private final ReportedCommentService reportedCommentService;
-    private final FoodService foodService;
     private final JwtService jwtService;
     private final TrainingService trainingService;
 
     public AdminController(AdminRepository adminRepository, UserService userService, MealService mealService, CommentService commentService, ReportedMealService reportedMealService, ReportedCommentService reportedCommentService, FoodService foodService, JwtService jwtService, TrainingService trainingService) {
         this.adminRepository = adminRepository;
         this.userService = userService;
-        this.mealService = mealService;
-        this.commentService = commentService;
         this.reportedMealService = reportedMealService;
         this.reportedCommentService = reportedCommentService;
-        this.foodService = foodService;
         this.jwtService = jwtService;
         this.trainingService = trainingService;
     }
@@ -89,7 +98,6 @@ public class AdminController {
     //admin
     @GetMapping("reports/meals/user/{userId}")
     public ResponseEntity<List<ReportedMeal>> getAllMealReportsByUser(@PathVariable int userId) {
-        User user = userService.getUserById(userId);
         List<ReportedMeal> reports = reportedMealService.getAllReportsByUser(userId);
         return ResponseEntity.ok(reports);
     }
@@ -97,7 +105,6 @@ public class AdminController {
     //admin
     @GetMapping("reports/comments/user/{userId}")
     public ResponseEntity<List<ReportedComment>> getAllCommentReportsByUser(@PathVariable int userId) {
-        User user = userService.getUserById(userId);
         List<ReportedComment> reports = reportedCommentService.getAllReportsByUser(userId);
 
         return ResponseEntity.ok(reports);
@@ -111,13 +118,11 @@ public class AdminController {
 
     //dodawanie cwiczenia do treningu
     @PostMapping("/trainings/addExercise")
-    public ResponseEntity<TrainingDetailsResponse> addExerciseToTraining(@RequestBody AddExerciseToTrainingRequest request, @RequestHeader("Authorization") String authHeader)
-    {
+    public ResponseEntity<TrainingDetailsResponse> addExerciseToTraining(@RequestBody AddExerciseToTrainingRequest request, @RequestHeader("Authorization") String authHeader) {
         //walidacja admina
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
         Admin admin = adminRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Admin not found"));
-
 
         TrainingDetailsResponse response = trainingService.addExerciseToTraining(
                 request.getExerciseId(),
@@ -127,35 +132,31 @@ public class AdminController {
         );
         return ResponseEntity.ok(response);
     }
-////////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////
 
     @GetMapping("/trainings")
-    public ResponseEntity<List<TrainingInfo>> getAllTrainings()
-    {
+    public ResponseEntity<List<TrainingInfo>> getAllTrainings() {
         return ResponseEntity.ok(trainingService.getAllTrainings());
     }
 
     @GetMapping("/trainings/{trainingId}/details")
-    public ResponseEntity<Training> getTrainingDetails(@PathVariable int trainingId)
-    {
+    public ResponseEntity<Training> getTrainingDetails(@PathVariable int trainingId) {
         return ResponseEntity.ok(trainingService.getTrainingById(trainingId));
     }
 
     @GetMapping("/exercises")
-    public ResponseEntity<List<Exercise>> getAllExercises()
-    {
+    public ResponseEntity<List<Exercise>> getAllExercises() {
         return ResponseEntity.ok(trainingService.getAllExercises());
     }
 
     @GetMapping("/exercises/{exerciseId}/details")
-    public ResponseEntity<Exercise> getExerciseDetails(@PathVariable int exerciseId)
-    {
+    public ResponseEntity<Exercise> getExerciseDetails(@PathVariable int exerciseId) {
         return ResponseEntity.ok(trainingService.getExerciseById(exerciseId));
     }
 
     @PostMapping("/exercises/add")
-    public ResponseEntity<Exercise> addExercise(@RequestBody ExerciseRequest request)
-    {
+    public ResponseEntity<Exercise> addExercise(@RequestBody ExerciseRequest request) {
         Exercise exercise = trainingService.createExercise(request.getName(), request.getDescription(), request.getType(), request.getDifficulty(), request.getNumberOfSets(), request.getRepetitionsPerSet());
         return ResponseEntity.ok(exercise);
     }

@@ -1,11 +1,11 @@
 package com.example.demo.entities;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
-import org.jetbrains.annotations.NotNull;
-import java.util.ArrayList;
-import java.util.List;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "trainings")
@@ -28,7 +28,6 @@ public class Training {
     private Integer dayOfExercise;
 
     // Gettery i settery
-
     public Integer getId() {
         return id;
     }

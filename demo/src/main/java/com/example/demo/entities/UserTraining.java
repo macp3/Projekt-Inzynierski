@@ -1,15 +1,18 @@
 package com.example.demo.entities;
 
-import jakarta.persistence.*;
+import java.time.LocalDate;
+
 import org.jetbrains.annotations.NotNull;
 
-import java.time.LocalDate;
-import java.util.Date;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "user_trainings")
-public class UserTraining
-{
+public class UserTraining {
+
     @Id
     //@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")

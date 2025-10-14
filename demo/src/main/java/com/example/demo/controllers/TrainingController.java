@@ -1,21 +1,28 @@
 package com.example.demo.controllers;
 
-import com.example.demo.dto.AssignTrainingRequest;
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.demo.dto.TrainingDetailsResponse;
-import com.example.demo.dto.TrainingRequest;
-import com.example.demo.entities.*;
+import com.example.demo.entities.Exercise;
+import com.example.demo.entities.TrainingInfo;
+import com.example.demo.entities.User;
 import com.example.demo.services.JwtService;
 import com.example.demo.services.TrainingService;
 import com.example.demo.services.UserService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/trainings")
-public class TrainingController
-{
+public class TrainingController {
+
     private final UserService userService;
     private final JwtService jwtService;
     private final TrainingService trainingService;
@@ -27,14 +34,12 @@ public class TrainingController
     }
 
     @GetMapping("")
-    public ResponseEntity<List<TrainingInfo>> getAllTrainings()
-    {
+    public ResponseEntity<List<TrainingInfo>> getAllTrainings() {
         return ResponseEntity.ok(trainingService.getAllTrainings());
     }
 
     @GetMapping("/exercises/{exerciseId}/details")
-    public ResponseEntity<Exercise> getExerciseDetails(@PathVariable int exerciseId)
-    {
+    public ResponseEntity<Exercise> getExerciseDetails(@PathVariable int exerciseId) {
         return ResponseEntity.ok(trainingService.getExerciseById(exerciseId));
     }
 
@@ -45,8 +50,7 @@ public class TrainingController
     }
 
     @PostMapping("/assign/{trainingId}")
-    public ResponseEntity<String> assignTraining(@PathVariable int trainingId, @RequestHeader("Authorization") String authHeader)
-    {
+    public ResponseEntity<String> assignTraining(@PathVariable int trainingId, @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
         User user = userService.getUserByEmail(email);
@@ -56,8 +60,7 @@ public class TrainingController
     }
 
     @DeleteMapping("/my/deprive")
-    public ResponseEntity<String> depriveTrainingFromUser(@RequestHeader("Authorization") String authHeader)
-    {
+    public ResponseEntity<String> depriveTrainingFromUser(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
         User user = userService.getUserByEmail(email);
@@ -67,8 +70,7 @@ public class TrainingController
     }
 
     @GetMapping("/my")
-    public ResponseEntity<TrainingInfo> getUserTraining(@RequestHeader("Authorization") String authHeader)
-    {
+    public ResponseEntity<TrainingInfo> getUserTraining(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
         User user = userService.getUserByEmail(email);

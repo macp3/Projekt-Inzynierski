@@ -1,12 +1,11 @@
 package com.example.demo.dto;
 
-import com.example.demo.entities.Training;
-import jakarta.persistence.ManyToMany;
-
 import java.util.List;
 
-public class ExerciseRequest
-{
+import com.example.demo.entities.Training;
+
+public class ExerciseRequest {
+
     private String name;
     private String description;
     private String type;

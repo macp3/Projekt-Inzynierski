@@ -1,10 +1,9 @@
 package com.example.demo.dto;
 
 import com.example.demo.entities.enums.Sex;
-import org.springframework.web.bind.annotation.RequestParam;
 
-public class BodyParametersRequest
-{
+public class BodyParametersRequest {
+
     private Sex sex;
     private Float height;
     private Float weight;

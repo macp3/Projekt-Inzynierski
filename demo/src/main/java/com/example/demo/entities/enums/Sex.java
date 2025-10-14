@@ -1,7 +1,6 @@
 package com.example.demo.entities.enums;
 
-public enum Sex
-{
+public enum Sex {
     male,
     female
 }

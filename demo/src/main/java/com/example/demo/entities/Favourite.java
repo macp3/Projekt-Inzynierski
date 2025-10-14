@@ -1,13 +1,19 @@
 package com.example.demo.entities;
 
-import jakarta.annotation.Nullable;
-import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
+
+import jakarta.annotation.Nullable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "favourite")
-public class Favourite
-{
+public class Favourite {
+
     @Id
     @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)

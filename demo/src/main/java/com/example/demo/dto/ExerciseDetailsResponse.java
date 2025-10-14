@@ -1,9 +1,7 @@
 package com.example.demo.dto;
 
-import jakarta.persistence.Column;
+public class ExerciseDetailsResponse {
 
-public class ExerciseDetailsResponse
-{
     private Integer id;
     private String name;
     private String description;

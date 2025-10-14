@@ -1,8 +1,5 @@
 package com.example.demo.dto;
 
-import com.example.demo.entities.Exercise;
-import com.example.demo.entities.TrainingInfo;
-
 import java.util.List;
 
 public class TrainingRequest {
@@ -27,6 +24,7 @@ public class TrainingRequest {
     }
 
     public static class TreningInfo {
+
         private String name;
         private String description;
         private int durationTime;
@@ -56,8 +54,8 @@ public class TrainingRequest {
         }
     }
 
-    public static class TrainingExercise
-    {
+    public static class TrainingExercise {
+
         private int exerciseDay;
         private int exerciseId;
 
@@ -78,4 +76,3 @@ public class TrainingRequest {
         }
     }
 }
-

@@ -1,12 +1,18 @@
 package com.example.demo.entities;
 
-import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "meal_diet_type")
-public class MealDietType
-{
+public class MealDietType {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull

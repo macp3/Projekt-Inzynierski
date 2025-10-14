@@ -1,6 +1,7 @@
 package com.example.demo.dto;
 
 public class CommentResponse {
+
     private int id;
     private int authorId;
     private String content;
@@ -45,4 +46,3 @@ public class CommentResponse {
         this.mealId = mealId;
     }
 }
-

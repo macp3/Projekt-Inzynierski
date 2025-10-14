@@ -1,7 +1,7 @@
 package com.example.demo.dto;
 
-public class CommentRequest
-{
+public class CommentRequest {
+
     private String content;
     private int mealId;
 

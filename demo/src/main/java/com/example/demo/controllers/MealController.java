@@ -53,8 +53,8 @@ public class MealController {
 
         boolean success = mealService.createMeal(request, user.getId());
         if (!success) {
-            return ResponseEntity.badRequest().body("Meal not created (invalid data)"); 
-        }else {
+            return ResponseEntity.badRequest().body("Meal not created (invalid data)");
+        } else {
             return ResponseEntity.ok("Meal successfully created");
         }
     }
@@ -65,8 +65,8 @@ public class MealController {
 
         boolean success = mealService.editMealByUser(mealId, request, user.getId());
         if (success) {
-            return ResponseEntity.ok("Meal successfully edited"); 
-        }else {
+            return ResponseEntity.ok("Meal successfully edited");
+        } else {
             return ResponseEntity.ok("Meal not edited (invalid data)");
         }
     }
@@ -78,8 +78,8 @@ public class MealController {
 
         boolean success = mealService.deleteMealByUser(mealId, user.getId());
         if (success) {
-            return ResponseEntity.ok("Meal successfully deleted"); 
-        }else {
+            return ResponseEntity.ok("Meal successfully deleted");
+        } else {
             return ResponseEntity.ok("Meal not deleted (invalid data)");
         }
     }

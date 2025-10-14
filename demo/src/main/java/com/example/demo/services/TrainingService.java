@@ -1,22 +1,34 @@
 package com.example.demo.services;
 
-import com.example.demo.dto.ExerciseDetailsResponse;
-import com.example.demo.dto.TrainingDetailsResponse;
-import com.example.demo.dto.TrainingRequest;
-import com.example.demo.entities.*;
-import com.example.demo.repositories.*;
-import jakarta.transaction.Transactional;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
+
+import com.example.demo.dto.ExerciseDetailsResponse;
+import com.example.demo.dto.TrainingDetailsResponse;
+import com.example.demo.dto.TrainingRequest;
+import com.example.demo.entities.Admin;
+import com.example.demo.entities.Exercise;
+import com.example.demo.entities.Training;
+import com.example.demo.entities.TrainingInfo;
+import com.example.demo.entities.User;
+import com.example.demo.entities.UserTraining;
+import com.example.demo.repositories.AdminRepository;
+import com.example.demo.repositories.ExerciseRepository;
+import com.example.demo.repositories.TrainingInfoRepository;
+import com.example.demo.repositories.TrainingRepository;
+import com.example.demo.repositories.UserRepository;
+import com.example.demo.repositories.UserTrainingRepository;
+
+import jakarta.transaction.Transactional;
+
 @Service
-public class TrainingService
-{
+public class TrainingService {
+
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final TrainingRepository trainingRepository;
@@ -37,22 +49,28 @@ public class TrainingService
 
     //admin
     @Transactional
-    public Exercise createExercise(String name, String description, String type, int difficulty, int numberOfSets, int repetitionsPerSet)
-    {
-        if(name == null || name.trim().isBlank())
+    public Exercise createExercise(String name, String description, String type, int difficulty, int numberOfSets, int repetitionsPerSet) {
+        if (name == null || name.trim().isBlank()) {
             throw new IllegalArgumentException("Name must not be empty");
-        if(exerciseRepository.existsByName(name.trim()))
+        }
+        if (exerciseRepository.existsByName(name.trim())) {
             throw new IllegalArgumentException("This exercise already exists");
-        if(description == null || description.isBlank())
+        }
+        if (description == null || description.isBlank()) {
             throw new IllegalArgumentException("Description must not be empty");
-        if(type == null || type.isBlank())
+        }
+        if (type == null || type.isBlank()) {
             throw new IllegalArgumentException("Type must not be empty");
-        if(difficulty < 1 || difficulty > 3)
+        }
+        if (difficulty < 1 || difficulty > 3) {
             throw new IllegalArgumentException("Difficulty must be 1/2/3");
-        if(numberOfSets <= 0 || numberOfSets > 10)
+        }
+        if (numberOfSets <= 0 || numberOfSets > 10) {
             throw new IllegalArgumentException("Number of sets must be from 1 to 10");
-        if(repetitionsPerSet < 1 || repetitionsPerSet > 20)
+        }
+        if (repetitionsPerSet < 1 || repetitionsPerSet > 20) {
             throw new IllegalArgumentException("Repetitions per set must be from 1 to 20");
+        }
 
         Exercise exercise = new Exercise();
         exercise.setName(name);
@@ -70,14 +88,15 @@ public class TrainingService
     //dorobic delete
     //dorobic edit
     @Transactional
-    public void createTraining(TrainingRequest request, int authorId)
-    {
-        if(request == null || request.getTreningInfo() == null)
+    public void createTraining(TrainingRequest request, int authorId) {
+        if (request == null || request.getTreningInfo() == null) {
             throw new IllegalArgumentException("Training info must not be null");
+        }
 
         boolean exists = trainingInfoRepository.existsByName(request.getTreningInfo().getName());
-        if(exists)
+        if (exists) {
             throw new IllegalArgumentException("Training with this name already exists");
+        }
 
         TrainingInfo info = getTrainingInfo(request);
 
@@ -87,8 +106,7 @@ public class TrainingService
             throw new IllegalArgumentException("Training must contain at least one exercise");
         }
 
-        for (TrainingRequest.TrainingExercise ex : request.getTrainingExercises())
-        {
+        for (TrainingRequest.TrainingExercise ex : request.getTrainingExercises()) {
             if (ex == null) {
                 throw new IllegalArgumentException("Exercise cannot be null");
             }
@@ -110,26 +128,27 @@ public class TrainingService
 
     //validate trainingInfo
     @NotNull
-    private static TrainingInfo getTrainingInfo(TrainingRequest request)
-    {
+    private static TrainingInfo getTrainingInfo(TrainingRequest request) {
         TrainingInfo info = new TrainingInfo();
 
-        if(request.getTreningInfo().getName() == null || request.getTreningInfo().getName().trim().isBlank())
+        if (request.getTreningInfo().getName() == null || request.getTreningInfo().getName().trim().isBlank()) {
             throw new IllegalArgumentException("Training name must not be empty");
+        }
         info.setName(request.getTreningInfo().getName());
 
-        if(request.getTreningInfo().getDescription() == null || request.getTreningInfo().getDescription().trim().isBlank())
+        if (request.getTreningInfo().getDescription() == null || request.getTreningInfo().getDescription().trim().isBlank()) {
             throw new IllegalArgumentException("Training description must not be empty");
+        }
         info.setDescription(request.getTreningInfo().getDescription());
 
-        if(request.getTreningInfo().getDurationTime() <= 0)
+        if (request.getTreningInfo().getDurationTime() <= 0) {
             throw new IllegalArgumentException("DurationTime must be greater than zero");
+        }
         info.setDurationTime(request.getTreningInfo().getDurationTime());
         return info;
     }
 
-    public ExerciseDetailsResponse getExerciseDetails(int exerciseId)
-    {
+    public ExerciseDetailsResponse getExerciseDetails(int exerciseId) {
         Exercise exercise = getExerciseById(exerciseId);
         return new ExerciseDetailsResponse(exercise.getId(), exercise.getName(), exercise.getDescription(), exercise.getType(), exercise.getDifficulty(), exercise.getNumberOfSets(), exercise.getRepetitionsPerSet());
     }
@@ -137,20 +156,20 @@ public class TrainingService
     //admin
     //dorobic delete
     @Transactional
-    public TrainingDetailsResponse addExerciseToTraining(int exerciseId, int trainingId, int authorId, int dayOfExercise)
-    {
+    public TrainingDetailsResponse addExerciseToTraining(int exerciseId, int trainingId, int authorId, int dayOfExercise) {
         Optional<Admin> optionalAdmin = adminRepository.findById(authorId);
-        if(optionalAdmin.isEmpty())
+        if (optionalAdmin.isEmpty()) {
             throw new IllegalArgumentException("Author not found");
+        }
 
         boolean exerciseExists = trainingRepository.existsByTrainingIdAndExerciseIdAndDayOfExercise(trainingId, exerciseId, dayOfExercise);
-        if (exerciseExists)
-        {
+        if (exerciseExists) {
             throw new IllegalArgumentException("This exercise is already assigned to this training on the given day");
         }
 
-        if(dayOfExercise <= 0)
+        if (dayOfExercise <= 0) {
             throw new IllegalArgumentException("Day of exercise must be greater than zero");
+        }
 
         Exercise exercise = getExerciseById(exerciseId);
         Training training = getTrainingById(trainingId);
@@ -191,8 +210,7 @@ public class TrainingService
     }
 
     @Transactional
-    public void assignTrainingToUser(int userId, int trainingId)
-    {
+    public void assignTrainingToUser(int userId, int trainingId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
         TrainingInfo info = getTrainingInfoById(trainingId);
 
@@ -209,19 +227,18 @@ public class TrainingService
         userTrainingRepository.save(newAssignment);
     }
 
-    public void depriveTrainingFromUser(int userId)
-    {
+    public void depriveTrainingFromUser(int userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
         List<UserTraining> existing = userTrainingRepository.findByUserId(userId);
-        if(existing.isEmpty())
+        if (existing.isEmpty()) {
             throw new IllegalArgumentException("This user already has no training assigned");
+        }
 
         userTrainingRepository.deleteAll(existing);
         System.out.println("Training deprived successfully");
     }
 
-    public TrainingInfo getUserTraining(int userId)
-    {
+    public TrainingInfo getUserTraining(int userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         //??????????? dlaczego list
@@ -232,30 +249,25 @@ public class TrainingService
         return getTrainingInfoById(userTraining.getTrainingId());
     }
 
-    public TrainingInfo getTrainingInfoById(int trainingInfoId)
-    {
+    public TrainingInfo getTrainingInfoById(int trainingInfoId) {
         return trainingInfoRepository.findById(trainingInfoId).orElseThrow(() -> new IllegalArgumentException("Training info not found"));
     }
 
-    public Exercise getExerciseById(int exerciseId)
-    {
+    public Exercise getExerciseById(int exerciseId) {
         Exercise exercise = exerciseRepository.findById(exerciseId).orElseThrow(() -> new IllegalArgumentException("Exercise not found"));
         return exercise;
     }
 
-    public Training getTrainingById(int trainingId)
-    {
+    public Training getTrainingById(int trainingId) {
         Training training = trainingRepository.findById(trainingId).orElseThrow(() -> new IllegalArgumentException("Training not found"));
         return training;
     }
 
-    public List<TrainingInfo> getAllTrainings()
-    {
+    public List<TrainingInfo> getAllTrainings() {
         return trainingInfoRepository.findAll();
     }
 
-    public List<Exercise> getAllExercises()
-    {
+    public List<Exercise> getAllExercises() {
         return exerciseRepository.findAll();
     }
 }

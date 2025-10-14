@@ -1,7 +1,6 @@
 package com.example.demo.entities.enums;
 
-public enum Status
-{
+public enum Status {
     active,
     inactive,
     banned

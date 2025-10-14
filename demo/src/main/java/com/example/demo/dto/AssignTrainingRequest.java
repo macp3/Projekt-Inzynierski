@@ -1,7 +1,7 @@
 package com.example.demo.dto;
 
-public class AssignTrainingRequest
-{
+public class AssignTrainingRequest {
+
     private int userId;
     private int trainingId;
 

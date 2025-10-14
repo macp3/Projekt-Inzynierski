@@ -1,11 +1,9 @@
 package com.example.demo.dto;
 
 import com.example.demo.entities.enums.Sex;
-import jakarta.persistence.Column;
-import org.jetbrains.annotations.NotNull;
 
-public class BodyParametersResponse
-{
+public class BodyParametersResponse {
+
     private int userId;
     private Sex sex;
     private Float height;
