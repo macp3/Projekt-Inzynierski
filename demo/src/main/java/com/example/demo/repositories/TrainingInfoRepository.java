@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TrainingInfoRepository extends JpaRepository<TrainingInfo, Integer>
 {
-
+    boolean existsByName(String name);
 }

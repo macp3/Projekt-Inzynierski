@@ -56,7 +56,8 @@ public class TrainingRequest {
         }
     }
 
-    public static class TrainingExercise {
+    public static class TrainingExercise
+    {
         private int exerciseDay;
         private int exerciseId;
 

@@ -3,10 +3,7 @@ package com.example.demo.controllers;
 import com.example.demo.dto.AssignTrainingRequest;
 import com.example.demo.dto.TrainingDetailsResponse;
 import com.example.demo.dto.TrainingRequest;
-import com.example.demo.entities.Exercise;
-import com.example.demo.entities.Training;
-import com.example.demo.entities.TrainingInfo;
-import com.example.demo.entities.User;
+import com.example.demo.entities.*;
 import com.example.demo.services.JwtService;
 import com.example.demo.services.TrainingService;
 import com.example.demo.services.UserService;
@@ -16,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("trainings")
+@RequestMapping("/trainings")
 public class TrainingController
 {
     private final UserService userService;
@@ -35,6 +32,12 @@ public class TrainingController
         return ResponseEntity.ok(trainingService.getAllTrainings());
     }
 
+    @GetMapping("/exercises/{exerciseId}/details")
+    public ResponseEntity<Exercise> getExerciseDetails(@PathVariable int exerciseId)
+    {
+        return ResponseEntity.ok(trainingService.getExerciseById(exerciseId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TrainingDetailsResponse> getTrainingDetails(@PathVariable int id) {
         TrainingDetailsResponse response = trainingService.getTrainingDetails(id);
@@ -46,10 +49,31 @@ public class TrainingController
     {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
-
         User user = userService.getUserByEmail(email);
 
         trainingService.assignTrainingToUser(user.getId(), trainingId);
-        return ResponseEntity.ok("Trening został przypisany użytkownikowi");
+        return ResponseEntity.ok("Training successfully assigned to user");
+    }
+
+    @DeleteMapping("/my/deprive")
+    public ResponseEntity<String> depriveTrainingFromUser(@RequestHeader("Authorization") String authHeader)
+    {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+        User user = userService.getUserByEmail(email);
+
+        trainingService.depriveTrainingFromUser(user.getId());
+        return ResponseEntity.ok("Training successfully deprived");
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<TrainingInfo> getUserTraining(@RequestHeader("Authorization") String authHeader)
+    {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+        User user = userService.getUserByEmail(email);
+
+        TrainingInfo training = trainingService.getUserTraining(user.getId());
+        return ResponseEntity.ok(training);
     }
 }
