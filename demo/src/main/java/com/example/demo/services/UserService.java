@@ -15,6 +15,8 @@ import com.example.demo.entities.enums.Status;
 import com.example.demo.repositories.BodyParametersRepository;
 import com.example.demo.repositories.UserRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class UserService {
 
@@ -129,6 +131,84 @@ public class UserService {
         bodyParametersRepository.save(bodyParameters);
 
         return new BodyParametersResponse(user.getId(), bodyParameters.getSex(), bodyParameters.getHeight(), bodyParameters.getWeight(), bodyParameters.getAge(), bodyParameters.getDailyActivityFactor(), bodyParameters.getDailyActivityTrainingFactor(), bodyParameters.getWeeklyWeightChangeTempo(), bodyParameters.getGoalWeight(), bodyParameters.getCalorieLimit(), bodyParameters.getProteinLimit(), bodyParameters.getFatLimit(), bodyParameters.getCarbohydratesLimit());
+    }
+
+    @Transactional
+    public BodyParameters addBodyParameters(Integer userId, Sex sex, Float height, Float weight, Integer age, Float dailyActivityFactor, Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo, Float goalWeight) {
+        if (sex == null) {
+            throw new IllegalArgumentException("Wrong body parameters");
+        }
+        if (height <= 0) {
+            throw new IllegalArgumentException("Wrong body parameters");
+        }
+        if (weight <= 0) {
+            throw new IllegalArgumentException("Wrong body parameters");
+        }
+        if (age <= 0) {
+            throw new IllegalArgumentException("Wrong body parameters");
+        }
+        if (goalWeight <= 0) {
+            throw new IllegalArgumentException("Wrong body parameters");
+        }
+        if (weeklyWeightChangeTempo < 0 || weeklyWeightChangeTempo > 1) {
+            throw new IllegalArgumentException("Wrong body parameters");
+        }
+
+        float formula = 0;
+        if (sex == Sex.male) {
+            formula = (float) ((10 * weight) + (6.25 * height) - (5 * age) + 5);
+        } else if (sex == Sex.female) {
+            formula = (float) ((10 * weight) + (6.25 * height) - (5 * age) - 161);
+        }
+
+        float caloricZero = 0;
+        if (dailyActivityFactor < 0.65 || dailyActivityFactor > 1.2) {
+            throw new IllegalArgumentException("Wrong body parameters");
+        }
+        if (dailyActivityTrainingFactor < 0.65 || dailyActivityTrainingFactor > 1.2) {
+            throw new IllegalArgumentException("Wrong body parameters");
+        }
+
+        caloricZero = formula * (dailyActivityFactor + dailyActivityTrainingFactor);
+
+        float calorieLimit = caloricZero;
+        float proteinLimit = 0;
+        float fatLimit = 0;
+        float carbohydratesLimit = 0;
+        if (goalWeight > weight) {
+            calorieLimit = caloricZero + weeklyWeightChangeTempo * 1000;
+            proteinLimit = (float) 0.2 * calorieLimit;
+            fatLimit = (float) 0.25 * calorieLimit;
+            carbohydratesLimit = (float) 0.55 * calorieLimit;
+        } else if (goalWeight < weight) {
+            calorieLimit = caloricZero - weeklyWeightChangeTempo * 1000;
+            proteinLimit = (float) 0.25 * calorieLimit;
+            fatLimit = (float) 0.2 * calorieLimit;
+            carbohydratesLimit = (float) 0.55 * calorieLimit;
+        } else {
+            calorieLimit = caloricZero;
+            proteinLimit = (float) 0.2 * calorieLimit;
+            fatLimit = (float) 0.25 * calorieLimit;
+            carbohydratesLimit = (float) 0.55 * calorieLimit;
+        }
+
+        BodyParameters bodyParameters = new BodyParameters();
+
+        bodyParameters.setUserId(userId);
+        bodyParameters.setSex(sex);
+        bodyParameters.setHeight(height);
+        bodyParameters.setWeight(weight);
+        bodyParameters.setAge(age);
+        bodyParameters.setDailyActivityFactor(dailyActivityFactor);
+        bodyParameters.setDailyActivityTrainingFactor(dailyActivityTrainingFactor);
+        bodyParameters.setWeeklyWeightChangeTempo(weeklyWeightChangeTempo);
+        bodyParameters.setGoalWeight(goalWeight);
+        bodyParameters.setCalorieLimit(calorieLimit);
+        bodyParameters.setProteinLimit(proteinLimit);
+        bodyParameters.setFatLimit(fatLimit);
+        bodyParameters.setCarbohydratesLimit(carbohydratesLimit);
+
+        return bodyParametersRepository.save(bodyParameters);
     }
 
     //admin

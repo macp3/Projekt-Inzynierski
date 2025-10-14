@@ -14,6 +14,8 @@ import com.example.demo.repositories.BodyParametersRepository;
 import com.example.demo.repositories.RegisteredAlimentationRepository;
 import com.example.demo.repositories.UserRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class DailyCheckService {
 
@@ -32,13 +34,10 @@ public class DailyCheckService {
     @Autowired
     private FoodService foodService;
 
-    /**
-     * Uruchamia się codziennie o północy czasu polskiego. CRON: sekunda,
-     * minuta, godzina, dzień miesiąca, miesiąc, dzień tygodnia
-     */
+    @Transactional
     @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Warsaw")
     public void checkCaloriesForAllUsers() {
-        LocalDate yesterday = LocalDate.now();//.minusDays(1);
+        LocalDate yesterday = LocalDate.now().minusDays(1);
         List<User> users = userRepository.findAll();
 
         for (User user : users) {
