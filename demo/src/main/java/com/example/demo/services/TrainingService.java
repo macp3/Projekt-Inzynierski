@@ -241,12 +241,9 @@ public class TrainingService {
     public TrainingInfo getUserTraining(int userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        //??????????? dlaczego list
-        List<UserTraining> exisiting = userTrainingRepository.findByUserId(user.getId());
-        //bierze pierwszy trening (BO TAM JEST TYLKO JEDEN WIEC NIE WIEM CZEMU LISTA)
-        UserTraining userTraining = exisiting.get(0);
+        UserTraining exisiting = userTrainingRepository.findById(user.getId()).orElseThrow(() -> new IllegalArgumentException("This user has no training assign"));
 
-        return getTrainingInfoById(userTraining.getTrainingId());
+        return getTrainingInfoById(exisiting.getTrainingId());
     }
 
     public TrainingInfo getTrainingInfoById(int trainingInfoId) {

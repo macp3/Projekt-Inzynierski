@@ -24,9 +24,6 @@ public class Favourite {
     @Column(name = "meal_id")
     @Nullable
     private int mealId;
-    @Column(name = "meal_api_id")
-    @Nullable
-    private int mealApiId;
 
     public int getId() {
         return id;
@@ -50,13 +47,5 @@ public class Favourite {
 
     public void setMealId(int mealId) {
         this.mealId = mealId;
-    }
-
-    public int getMealApiId() {
-        return mealApiId;
-    }
-
-    public void setMealApiId(int mealApiId) {
-        this.mealApiId = mealApiId;
     }
 }

@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dto.BodyParametersResponse;
 import com.example.demo.entities.BodyParameters;
 import com.example.demo.entities.User;
+import com.example.demo.entities.UserDeviceToken;
 import com.example.demo.entities.enums.DietTypes;
 import com.example.demo.entities.enums.Sex;
 import com.example.demo.entities.enums.Status;
 import com.example.demo.repositories.BodyParametersRepository;
+import com.example.demo.repositories.UserDeviceTokenRepository;
 import com.example.demo.repositories.UserRepository;
 
 import jakarta.transaction.Transactional;
@@ -22,10 +24,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BodyParametersRepository bodyParametersRepository;
+    private final UserDeviceTokenRepository deviceTokenRepository;
 
-    public UserService(UserRepository userRepository, BodyParametersRepository bodyParametersRepository) {
+    public UserService(UserRepository userRepository, BodyParametersRepository bodyParametersRepository, UserDeviceTokenRepository deviceTokenRepository) {
         this.userRepository = userRepository;
         this.bodyParametersRepository = bodyParametersRepository;
+        this.deviceTokenRepository = deviceTokenRepository;
     }
 
     public User changePassword(int userId, String password) {
@@ -272,4 +276,31 @@ public class UserService {
         return userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
+    public void saveDeviceToken(int userId, String deviceToken) {
+        UserDeviceToken token = new UserDeviceToken(userId, deviceToken);
+        deviceTokenRepository.save(token);
+    }
+
+    public List<String> getDeviceTokens(int userId) {
+        return deviceTokenRepository.findByUserId(userId)
+                .stream()
+                .map(UserDeviceToken::getDeviceToken)
+                .toList();
+    }
+
+    public List<User> getUsersByRecipientType(String recipients) {
+        switch (recipients) {
+            case "premium" -> {
+                return userRepository.findByPremiumExpirationNotNull();
+            }
+            case "non_premium" -> {
+                return userRepository.findByPremiumExpirationNull();
+            }
+            case "all" -> {
+                return userRepository.findAll();
+            }
+            default ->
+                throw new IllegalArgumentException("Invalid recipient type: " + recipients);
+        }
+    }
 }

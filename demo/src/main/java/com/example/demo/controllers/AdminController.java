@@ -17,20 +17,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.AddExerciseToTrainingRequest;
 import com.example.demo.dto.ExerciseRequest;
+import com.example.demo.dto.NotificationRequest;
 import com.example.demo.dto.TrainingDetailsResponse;
 import com.example.demo.dto.TrainingRequest;
 import com.example.demo.entities.Admin;
 import com.example.demo.entities.Exercise;
+import com.example.demo.entities.Notification;
 import com.example.demo.entities.ReportedComment;
 import com.example.demo.entities.ReportedMeal;
 import com.example.demo.entities.Training;
 import com.example.demo.entities.TrainingInfo;
 import com.example.demo.entities.User;
+import com.example.demo.entities.enums.Recipients;
 import com.example.demo.repositories.AdminRepository;
 import com.example.demo.services.CommentService;
 import com.example.demo.services.FoodService;
 import com.example.demo.services.JwtService;
 import com.example.demo.services.MealService;
+import com.example.demo.services.NotificationService;
 import com.example.demo.services.ReportedCommentService;
 import com.example.demo.services.ReportedMealService;
 import com.example.demo.services.TrainingService;
@@ -46,14 +50,16 @@ public class AdminController {
     private final ReportedCommentService reportedCommentService;
     private final JwtService jwtService;
     private final TrainingService trainingService;
+    private final NotificationService notificationService;
 
-    public AdminController(AdminRepository adminRepository, UserService userService, MealService mealService, CommentService commentService, ReportedMealService reportedMealService, ReportedCommentService reportedCommentService, FoodService foodService, JwtService jwtService, TrainingService trainingService) {
+    public AdminController(AdminRepository adminRepository, UserService userService, MealService mealService, CommentService commentService, ReportedMealService reportedMealService, ReportedCommentService reportedCommentService, FoodService foodService, JwtService jwtService, TrainingService trainingService, NotificationService notificationService) {
         this.adminRepository = adminRepository;
         this.userService = userService;
         this.reportedMealService = reportedMealService;
         this.reportedCommentService = reportedCommentService;
         this.jwtService = jwtService;
         this.trainingService = trainingService;
+        this.notificationService = notificationService;
     }
 
     @GetMapping("/dashboard")
@@ -159,5 +165,46 @@ public class AdminController {
     public ResponseEntity<Exercise> addExercise(@RequestBody ExerciseRequest request) {
         Exercise exercise = trainingService.createExercise(request.getName(), request.getDescription(), request.getType(), request.getDifficulty(), request.getNumberOfSets(), request.getRepetitionsPerSet());
         return ResponseEntity.ok(exercise);
+    }
+
+    @PostMapping("/notifications/add")
+    public ResponseEntity<Notification> createNotification(
+            @RequestBody NotificationRequest request,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+        Admin admin = adminRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
+
+        Notification notification = notificationService.createNotification(request, admin);
+        return ResponseEntity.ok(notification);
+    }
+
+    @GetMapping("/notifications")
+    public ResponseEntity<List<Notification>> getAllNotifications(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+        adminRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
+
+        List<Notification> notifications = notificationService.getAllNotifications();
+        return ResponseEntity.ok(notifications);
+    }
+
+    @GetMapping("/notifications/filter")
+    public ResponseEntity<List<Notification>> getNotificationsByRecipients(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestParam Recipients recipients
+    ) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+        adminRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
+
+        List<Notification> notifications = notificationService.getNotificationsByRecipients(recipients);
+        return ResponseEntity.ok(notifications);
     }
 }

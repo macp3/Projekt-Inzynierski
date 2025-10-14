@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 
 .env
+!**/src/main/resource/firebase/serviceAccountKey.json
 
 ### STS ###
 .apt_generated

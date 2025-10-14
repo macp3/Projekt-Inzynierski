@@ -1,10 +1,14 @@
 package com.example.demo.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,12 +17,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.example.demo.dto.AddFavouriteRequest;
 import com.example.demo.dto.BodyParametersRequest;
 import com.example.demo.dto.BodyParametersResponse;
+import com.example.demo.dto.NotificationResponse;
 import com.example.demo.entities.BodyParameters;
+import com.example.demo.entities.Favourite;
+import com.example.demo.entities.Meal;
+import com.example.demo.entities.Notification;
 import com.example.demo.entities.User;
 import com.example.demo.entities.enums.DietTypes;
+import com.example.demo.repositories.FavouriteRepository;
+import com.example.demo.repositories.MealRepository;
+import com.example.demo.repositories.UserRepository;
 import com.example.demo.services.JwtService;
+import com.example.demo.services.NotificationService;
 import com.example.demo.services.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +43,10 @@ public class UserController {
 
     private final UserService userService;
     private final JwtService jwtService;
+    private final NotificationService notificationService;
+    private final UserRepository userRepository;
+    private final FavouriteRepository favouriteRepository;
+    private final MealRepository mealRepository;
 
     //admin
     @ResponseBody
@@ -102,6 +119,110 @@ public class UserController {
         BodyParameters response
                 = userService.addBodyParameters(user.getId(), request.getSex(), request.getHeight(), request.getWeight(), request.getAge(), request.getDailyActivityFactor(), request.getDailyActivityTrainingFactor(), request.getWeeklyWeightChangeTempo(), request.getGoalWeight());
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/myStreak")
+    public ResponseEntity<Integer> getMyStreak(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+
+        User user = userService.getUserByEmail(email);
+
+        return ResponseEntity.ok(user.getStreak());
+    }
+
+    @GetMapping("/notifications")
+    public ResponseEntity<List<NotificationResponse>> getUserNotifications(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+
+        User user = userService.getUserByEmail(email);
+
+        List<Notification> notifications = notificationService.getNotificationsForUser(!(user.getPremiumExpiration() == null));
+
+        List<NotificationResponse> notificationResponses = new ArrayList<>();
+
+        for (var notif : notifications) {
+            notificationResponses.add(new NotificationResponse(notif.getId(), notif.getName(), notif.getDescription(), notif.getSendingTime()));
+        }
+
+        return ResponseEntity.ok(notificationResponses);
+    }
+
+    @PostMapping("/device-token")
+    public ResponseEntity<String> saveDeviceToken(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody Map<String, String> request
+    ) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+        User user = userService.getUserByEmail(email);
+
+        String deviceToken = request.get("token");
+        userService.saveDeviceToken(user.getId(), deviceToken);
+
+        return ResponseEntity.ok("Device token saved");
+    }
+
+    @PostMapping("/favourite/add")
+    public ResponseEntity<Favourite> addFavourite(@RequestBody AddFavouriteRequest request,
+            @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        favouriteRepository.findByUserIdAndMealId(user.getId(), request.getMealId())
+                .ifPresent(f -> {
+                    throw new RuntimeException("Meal is already in favourites");
+                });
+
+        Favourite favourite = new Favourite();
+        favourite.setUserId(user.getId());
+        favourite.setMealId(request.getMealId());
+
+        Favourite saved = favouriteRepository.save(favourite);
+        return ResponseEntity.ok(saved);
+    }
+
+    @DeleteMapping("/favourite/remove/{mealId}")
+    public ResponseEntity<String> removeFavourite(@PathVariable int mealId,
+            @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Favourite favourite = favouriteRepository.findByUserIdAndMealId(user.getId(), mealId)
+                .orElseThrow(() -> new RuntimeException("Favourite not found"));
+
+        favouriteRepository.delete(favourite);
+        return ResponseEntity.ok("Favourite removed successfully");
+    }
+
+    @GetMapping("/favourite")
+    public ResponseEntity<List<Meal>> getMyFavouriteMeals(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Favourite> favourites = favouriteRepository.findByUserId(user.getId());
+
+        List<Meal> meals = favourites.stream()
+                .map(f -> {
+                    return mealRepository.findById(f.getMealId())
+                            .orElse(null);
+                })
+                .filter(m -> m != null)
+                .toList();
+
+        return ResponseEntity.ok(meals);
     }
 
 }
