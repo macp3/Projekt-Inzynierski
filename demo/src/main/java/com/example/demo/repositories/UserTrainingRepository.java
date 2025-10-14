@@ -10,4 +10,5 @@ import java.util.List;
 public interface UserTrainingRepository extends JpaRepository<UserTraining, Integer>
 {
     List<UserTraining> findByUserId(int userId);
+    //UserTraining findByUserId(int userId);
 }

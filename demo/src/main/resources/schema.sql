@@ -253,7 +253,7 @@ CREATE TABLE `exercises` (
 -- --------------------------------------------------------
 CREATE TABLE `trainings_info` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(30) NOT NULL,
+  `name` varchar(100) NOT NULL,
   `description` varchar(100) NOT NULL,
   `duration_time` int(11) NOT NULL,
   PRIMARY KEY (`id`)

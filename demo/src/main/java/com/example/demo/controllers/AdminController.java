@@ -3,21 +3,14 @@ package com.example.demo.controllers;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.example.demo.dto.AddExerciseToTrainingRequest;
+import com.example.demo.dto.ExerciseRequest;
+import com.example.demo.dto.TrainingDetailsResponse;
+import com.example.demo.entities.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dto.TrainingRequest;
-import com.example.demo.entities.ReportedComment;
-import com.example.demo.entities.ReportedMeal;
-import com.example.demo.entities.User;
 import com.example.demo.repositories.AdminRepository;
 import com.example.demo.services.CommentService;
 import com.example.demo.services.FoodService;
@@ -113,24 +106,36 @@ public class AdminController {
     @PostMapping("/trainings/add")
     public ResponseEntity<String> addTraining(@RequestBody TrainingRequest request) {
         trainingService.createTraining(request, 1);
-        return ResponseEntity.ok("Trening został dodany");
+        return ResponseEntity.ok("Training added successfully");
     }
 
     //dodawanie cwiczenia do treningu
-    /*@PostMapping("/{trainingId}/add/{exerciseId}")
-    public ResponseEntity<Training> addExerciseToTraining(@PathVariable int trainingId, @PathVariable int exerciseId)
+    @PostMapping("/trainings/addExercise")
+    public ResponseEntity<TrainingDetailsResponse> addExerciseToTraining(@RequestBody AddExerciseToTrainingRequest request, @RequestHeader("Authorization") String authHeader)
     {
-        trainingService.addExerciseToTraining(exerciseId, trainingId);
-        return ResponseEntity.ok(trainingService.getTrainingById(trainingId));
-    }*/
+        //walidacja admina
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+        Admin admin = adminRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Admin not found"));
 
- /* @GetMapping("/trainings")
-    public ResponseEntity<List<Training>> getAllTrainings()
+
+        TrainingDetailsResponse response = trainingService.addExerciseToTraining(
+                request.getExerciseId(),
+                request.getTrainingId(),
+                admin.getId(),
+                request.getDayOfExercise()
+        );
+        return ResponseEntity.ok(response);
+    }
+////////////////////////////////////////////////////////////////////////
+
+    @GetMapping("/trainings")
+    public ResponseEntity<List<TrainingInfo>> getAllTrainings()
     {
         return ResponseEntity.ok(trainingService.getAllTrainings());
-    }*/
+    }
 
- /*@GetMapping("/trainings/{trainingId}/details")
+    @GetMapping("/trainings/{trainingId}/details")
     public ResponseEntity<Training> getTrainingDetails(@PathVariable int trainingId)
     {
         return ResponseEntity.ok(trainingService.getTrainingById(trainingId));
@@ -153,5 +158,5 @@ public class AdminController {
     {
         Exercise exercise = trainingService.createExercise(request.getName(), request.getDescription(), request.getType(), request.getDifficulty(), request.getNumberOfSets(), request.getRepetitionsPerSet());
         return ResponseEntity.ok(exercise);
-    }*/
+    }
 }
