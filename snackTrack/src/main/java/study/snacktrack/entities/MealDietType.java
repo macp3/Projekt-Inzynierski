@@ -10,7 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "meal_diet_type")
+@Table(name = "meal_diet_types")
 public class MealDietType {
 
     @Id
@@ -21,4 +21,28 @@ public class MealDietType {
     private int mealId;
     @Column(name = "diet_type_id")
     private int dietTypeId;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getMealId() {
+        return mealId;
+    }
+
+    public void setMealId(int mealId) {
+        this.mealId = mealId;
+    }
+
+    public int getDietTypeId() {
+        return dietTypeId;
+    }
+
+    public void setDietTypeId(int dietTypeId) {
+        this.dietTypeId = dietTypeId;
+    }
 }
