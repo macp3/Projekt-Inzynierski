@@ -13,3 +13,15 @@ INSERT INTO exercises (name, description, type, difficulty, number_of_sets, repe
 ('Plank', 'Core strengthening plank', 'Core', 2, 3, 10), -- czas w sekundach
 ('Jumping Jacks', 'Cardio warm-up exercise', 'Cardio', 1, 3, 20),
 ('Lunges', 'Forward lunges for legs and glutes', 'Strength', 2, 3, 12);
+
+
+INSERT INTO diet_types (name) VALUES 
+('balanced'),
+('keto'),
+('low_carb'),
+('high_protein'),
+('low_fat'),
+('vegan'),
+('vegetarian'),
+('gluten_free'),
+('lactose_free');

@@ -21,9 +21,12 @@ import study.snacktrack.dto.MealResponse;
 import study.snacktrack.entities.EssentialFood;
 import study.snacktrack.entities.Ingredient;
 import study.snacktrack.entities.Meal;
+import study.snacktrack.entities.MealDietType;
 import study.snacktrack.entities.User;
+import study.snacktrack.repositories.DietTypeRepository;
 import study.snacktrack.repositories.FoodRepository;
 import study.snacktrack.repositories.IngredientRepository;
+import study.snacktrack.repositories.MealDietTypeRepository;
 import study.snacktrack.repositories.MealRepository;
 import study.snacktrack.repositories.UserRepository;
 
@@ -38,13 +41,17 @@ public class MealService {
     private final IngredientRepository ingredientRepository;
     private final FoodRepository foodRepository;
     private final FoodService foodService;
+    private final MealDietTypeRepository mealDietTypeRepository;
+    private final DietTypeRepository dietTypeRepository;
 
-    public MealService(UserRepository userRepository, FoodRepository foodRepository, MealRepository mealRepository, IngredientRepository ingredientRepository, FoodService foodService) {
+    public MealService(UserRepository userRepository, FoodRepository foodRepository, MealRepository mealRepository, IngredientRepository ingredientRepository, FoodService foodService, MealDietTypeRepository mealDietTypeRepository, DietTypeRepository dietTypeRepository) {
         this.userRepository = userRepository;
         this.mealRepository = mealRepository;
         this.ingredientRepository = ingredientRepository;
         this.foodRepository = foodRepository;
         this.foodService = foodService;
+        this.mealDietTypeRepository = mealDietTypeRepository;
+        this.dietTypeRepository = dietTypeRepository;
     }
 
     private Meal validateMealExistance(int mealId) {
@@ -272,5 +279,25 @@ public class MealService {
 
     public Meal getMealById(int mealId) {
         return mealRepository.findById(mealId).orElseThrow(() -> new IllegalArgumentException("This meal doesn't exist"));
+    }
+
+    @Transactional
+    public void assignDietTypesToMeal(int mealId, List<Integer> dietTypeIds) {
+        if (!mealRepository.existsById(mealId)) {
+            throw new IllegalArgumentException("Meal not found with id: " + mealId);
+        }
+
+        mealDietTypeRepository.deleteByMealId(mealId);
+
+        for (Integer dietTypeId : dietTypeIds) {
+            if (!dietTypeRepository.existsById(dietTypeId)) {
+                throw new IllegalArgumentException("DietType not found with id: " + dietTypeId);
+            }
+
+            MealDietType mdt = new MealDietType();
+            mdt.setMealId(mealId);
+            mdt.setDietTypeId(dietTypeId);
+            mealDietTypeRepository.save(mdt);
+        }
     }
 }
