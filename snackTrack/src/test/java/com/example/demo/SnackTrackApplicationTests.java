@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
-class DemoApplicationTests {
+class SnackTrackApplicationTests {
 
     @BeforeAll
     void waitForDatabase() throws InterruptedException {
