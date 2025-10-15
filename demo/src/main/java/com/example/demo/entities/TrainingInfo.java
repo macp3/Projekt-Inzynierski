@@ -1,12 +1,11 @@
 package com.example.demo.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
 
+import java.util.List;
+
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "trainings_info")
 public class TrainingInfo {
@@ -23,6 +22,16 @@ public class TrainingInfo {
 
     @Column(name = "duration_time", nullable = false)
     private Integer durationTime;
+
+    //ewentualnie do wypierdolenia xd
+    @OneToMany(mappedBy = "trainingInfo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Training> trainings;
+
+    //to tez
+    @OneToMany(mappedBy = "trainingInfo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserTraining> userTrainings;
+
+
 
     // Gettery i settery
     public Integer getId() {

@@ -283,7 +283,7 @@ CREATE TABLE `user_trainings` (
   `timestamp` date NOT NULL,
   PRIMARY KEY (`user_id`, `training_id`, `timestamp`),
   CONSTRAINT `user_trainings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
-  CONSTRAINT `user_trainings_ibfk_2` FOREIGN KEY (`training_id`) REFERENCES `trainings`(`id`) ON DELETE CASCADE
+  CONSTRAINT `user_trainings_ibfk_2` FOREIGN KEY (`training_id`) REFERENCES `trainings_info`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE user_device_tokens (

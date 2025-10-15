@@ -27,7 +27,7 @@ public class TrainingRequest {
 
         private String name;
         private String description;
-        private int durationTime;
+        private Integer durationTime;
 
         public String getName() {
             return name;
@@ -45,11 +45,11 @@ public class TrainingRequest {
             this.description = description;
         }
 
-        public int getDurationTime() {
+        public Integer getDurationTime() {
             return durationTime;
         }
 
-        public void setDurationTime(int durationTime) {
+        public void setDurationTime(Integer durationTime) {
             this.durationTime = durationTime;
         }
     }

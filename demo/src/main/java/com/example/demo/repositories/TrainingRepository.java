@@ -16,4 +16,10 @@ public interface TrainingRepository extends JpaRepository<Training, Integer> {
     List<Training> findByTrainingId(int trainingId);
 
     boolean existsByTrainingIdAndExerciseIdAndDayOfExercise(int trainingId, int exerciseId, int dayOfExercise);
+    List<Training> findAllByTrainingIdAndExerciseId(int trainingId, int exerciseId);
+    void deleteAllByTrainingId(int trainingId);
+
+    Optional<Training> findByTrainingIdAndExerciseIdAndDayOfExercise(int trainingId, int exerciseId, int dayOfExercise);
+
+    List<Training> findAllByExerciseId(int exerciseId);
 }
