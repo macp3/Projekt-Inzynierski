@@ -1,7 +1,9 @@
+version: '3.8'
+
 services:
-  snacktrack-db:
-    container_name: snacktrack-db
-    image: mysql:8.0
+  mysql:
+    container_name: guide-mysql
+    image: mysql:latest
     environment:
       MYSQL_DATABASE: snackTrackDB
       MYSQL_USER: myuser
@@ -11,27 +13,23 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-    networks:
-      - snacktrack-network
 
-  snacktrack-app:
+  app:
     container_name: snacktrack-app
     build: .
+    image: snacktrack:latest
     depends_on:
-      - snacktrack-db
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://snacktrack-db:3306/snackTrackDB
-      SPRING_DATASOURCE_USERNAME: myuser
-      SPRING_DATASOURCE_PASSWORD: secret
-      SPRING_SQL_INIT_MODE: always
+      - mysql
     ports:
       - "8080:8080"
-    networks:
-      - snacktrack-network
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/snackTrackDB
+      SPRING_DATASOURCE_USERNAME: myuser
+      SPRING_DATASOURCE_PASSWORD: secret
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_SQL_INIT_MODE: never
+    restart: always
 
 volumes:
   mysql_data:
-
-networks:
-  snacktrack-network:
-    driver: bridge
