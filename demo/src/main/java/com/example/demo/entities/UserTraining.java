@@ -2,30 +2,30 @@ package com.example.demo.entities;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "user_trainings")
+@IdClass(UserTrainingId.class)
 public class UserTraining {
 
     @Id
     //@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     @NotNull
-    //czy tutaj kluczem glownym nie powinno byc po prostu pole "id" zamiast "user_id"?
-    //bo tutaj klucz glowny ma auto inkrementacje i w momencie gdy user sobie przypisze (zmieni obecny na) kolejny trening to zinkrementuje nam sie user_id a nie cos inego a tak nie powinno byc bo w tej tabeli w tym momencie mozemy miec user_id równy 5 a faktycznie zarejestrowanych tylko dwoch uzytkownikow xd
-    //help
     private int userId;
+    @Id
     @Column(name = "training_id")
     @NotNull
     private int trainingId;
     @NotNull
     private LocalDate timestamp;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "training_id", insertable = false, updatable = false)
+    private TrainingInfo trainingInfo;
+
 
     public int getUserId() {
         return userId;

@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "trainings")
@@ -26,6 +27,13 @@ public class Training {
 
     @Column(name = "day_of_exercise", nullable = false)
     private Integer dayOfExercise;
+
+    //ewentualnie do wypierdolenia
+    @ManyToOne
+    @JoinColumn(name = "training_id", insertable = false, updatable = false)
+    private TrainingInfo trainingInfo;
+
+
 
     // Gettery i settery
     public Integer getId() {

@@ -2,6 +2,7 @@ package com.example.demo.controllers;
 
 import java.util.List;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,6 +50,28 @@ public class TrainingController {
         return ResponseEntity.ok(response);
     }
 
+    //zrobilem assign i potem wywolalem to i nie dziala
+    @GetMapping("/my")
+    public ResponseEntity<TrainingInfo> getUserTraining(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+        User user = userService.getUserByEmail(email);
+
+        TrainingInfo trainingInfo = trainingService.getUserTraining(user.getId());
+        return ResponseEntity.ok(trainingInfo);
+    }
+
+    @GetMapping("/my/details")
+    public ResponseEntity<TrainingDetailsResponse> getUserTrainingWithDetails(@RequestHeader("Authorization") String authHeader)
+    {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+        User user = userService.getUserByEmail(email);
+
+        TrainingInfo trainingInfo = trainingService.getUserTraining(user.getId());
+        return ResponseEntity.ok(trainingService.getTrainingDetails(trainingInfo.getId()));
+    }
+
     @PostMapping("/assign/{trainingId}")
     public ResponseEntity<String> assignTraining(@PathVariable int trainingId, @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
@@ -67,15 +90,5 @@ public class TrainingController {
 
         trainingService.depriveTrainingFromUser(user.getId());
         return ResponseEntity.ok("Training successfully deprived");
-    }
-
-    @GetMapping("/my")
-    public ResponseEntity<TrainingInfo> getUserTraining(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
-        User user = userService.getUserByEmail(email);
-
-        TrainingInfo training = trainingService.getUserTraining(user.getId());
-        return ResponseEntity.ok(training);
     }
 }

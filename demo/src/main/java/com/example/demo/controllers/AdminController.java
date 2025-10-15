@@ -3,17 +3,9 @@ package com.example.demo.controllers;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.example.demo.repositories.ExerciseRepository;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dto.AddExerciseToTrainingRequest;
 import com.example.demo.dto.ExerciseRequest;
@@ -23,7 +15,6 @@ import com.example.demo.entities.Admin;
 import com.example.demo.entities.Exercise;
 import com.example.demo.entities.ReportedComment;
 import com.example.demo.entities.ReportedMeal;
-import com.example.demo.entities.Training;
 import com.example.demo.entities.TrainingInfo;
 import com.example.demo.entities.User;
 import com.example.demo.repositories.AdminRepository;
@@ -110,10 +101,36 @@ public class AdminController {
         return ResponseEntity.ok(reports);
     }
 
+    ////////////////////////////////////////////////////////////////////////
+
+    @GetMapping("/trainings")
+    public ResponseEntity<List<TrainingInfo>> getAllTrainings() {
+        return ResponseEntity.ok(trainingService.getAllTrainings());
+    }
+
+    @GetMapping("/trainings/{trainingId}/details")
+    public ResponseEntity<TrainingDetailsResponse> getTrainingDetails(@PathVariable int trainingId) {
+        return ResponseEntity.ok(trainingService.getTrainingDetails(trainingId));
+    }
+
     @PostMapping("/trainings/add")
     public ResponseEntity<String> addTraining(@RequestBody TrainingRequest request) {
         trainingService.createTraining(request, 1);
         return ResponseEntity.ok("Training added successfully");
+    }
+
+    //pojebane - nie moga byc dwa te same cwiczenia tego samego dnia
+
+    @PutMapping("/trainings/{trainingId}/edit")
+    public ResponseEntity<String> editTraining(@PathVariable int trainingId, @RequestBody TrainingRequest request, @RequestHeader("Authorization") String authHeader)
+    {
+        //walidacja admina
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+        Admin admin = adminRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Admin not found"));
+
+        trainingService.editTraining(request,  admin.getId(), trainingId);
+        return ResponseEntity.ok("Training edited successfully");
     }
 
     //dodawanie cwiczenia do treningu
@@ -133,16 +150,23 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    ////////////////////////////////////////////////////////////////////////
-
-    @GetMapping("/trainings")
-    public ResponseEntity<List<TrainingInfo>> getAllTrainings() {
-        return ResponseEntity.ok(trainingService.getAllTrainings());
+    @DeleteMapping("/trainings/{trainingId}/delete/{exerciseId}")
+    public ResponseEntity<TrainingDetailsResponse> deleteExercisesByIdFromTraining(@PathVariable int trainingId, @PathVariable int exerciseId)
+    {
+        return ResponseEntity.ok(trainingService.deleteAllExercisesByIdFromTraining(trainingId, exerciseId));
     }
 
-    @GetMapping("/trainings/{trainingId}/details")
-    public ResponseEntity<Training> getTrainingDetails(@PathVariable int trainingId) {
-        return ResponseEntity.ok(trainingService.getTrainingById(trainingId));
+    @DeleteMapping("/trainings/{trainingId}/delete/{exerciseId}/{dayOfExercise}")
+    public ResponseEntity<TrainingDetailsResponse> deleteExerciseByIdAndDayFromTraining(@PathVariable int trainingId, @PathVariable int exerciseId, @PathVariable int dayOfExercise)
+    {
+        return ResponseEntity.ok(trainingService.deleteExerciseByIdAndDayFromTraining(trainingId, exerciseId, dayOfExercise));
+    }
+
+    @DeleteMapping("/trainings/{trainingId}/delete")
+    public ResponseEntity<String> deleteTraining(@PathVariable int trainingId)
+    {
+        trainingService.deleteTraining(trainingId);
+        return ResponseEntity.ok("Training deleted successfully");
     }
 
     @GetMapping("/exercises")
@@ -160,4 +184,13 @@ public class AdminController {
         Exercise exercise = trainingService.createExercise(request.getName(), request.getDescription(), request.getType(), request.getDifficulty(), request.getNumberOfSets(), request.getRepetitionsPerSet());
         return ResponseEntity.ok(exercise);
     }
+
+    @DeleteMapping("/exercises/delete/{exerciseId}")
+    public ResponseEntity<String> deleteExercise(@PathVariable int exerciseId) {
+        trainingService.deleteExercise(exerciseId);
+        return ResponseEntity.ok("Exercise deleted successfully");
+    }
+
+
+    ////////////////////////////////////////////////////////////////////
 }

@@ -9,4 +9,5 @@ import com.example.demo.entities.TrainingInfo;
 public interface TrainingInfoRepository extends JpaRepository<TrainingInfo, Integer> {
 
     boolean existsByName(String name);
+    boolean existsByNameAndIdNot(String name, Integer id);
 }

@@ -1,8 +1,10 @@
 package com.example.demo.services;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
@@ -85,7 +87,6 @@ public class TrainingService {
     }
 
     //admin
-    //dorobic delete
     //dorobic edit
     @Transactional
     public void createTraining(TrainingRequest request, int authorId) {
@@ -113,8 +114,8 @@ public class TrainingService {
             if (ex.getExerciseId() <= 0) {
                 throw new IllegalArgumentException("Exercise ID must be greater than zero");
             }
-            if (ex.getExerciseDay() <= 0) {
-                throw new IllegalArgumentException("Day of exercise must be greater than zero");
+            if (ex.getExerciseDay() <= 0 || ex.getExerciseDay() > info.getDurationTime()) {
+                throw new IllegalArgumentException("Day of exercise must be greater than zero and must be lesser than duration time");
             }
             Training training = new Training();
             training.setTrainingId(info.getId());
@@ -125,6 +126,93 @@ public class TrainingService {
         }
         System.out.println("Training added successfully");
     }
+
+    @Transactional
+    public void editTraining(TrainingRequest request, int authorId, int trainingId) {
+        if (request == null || request.getTreningInfo() == null)
+            throw new IllegalArgumentException("Training info must not be null");
+
+        TrainingInfo existingInfo = trainingInfoRepository.findById(trainingId)
+                .orElseThrow(() -> new IllegalArgumentException("Training not found"));
+
+        TrainingRequest.TreningInfo updatedInfo = request.getTreningInfo();
+
+        // Sprawdź, czy nowa nazwa jest unikalna (jeśli została podana)
+        if (updatedInfo.getName() != null && !updatedInfo.getName().equals(existingInfo.getName())) {
+            boolean nameExists = trainingInfoRepository.existsByNameAndIdNot(updatedInfo.getName(), trainingId);
+            if (nameExists) {
+                throw new IllegalArgumentException("Training with this name already exists");
+            }
+            existingInfo.setName(updatedInfo.getName());
+        }
+
+        // Aktualizuj tylko te pola, które są zdefiniowane
+        if (updatedInfo.getDescription() != null) {
+            existingInfo.setDescription(updatedInfo.getDescription());
+        }
+
+        if (updatedInfo.getDurationTime() != null && updatedInfo.getDurationTime() > 0) {
+            existingInfo.setDurationTime(updatedInfo.getDurationTime());
+        }
+
+        trainingInfoRepository.save(existingInfo);
+
+        // Jeśli lista ćwiczeń została podana — nadpisujemy
+        if (request.getTrainingExercises() != null) {
+            trainingRepository.deleteAllByTrainingId(trainingId);
+
+            if (request.getTrainingExercises().isEmpty()) {
+                throw new IllegalArgumentException("Training must contain at least one exercise");
+            }
+
+            // Ustal aktualny durationTime
+            int durationTime = existingInfo.getDurationTime();
+
+            // Walidacja duplikatów ćwiczeń w tym samym dniu
+            Set<String> uniqueExerciseDayPairs = new HashSet<>();
+            for (TrainingRequest.TrainingExercise ex : request.getTrainingExercises()) {
+                if (ex == null || ex.getExerciseId() <= 0 || ex.getExerciseDay() <= 0) {
+                    throw new IllegalArgumentException("Invalid exercise data");
+                }
+
+                if (ex.getExerciseDay() > durationTime) {
+                    throw new IllegalArgumentException("Day of exercise must be between 1 and " + durationTime);
+                }
+
+                String key = ex.getExerciseId() + "_" + ex.getExerciseDay();
+                if (!uniqueExerciseDayPairs.add(key)) {
+                    throw new IllegalArgumentException("You cannot assign the same exercise more than once on the same day");
+                }
+            }
+
+            // Zapis ćwiczeń
+            for (TrainingRequest.TrainingExercise ex : request.getTrainingExercises()) {
+                Training training = new Training();
+                training.setTrainingId(trainingId);
+                training.setAuthorId(authorId);
+                training.setExerciseId(ex.getExerciseId());
+                training.setDayOfExercise(ex.getExerciseDay());
+                trainingRepository.save(training);
+            }
+        }
+
+        System.out.println("Training edited successfully");
+    }
+
+
+
+    @Transactional
+    public void deleteTraining(int trainingId)
+    {
+        TrainingInfo info = trainingInfoRepository.findById(trainingId).orElseThrow(() -> new IllegalArgumentException("Training does not exist"));
+
+        trainingRepository.deleteAllByTrainingId(trainingId);
+        userTrainingRepository.deleteAllByTrainingId(trainingId);
+        trainingInfoRepository.deleteById(trainingId);
+        System.out.println("Training deleted successfully");
+    }
+
+
 
     //validate trainingInfo
     @NotNull
@@ -154,7 +242,6 @@ public class TrainingService {
     }
 
     //admin
-    //dorobic delete
     @Transactional
     public TrainingDetailsResponse addExerciseToTraining(int exerciseId, int trainingId, int authorId, int dayOfExercise) {
         Optional<Admin> optionalAdmin = adminRepository.findById(authorId);
@@ -185,9 +272,37 @@ public class TrainingService {
         return getTrainingDetails(training.getId());
     }
 
+    //admin
+    @Transactional
+    public TrainingDetailsResponse deleteAllExercisesByIdFromTraining(int trainingId, int exerciseId)
+    {
+        Training training = getTrainingById(trainingId);
+        boolean exerciseExists = exerciseRepository.existsById(exerciseId);
+        if(!exerciseExists)
+            throw new IllegalArgumentException("Exercise not found");
+        List<Training> trainings = trainingRepository.findAllByTrainingIdAndExerciseId(trainingId, exerciseId);
+        if(trainings.isEmpty())
+            throw new IllegalArgumentException("This exercise is not assigned to this training");
+
+        trainingRepository.deleteAll(trainings);
+        return getTrainingDetails(training.getId());
+    }
+
+    @Transactional
+    public TrainingDetailsResponse deleteExerciseByIdAndDayFromTraining(int trainingId, int exerciseId, int dayOfExercise)
+    {
+        boolean exerciseExists = exerciseRepository.existsById(exerciseId);
+        if(!exerciseExists)
+            throw new IllegalArgumentException("Exercise not found");
+        Training training = trainingRepository.findByTrainingIdAndExerciseIdAndDayOfExercise(trainingId, exerciseId, dayOfExercise).orElseThrow(() -> new IllegalArgumentException("This exercise is not assigned to this training and this day"));
+
+        trainingRepository.delete(training);
+        return getTrainingDetails(trainingId);
+    }
+
     public TrainingDetailsResponse getTrainingDetails(int trainingInfoId) {
         TrainingInfo info = trainingInfoRepository.findById(trainingInfoId)
-                .orElseThrow(() -> new RuntimeException("Training not found"));
+                .orElseThrow(() -> new RuntimeException("Training not found for ID = " +trainingInfoId));
 
         List<Training> trainingEntries = trainingRepository.findByTrainingId(trainingInfoId);
 
@@ -211,14 +326,19 @@ public class TrainingService {
 
     @Transactional
     public void assignTrainingToUser(int userId, int trainingId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
-        TrainingInfo info = getTrainingInfoById(trainingId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
 
-        // Usuń istniejące przypisania
+        TrainingInfo info = trainingInfoRepository.findById(trainingId)
+                .orElseThrow(() -> new IllegalArgumentException("TrainingInfo not found with ID: " + trainingId));
+
         List<UserTraining> existing = userTrainingRepository.findByUserId(userId);
+        if (existing == null) {
+            throw new IllegalStateException("UserTraining list is null for user ID: " + userId);
+        }
+
         userTrainingRepository.deleteAll(existing);
 
-        // Dodaj nowe przypisanie
         UserTraining newAssignment = new UserTraining();
         newAssignment.setUserId(userId);
         newAssignment.setTrainingId(trainingId);
@@ -226,6 +346,7 @@ public class TrainingService {
 
         userTrainingRepository.save(newAssignment);
     }
+
 
     public void depriveTrainingFromUser(int userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -239,15 +360,40 @@ public class TrainingService {
     }
 
     public TrainingInfo getUserTraining(int userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
 
-        //??????????? dlaczego list
-        List<UserTraining> exisiting = userTrainingRepository.findByUserId(user.getId());
-        //bierze pierwszy trening (BO TAM JEST TYLKO JEDEN WIEC NIE WIEM CZEMU LISTA)
-        UserTraining userTraining = exisiting.get(0);
+        List<UserTraining> existing = userTrainingRepository.findByUserId(userId);
+        if (existing == null || existing.isEmpty()) {
+            throw new IllegalStateException("No training assigned to user ID: " + userId);
+        }
 
-        return getTrainingInfoById(userTraining.getTrainingId());
+        UserTraining userTraining = existing.get(0);
+        return trainingInfoRepository.findById(userTraining.getTrainingId())
+                .orElseThrow(() -> new IllegalArgumentException("TrainingInfo not found with ID: " + userTraining.getTrainingId()));
     }
+
+
+    @Transactional
+    public void deleteExercise(int exerciseId) {
+        // Sprawdź, czy ćwiczenie istnieje
+        boolean exists = exerciseRepository.existsById(exerciseId);
+        if (!exists) {
+            throw new IllegalArgumentException("Exercise not found");
+        }
+
+        // Usuń wszystkie treningi, które zawierają to ćwiczenie
+        List<Training> trainingsToDelete = trainingRepository.findAllByExerciseId(exerciseId);
+        if (!trainingsToDelete.isEmpty()) {
+            trainingRepository.deleteAll(trainingsToDelete);
+        }
+
+        // Usuń ćwiczenie z bazy
+        exerciseRepository.deleteById(exerciseId);
+
+        System.out.println("Exercise and related training entries deleted successfully");
+    }
+
 
     public TrainingInfo getTrainingInfoById(int trainingInfoId) {
         return trainingInfoRepository.findById(trainingInfoId).orElseThrow(() -> new IllegalArgumentException("Training info not found"));
