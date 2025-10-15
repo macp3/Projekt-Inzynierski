@@ -8,25 +8,24 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
-import study.snacktrack.entities.EssentialFood;
-import study.snacktrack.entities.Ingredient;
-import study.snacktrack.entities.Meal;
-import study.snacktrack.repositories.FoodRepository;
-import study.snacktrack.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.transaction.Transactional;
 import study.snacktrack.dto.EssentialFoodResponse;
 import study.snacktrack.dto.IngredientRequest;
 import study.snacktrack.dto.IngredientResponse;
 import study.snacktrack.dto.MealRequest;
 import study.snacktrack.dto.MealResponse;
+import study.snacktrack.entities.EssentialFood;
+import study.snacktrack.entities.Ingredient;
+import study.snacktrack.entities.Meal;
 import study.snacktrack.entities.User;
+import study.snacktrack.repositories.FoodRepository;
 import study.snacktrack.repositories.IngredientRepository;
 import study.snacktrack.repositories.MealRepository;
-
-import jakarta.transaction.Transactional;
+import study.snacktrack.repositories.UserRepository;
 
 @Service
 public class MealService {
@@ -117,7 +116,6 @@ public class MealService {
         }
 
         mealRepository.save(meal);
-        System.out.println("Meal added successfully");
         return true;
     }
 
@@ -176,6 +174,7 @@ public class MealService {
         response.setDescription(meal.getDescription());
         response.setAuthorId(meal.getAuthorId());
         response.setIngredients(ingredientResponses);
+        response.setImageUrl(meal.getImageUrl());
 
         return response;
     }

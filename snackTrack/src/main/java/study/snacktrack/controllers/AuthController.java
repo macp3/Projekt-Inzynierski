@@ -1,21 +1,28 @@
 package study.snacktrack.controllers;
 
-import study.snacktrack.dto.LoginRequest;
-import study.snacktrack.dto.RegisterRequest;
-import study.snacktrack.services.JwtService;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.RequiredArgsConstructor;
+import study.snacktrack.dto.LoginRequest;
+import study.snacktrack.dto.RegisterRequest;
 import study.snacktrack.entities.User;
+import study.snacktrack.entities.VerificationToken;
 import study.snacktrack.entities.enums.Status;
 import study.snacktrack.repositories.UserRepository;
-
-import lombok.RequiredArgsConstructor;
+import study.snacktrack.repositories.VerificationTokenRepository;
+import study.snacktrack.services.EmailService;
+import study.snacktrack.services.JwtService;
 
 @RestController
 @RequestMapping("/auth")
@@ -25,6 +32,8 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final VerificationTokenRepository tokenRepository;
+    private final EmailService emailService;
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
@@ -41,7 +50,39 @@ public class AuthController {
         user.setName(request.getName());
         userRepository.save(user);
 
-        return ResponseEntity.ok("User registered successfully!");
+        String token = UUID.randomUUID().toString();
+        VerificationToken verificationToken = new VerificationToken();
+        verificationToken.setToken(token);
+        verificationToken.setUser(user);
+        verificationToken.setExpiryDate(LocalDateTime.now().plusHours(24));
+        tokenRepository.save(verificationToken);
+
+        String activationLink = "http://localhost:8080/auth/activate?token=" + token;
+        emailService.sendEmail(
+                user.getEmail(),
+                "Activate your SnackTrack account",
+                "Hi " + user.getName() + ",\n\nClick here to activate your account:\n" + activationLink
+        );
+
+        return ResponseEntity.ok("User registered successfully! Check your email for activation link.");
+    }
+
+    @GetMapping("/activate")
+    public ResponseEntity<String> activateAccount(@RequestParam("token") String token) {
+        VerificationToken verificationToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid activation token"));
+
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token expired");
+        }
+
+        User user = verificationToken.getUser();
+        user.setStatus(Status.active);
+        userRepository.save(user);
+
+        tokenRepository.delete(verificationToken);
+
+        return ResponseEntity.ok("Account activated successfully!");
     }
 
     @PostMapping("/login")
@@ -51,6 +92,10 @@ public class AuthController {
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
+
+        if (user.getStatus() != Status.active) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Account not activated or banned");
         }
 
         String token = jwtService.generateToken(user.getEmail(), "USER");

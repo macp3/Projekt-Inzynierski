@@ -12,4 +12,5 @@ public class MealResponse {
     private String description;
     private int authorId;
     private List<IngredientResponse> ingredients;
+    private String imageUrl;
 }

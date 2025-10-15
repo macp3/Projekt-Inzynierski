@@ -1,20 +1,10 @@
 package study.snacktrack.controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import study.snacktrack.dto.AddFavouriteRequest;
-import study.snacktrack.dto.BodyParametersRequest;
-import study.snacktrack.dto.BodyParametersResponse;
-import study.snacktrack.dto.NotificationResponse;
-import study.snacktrack.entities.enums.DietTypes;
-import study.snacktrack.repositories.FavouriteRepository;
-import study.snacktrack.repositories.MealRepository;
-import study.snacktrack.repositories.UserRepository;
-import study.snacktrack.services.JwtService;
-import study.snacktrack.services.NotificationService;
-import study.snacktrack.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,14 +17,25 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
+import lombok.RequiredArgsConstructor;
+import study.snacktrack.dto.AddFavouriteRequest;
+import study.snacktrack.dto.BodyParametersRequest;
+import study.snacktrack.dto.BodyParametersResponse;
+import study.snacktrack.dto.NotificationResponse;
 import study.snacktrack.entities.BodyParameters;
 import study.snacktrack.entities.Favourite;
 import study.snacktrack.entities.Meal;
 import study.snacktrack.entities.Notification;
 import study.snacktrack.entities.User;
-
-import lombok.RequiredArgsConstructor;
+import study.snacktrack.entities.enums.DietTypes;
+import study.snacktrack.repositories.FavouriteRepository;
+import study.snacktrack.repositories.MealRepository;
+import study.snacktrack.repositories.UserRepository;
+import study.snacktrack.services.JwtService;
+import study.snacktrack.services.NotificationService;
+import study.snacktrack.services.UserService;
 
 @Controller
 @RequestMapping("/users")
@@ -168,7 +169,7 @@ public class UserController {
 
     @PostMapping("/favourite/add")
     public ResponseEntity<Favourite> addFavourite(@RequestBody AddFavouriteRequest request,
-                                                  @RequestHeader("Authorization") String authHeader) {
+            @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
 
@@ -223,6 +224,23 @@ public class UserController {
                 .toList();
 
         return ResponseEntity.ok(meals);
+    }
+
+    @PostMapping("/image")
+    public ResponseEntity<String> uploadMealImage(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestParam("image") MultipartFile imageFile) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
+
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            String imageUrl = userService.uploadProfileImage(user.getId(), imageFile);
+            return ResponseEntity.ok(imageUrl);
+        } catch (IllegalArgumentException | IOException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }

@@ -1,11 +1,19 @@
 package study.snacktrack.services;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.transaction.Transactional;
 import study.snacktrack.dto.BodyParametersResponse;
 import study.snacktrack.entities.BodyParameters;
 import study.snacktrack.entities.User;
@@ -17,10 +25,11 @@ import study.snacktrack.repositories.BodyParametersRepository;
 import study.snacktrack.repositories.UserDeviceTokenRepository;
 import study.snacktrack.repositories.UserRepository;
 
-import jakarta.transaction.Transactional;
-
 @Service
 public class UserService {
+
+    @Value("${image.upload-dir:src/main/resources/static/images/profiles}")
+    private String uploadDir;
 
     private final UserRepository userRepository;
     private final BodyParametersRepository bodyParametersRepository;
@@ -302,5 +311,31 @@ public class UserService {
             default ->
                 throw new IllegalArgumentException("Invalid recipient type: " + recipients);
         }
+    }
+
+    @Transactional
+    public String uploadProfileImage(int userId, MultipartFile imageFile) throws IOException {
+        if (imageFile == null || imageFile.isEmpty()) {
+            throw new IllegalArgumentException("Image file cannot be empty");
+        }
+
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
+        Path filePath = uploadPath.resolve(fileName);
+
+        Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        String relativePath = "/images/meals/" + fileName;
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setImageUrl(relativePath);
+        userRepository.save(user);
+
+        return relativePath;
     }
 }

@@ -294,5 +294,13 @@ CREATE TABLE user_device_tokens (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE verification_token (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  token VARCHAR(255) NOT NULL,
+  expiry_date DATETIME NOT NULL,
+  user_id INT NOT NULL,
+  CONSTRAINT fk_verification_token_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 SET FOREIGN_KEY_CHECKS = 1;
 COMMIT;
