@@ -36,6 +36,8 @@ public class Meal {
     @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Ingredient> ingredients;
+    @Column(name = "image_url")
+    private String imageUrl;
 
     public Meal() {
         this.ingredients = new ArrayList<>();
@@ -124,5 +126,13 @@ public class Meal {
         }
 
         return total;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

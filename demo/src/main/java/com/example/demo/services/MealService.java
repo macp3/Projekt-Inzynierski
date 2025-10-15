@@ -1,10 +1,16 @@
 package com.example.demo.services;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.dto.EssentialFoodResponse;
 import com.example.demo.dto.IngredientRequest;
@@ -113,6 +119,31 @@ public class MealService {
         mealRepository.save(meal);
         System.out.println("Meal added successfully");
         return true;
+    }
+
+    @Transactional
+    public String uploadMealImage(int mealId, MultipartFile imageFile) throws IOException {
+        Meal meal = validateMealExistance(mealId);
+
+        if (imageFile == null || imageFile.isEmpty()) {
+            throw new IllegalArgumentException("Image file cannot be empty");
+        }
+
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
+        Path filePath = uploadPath.resolve(fileName);
+
+        Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        String relativePath = "/images/meals/" + fileName;
+        meal.setImageUrl(relativePath);
+        mealRepository.save(meal);
+
+        return relativePath;
     }
 
     public MealResponse getMealWithIngredients(int mealId) {
