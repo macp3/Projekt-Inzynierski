@@ -51,7 +51,7 @@ CREATE TABLE `users` (
   `email` varchar(40) NOT NULL UNIQUE,
   `login` varchar(40) NOT NULL UNIQUE,
   `password` varchar(500) NOT NULL,
-  `profile_picture` blob DEFAULT NULL,
+  `image_url` VARCHAR(255) DEFAULT NULL,
   `premium_expiration` date DEFAULT NULL,
   `status` enum('banned','active','inactive') NOT NULL,
   `preffered_diet` enum('balanced','keto','low_carb','high_protein','low_fat','vegan','vegetarian','gluten_free','lactose_free') DEFAULT NULL,
@@ -119,6 +119,7 @@ CREATE TABLE `meals` (
   `author_id` int(11) NOT NULL,
   `name` varchar(50) NOT NULL,
   `description` varchar(100) NOT NULL,
+  `image_url` VARCHAR(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `meals_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

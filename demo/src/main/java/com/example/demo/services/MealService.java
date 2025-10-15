@@ -3,6 +3,7 @@ package com.example.demo.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.EssentialFoodResponse;
@@ -23,6 +24,9 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class MealService {
+
+    @Value("${image.upload-dir:src/main/resources/static/images/meals}")
+    private String uploadDir;
 
     private final UserRepository userRepository;
     private final MealRepository mealRepository;
