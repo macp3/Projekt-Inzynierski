@@ -21,7 +21,7 @@ public class RegisteredAlimentation {
     private Integer id;
 
     @Column(name = "user_id")
-    private int userId;
+    private Integer userId;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "essential_id")
@@ -99,7 +99,7 @@ public class RegisteredAlimentation {
         this.pieces = pieces;
     }
 
-    public int getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 

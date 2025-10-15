@@ -6,8 +6,11 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -135,6 +138,68 @@ public class RegisteredAlimentationController {
                 .toList();
 
         return ResponseEntity.ok(responses);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteEntry(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable Integer id
+    ) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        RegisteredAlimentation entry = repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry not found"));
+
+        if (!entry.getUserId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to delete this entry");
+        }
+
+        repository.delete(entry);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<RegisteredAlimentation> updateEntry(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable Integer id,
+            @RequestBody RegisteredAlimentationRequest dto
+    ) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        RegisteredAlimentation entry = repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry not found"));
+
+        if (!entry.getUserId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to edit this entry");
+        }
+
+        if (dto.getAmount() != null) {
+            if (dto.getAmount() <= 0) {
+                throw new IllegalArgumentException("Amount can't be smaller or equal 0");
+            }
+            entry.setAmount(dto.getAmount());
+            entry.setPieces(null);
+        }
+
+        if (dto.getPieces() != null) {
+            if (dto.getPieces() <= 0) {
+                throw new IllegalArgumentException("Pieces can't be smaller or equal 0");
+            }
+            entry.setPieces(dto.getPieces());
+            entry.setAmount(null);
+        }
+
+        RegisteredAlimentation updated = repository.save(entry);
+
+        return ResponseEntity.ok(updated);
     }
 
 }

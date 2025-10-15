@@ -170,7 +170,6 @@ CREATE TABLE `favourite` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `meal_id` int(11) DEFAULT NULL,
-  `meal_api_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `favourite_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
   CONSTRAINT `favourite_ibfk_2` FOREIGN KEY (`meal_id`) REFERENCES `meals`(`id`) ON DELETE CASCADE
@@ -286,6 +285,13 @@ CREATE TABLE `user_trainings` (
   CONSTRAINT `user_trainings_ibfk_2` FOREIGN KEY (`training_id`) REFERENCES `trainings_info`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE user_device_tokens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    device_token VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 
 SET FOREIGN_KEY_CHECKS = 1;
 COMMIT;

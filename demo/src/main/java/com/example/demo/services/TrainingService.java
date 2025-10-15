@@ -87,7 +87,6 @@ public class TrainingService {
     }
 
     //admin
-    //dorobic edit
     @Transactional
     public void createTraining(TrainingRequest request, int authorId) {
         if (request == null || request.getTreningInfo() == null) {
@@ -360,19 +359,12 @@ public class TrainingService {
     }
 
     public TrainingInfo getUserTraining(int userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        List<UserTraining> existing = userTrainingRepository.findByUserId(userId);
-        if (existing == null || existing.isEmpty()) {
-            throw new IllegalStateException("No training assigned to user ID: " + userId);
-        }
+        UserTraining exisiting = userTrainingRepository.findById(user.getId()).orElseThrow(() -> new IllegalArgumentException("This user has no training assign"));
 
-        UserTraining userTraining = existing.get(0);
-        return trainingInfoRepository.findById(userTraining.getTrainingId())
-                .orElseThrow(() -> new IllegalArgumentException("TrainingInfo not found with ID: " + userTraining.getTrainingId()));
+        return getTrainingInfoById(exisiting.getTrainingId());
     }
-
 
     @Transactional
     public void deleteExercise(int exerciseId) {
@@ -393,8 +385,7 @@ public class TrainingService {
 
         System.out.println("Exercise and related training entries deleted successfully");
     }
-
-
+    
     public TrainingInfo getTrainingInfoById(int trainingInfoId) {
         return trainingInfoRepository.findById(trainingInfoId).orElseThrow(() -> new IllegalArgumentException("Training info not found"));
     }
