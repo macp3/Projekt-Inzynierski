@@ -18,7 +18,7 @@ class SnackTrackApplicationTests {
         int retries = 10;
         while (retries > 0) {
             try (Connection conn = DriverManager.getConnection(
-                    "jdbc:mysql://127.0.0.1:3306/mydatabase",
+                    "jdbc:mysql://127.0.0.1:3306/snackTrackDB",
                     "myuser",
                     "secret")) {
                 return; // połączenie OK
