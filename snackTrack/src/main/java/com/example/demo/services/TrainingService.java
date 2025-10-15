@@ -361,9 +361,13 @@ public class TrainingService {
     public TrainingInfo getUserTraining(int userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        UserTraining exisiting = userTrainingRepository.findById(user.getId()).orElseThrow(() -> new IllegalArgumentException("This user has no training assign"));
+        List<UserTraining> userTrainings = userTrainingRepository.findByUserId(userId);
+        if (userTrainings.isEmpty()) {
+            throw new IllegalArgumentException("This user has no training assigned");
+        }
 
-        return getTrainingInfoById(exisiting.getTrainingId());
+        UserTraining existing = userTrainings.get(0); // jeśli zakładasz tylko jedno przypisanie
+        return getTrainingInfoById(existing.getTrainingId());
     }
 
     @Transactional

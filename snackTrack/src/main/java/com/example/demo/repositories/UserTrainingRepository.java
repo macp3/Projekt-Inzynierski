@@ -13,4 +13,5 @@ public interface UserTrainingRepository extends JpaRepository<UserTraining, Inte
     List<UserTraining> findByUserId(int userId);
     //UserTraining findByUserId(int userId);
     void deleteAllByTrainingId(int trainingId);
+
 }

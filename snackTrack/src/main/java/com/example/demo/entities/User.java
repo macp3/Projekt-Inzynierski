@@ -38,9 +38,9 @@ public class User {
     @NotNull
     private String password;
 
-    @Column(name = "profile_picture")
+    @Column(name = "image_url")
     @Nullable
-    private byte[] profilePicture;
+    private String imageUrl;
     @Column(name = "premium_expiration")
     @Nullable
     private LocalDate premiumExpiration;
@@ -108,15 +108,6 @@ public class User {
     }
 
     @Nullable
-    public byte[] getProfilePicture() {
-        return profilePicture;
-    }
-
-    public void setProfilePicture(@Nullable byte[] profilePicture) {
-        this.profilePicture = profilePicture;
-    }
-
-    @Nullable
     public LocalDate getPremiumExpiration() {
         return premiumExpiration;
     }
@@ -151,4 +142,12 @@ public class User {
         this.streak = streak;
     }
 
+    @Nullable
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(@Nullable String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }
