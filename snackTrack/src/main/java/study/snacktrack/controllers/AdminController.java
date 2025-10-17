@@ -231,7 +231,7 @@ public class AdminController {
     }
 
     // pola nie moga byc nullami
-    // MAciej: już nie będą bo nie da się zapisać nulla
+    // MAciej: już nie będą bo nie da się zapisać nulla ale trzeba dodać response żeby nie pokazywało autora
     @GetMapping("/notifications")
     public ResponseEntity<List<Notification>> getAllNotifications(
             @RequestHeader("Authorization") String authHeader) {
