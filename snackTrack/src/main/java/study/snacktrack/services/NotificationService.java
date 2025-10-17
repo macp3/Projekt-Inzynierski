@@ -22,6 +22,29 @@ public class NotificationService {
     }
 
     public Notification createNotification(NotificationRequest request, Admin author) {
+
+        if (author == null) {
+            throw new IllegalArgumentException("Author cant be null");
+        }
+
+        if (request.getName() == null || request.getName().isBlank() || request.getName() == "") {
+            throw new IllegalArgumentException("Name cant be null");
+        }
+
+        if (request.getDescription() == null || request.getDescription().isBlank() || request.getDescription() == "") {
+            throw new IllegalArgumentException("Description cant be null");
+        }
+
+        if (request.getRecipients() == null
+                || (request.getRecipients() != Recipients.all && request.getRecipients() != Recipients.non_premium
+                        && request.getRecipients() != Recipients.premium)) {
+            throw new IllegalArgumentException("Wrong value of recipients");
+        }
+
+        if (request.getSendingTime() == null) {
+            throw new IllegalArgumentException("Sending time cant be null");
+        }
+
         Notification notification = new Notification();
         notification.setAuthor(author);
         notification.setName(request.getName());
@@ -37,6 +60,11 @@ public class NotificationService {
     }
 
     public List<Notification> getNotificationsByRecipients(Recipients recipients) {
+        if (recipients == null
+                || (recipients != Recipients.all && recipients != Recipients.non_premium
+                        && recipients != Recipients.premium)) {
+            throw new IllegalArgumentException("Wrong value of recipients");
+        }
         return repository.findByRecipients(recipients);
     }
 

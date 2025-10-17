@@ -42,7 +42,10 @@ public class AdminController {
     private final TrainingService trainingService;
     private final NotificationService notificationService;
 
-    public AdminController(AdminRepository adminRepository, UserService userService, MealService mealService, CommentService commentService, ReportedMealService reportedMealService, ReportedCommentService reportedCommentService, FoodService foodService, JwtService jwtService, TrainingService trainingService, NotificationService notificationService) {
+    public AdminController(AdminRepository adminRepository, UserService userService, MealService mealService,
+            CommentService commentService, ReportedMealService reportedMealService,
+            ReportedCommentService reportedCommentService, FoodService foodService, JwtService jwtService,
+            TrainingService trainingService, NotificationService notificationService) {
         this.adminRepository = adminRepository;
         this.userService = userService;
         this.reportedMealService = reportedMealService;
@@ -52,22 +55,22 @@ public class AdminController {
         this.notificationService = notificationService;
     }
 
-    //dziala
+    // dziala
     @GetMapping("/dashboard")
     public String getDashboard() {
         return "Witaj, ADMIN!";
     }
 
-    //nowe
-    //dziala
+    // nowe
+    // dziala
     @GetMapping("/user/{userId}")
     public ResponseEntity<User> getUserInfo(@PathVariable int userId) {
         User user = userService.getUserById(userId);
         return ResponseEntity.ok(user);
     }
 
-    //admin
-    //pozniej przetestujemy bo trzeba zrestartowac
+    // admin
+    // pozniej przetestujemy bo trzeba zrestartowac
     @PutMapping("/user/{userId}/info/expirationDate")
     public ResponseEntity<User> updateExpirationDate(@PathVariable int userId, @RequestParam LocalDate date) {
         User user = userService.getUserById(userId);
@@ -75,8 +78,8 @@ public class AdminController {
         return ResponseEntity.ok(user);
     }
 
-    //admin
-    //dziala
+    // admin
+    // dziala
     @ResponseBody
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
@@ -84,16 +87,16 @@ public class AdminController {
         return ResponseEntity.ok(allUsers);
     }
 
-    //admin
-    //przetestujemy pozniej bo odjebalem
+    // admin
+    // przetestujemy pozniej bo odjebalem
     @GetMapping("/reports/meals/user/{userId}")
     public ResponseEntity<List<ReportedMeal>> getAllMealReportsByUser(@PathVariable int userId) {
         List<ReportedMeal> reports = reportedMealService.getAllReportsByUser(userId);
         return ResponseEntity.ok(reports);
     }
 
-    //admin
-    //pozniej bo trzeba zrobic report i tu tez odpierdolilem
+    // admin
+    // pozniej bo trzeba zrobic report i tu tez odpierdolilem
     @GetMapping("/reports/comments/user/{userId}")
     public ResponseEntity<List<ReportedComment>> getAllCommentReportsByUser(@PathVariable int userId) {
         List<ReportedComment> reports = reportedCommentService.getAllReportsByUser(userId);
@@ -103,7 +106,7 @@ public class AdminController {
 
     ////////////////////////////////////////////////////////////////////////
 
-    //dziala
+    // dziala
     @GetMapping("/trainings")
     public ResponseEntity<List<TrainingInfo>> getAllTrainings() {
         return ResponseEntity.ok(trainingService.getAllTrainings());
@@ -115,8 +118,8 @@ public class AdminController {
         return ResponseEntity.ok(trainingService.getTrainingDetails(trainingId));
     }
 
-    //dodac walidacje duration time
-    //walidacja exeercise id musi byc z bazy
+    // dodac walidacje duration time
+    // walidacja exeercise id musi byc z bazy
 
     @PostMapping("/trainings/add")
     public ResponseEntity<String> addTraining(@RequestBody TrainingRequest request) {
@@ -124,112 +127,114 @@ public class AdminController {
         return ResponseEntity.ok("Training added successfully");
     }
 
-    //dodac walidacje exercise id musi byc w bazie
+    // dodac walidacje exercise id musi byc w bazie
     @PutMapping("/trainings/{trainingId}/edit")
-    public ResponseEntity<String> editTraining(@PathVariable int trainingId, @RequestBody TrainingRequest request, @RequestHeader("Authorization") String authHeader)
-    {
-        //walidacja admina
+    public ResponseEntity<String> editTraining(@PathVariable int trainingId, @RequestBody TrainingRequest request,
+            @RequestHeader("Authorization") String authHeader) {
+        // walidacja admina
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
-        Admin admin = adminRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Admin not found"));
+        Admin admin = adminRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
 
-        trainingService.editTraining(request,  admin.getId(), trainingId);
+        trainingService.editTraining(request, admin.getId(), trainingId);
         return ResponseEntity.ok("Training edited successfully");
     }
 
-    //dodawanie cwiczenia do treningu
-    //nie wykrywa trainingid a w bazie on istnieje
-    //potem przetestuj wszystko
+    // dodawanie cwiczenia do treningu
+    // nie wykrywa trainingid a w bazie on istnieje
+    // potem przetestuj wszystko
     @PostMapping("/trainings/addExercise")
-    public ResponseEntity<TrainingDetailsResponse> addExerciseToTraining(@RequestBody AddExerciseToTrainingRequest request, @RequestHeader("Authorization") String authHeader) {
-        //walidacja admina
+    public ResponseEntity<TrainingDetailsResponse> addExerciseToTraining(
+            @RequestBody AddExerciseToTrainingRequest request, @RequestHeader("Authorization") String authHeader) {
+        // walidacja admina
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
-        Admin admin = adminRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Admin not found"));
+        Admin admin = adminRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
 
         TrainingDetailsResponse response = trainingService.addExerciseToTraining(
                 request.getExerciseId(),
                 request.getTrainingId(),
                 admin.getId(),
-                request.getDayOfExercise()
-        );
+                request.getDayOfExercise());
         return ResponseEntity.ok(response);
     }
 
-    //nie znajduje training o id 1 a jest on w bazie
-    //potem przetestuj wszystko
+    // nie znajduje training o id 1 a jest on w bazie
+    // potem przetestuj wszystko
     @DeleteMapping("/trainings/{trainingId}/delete/{exerciseId}")
-    public ResponseEntity<TrainingDetailsResponse> deleteExercisesByIdFromTraining(@PathVariable int trainingId, @PathVariable int exerciseId)
-    {
+    public ResponseEntity<TrainingDetailsResponse> deleteExercisesByIdFromTraining(@PathVariable int trainingId,
+            @PathVariable int exerciseId) {
         return ResponseEntity.ok(trainingService.deleteAllExercisesByIdFromTraining(trainingId, exerciseId));
     }
 
-    //dziala
+    // dziala
     @DeleteMapping("/trainings/{trainingId}/delete/{exerciseId}/{dayOfExercise}")
-    public ResponseEntity<TrainingDetailsResponse> deleteExerciseByIdAndDayFromTraining(@PathVariable int trainingId, @PathVariable int exerciseId, @PathVariable int dayOfExercise)
-    {
-        return ResponseEntity.ok(trainingService.deleteExerciseByIdAndDayFromTraining(trainingId, exerciseId, dayOfExercise));
+    public ResponseEntity<TrainingDetailsResponse> deleteExerciseByIdAndDayFromTraining(@PathVariable int trainingId,
+            @PathVariable int exerciseId, @PathVariable int dayOfExercise) {
+        return ResponseEntity
+                .ok(trainingService.deleteExerciseByIdAndDayFromTraining(trainingId, exerciseId, dayOfExercise));
     }
 
-    //dziala
+    // dziala
     @DeleteMapping("/trainings/{trainingId}/delete")
-    public ResponseEntity<String> deleteTraining(@PathVariable int trainingId)
-    {
+    public ResponseEntity<String> deleteTraining(@PathVariable int trainingId) {
         trainingService.deleteTraining(trainingId);
         return ResponseEntity.ok("Training deleted successfully");
     }
 
-    //dziala
+    // dziala
     @GetMapping("/exercises")
     public ResponseEntity<List<Exercise>> getAllExercises() {
         return ResponseEntity.ok(trainingService.getAllExercises());
     }
 
-    //dziala
+    // dziala
     @GetMapping("/exercises/{exerciseId}/details")
     public ResponseEntity<Exercise> getExerciseDetails(@PathVariable int exerciseId) {
         return ResponseEntity.ok(trainingService.getExerciseById(exerciseId));
     }
 
-    //wszystkie pola z intami maja byc przyrownane do null i bedzie dzialac
+    // wszystkie pola z intami maja byc przyrownane do null i bedzie dzialac
     @PostMapping("/exercises/add")
     public ResponseEntity<Exercise> addExercise(@RequestBody ExerciseRequest request) {
-        Exercise exercise = trainingService.createExercise(request.getName(), request.getDescription(), request.getType(), request.getDifficulty(), request.getNumberOfSets(), request.getRepetitionsPerSet());
+        Exercise exercise = trainingService.createExercise(request.getName(), request.getDescription(),
+                request.getType(), request.getDifficulty(), request.getNumberOfSets(), request.getRepetitionsPerSet());
         return ResponseEntity.ok(exercise);
     }
 
-    //dziala
+    // dziala
     @DeleteMapping("/exercises/delete/{exerciseId}")
     public ResponseEntity<String> deleteExercise(@PathVariable int exerciseId) {
         trainingService.deleteExercise(exerciseId);
         return ResponseEntity.ok("Exercise deleted successfully");
     }
 
-
     ////////////////////////////////////////////////////////////////////
 
-    //wyjebac login, email, password xd
-    //walidacja stringow - nic nie wyrzuca exeption
-    //porownanie do nulli tak samo
+    // wyjebac login, email, password xd
+    // walidacja stringow - nic nie wyrzuca exeption
+    // porownanie do nulli tak samo
+    // Maciej: zrobione
     @PostMapping("/notifications/add")
-    public ResponseEntity<Notification> createNotification(
+    public ResponseEntity<String> createNotification(
             @RequestBody NotificationRequest request,
-            @RequestHeader("Authorization") String authHeader
-    ) {
+            @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
         Admin admin = adminRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
 
-        Notification notification = notificationService.createNotification(request, admin);
-        return ResponseEntity.ok(notification);
+        notificationService.createNotification(request, admin);
+        return ResponseEntity.ok("Notification created successfully");
     }
 
-    //pola nie moga byc nullami
+    // pola nie moga byc nullami
+    // MAciej: już nie będą bo nie da się zapisać nulla
     @GetMapping("/notifications")
     public ResponseEntity<List<Notification>> getAllNotifications(
-            @RequestHeader("Authorization") String authHeader
-    ) {
+            @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
         adminRepository.findByEmail(email)
@@ -239,12 +244,12 @@ public class AdminController {
         return ResponseEntity.ok(notifications);
     }
 
-    //recipients=gowno musi cos wyrzucac
+    // recipients=gowno musi cos wyrzucac
+    // Maciej: wyrzuca już
     @GetMapping("/notifications/filter")
     public ResponseEntity<List<Notification>> getNotificationsByRecipients(
             @RequestHeader("Authorization") String authHeader,
-            @RequestParam Recipients recipients
-    ) {
+            @RequestParam Recipients recipients) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
         adminRepository.findByEmail(email)
