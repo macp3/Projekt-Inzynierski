@@ -3,15 +3,12 @@ package study.snacktrack.controllers;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
+import study.snacktrack.dto.*;
 import study.snacktrack.entities.enums.Recipients;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import study.snacktrack.dto.AddExerciseToTrainingRequest;
-import study.snacktrack.dto.ExerciseRequest;
-import study.snacktrack.dto.NotificationRequest;
-import study.snacktrack.dto.TrainingDetailsResponse;
-import study.snacktrack.dto.TrainingRequest;
 import study.snacktrack.entities.Admin;
 import study.snacktrack.entities.Exercise;
 import study.snacktrack.entities.Notification;
@@ -20,6 +17,7 @@ import study.snacktrack.entities.ReportedMeal;
 import study.snacktrack.entities.TrainingInfo;
 import study.snacktrack.entities.User;
 import study.snacktrack.repositories.AdminRepository;
+import study.snacktrack.repositories.UserRepository;
 import study.snacktrack.services.CommentService;
 import study.snacktrack.services.FoodService;
 import study.snacktrack.services.JwtService;
@@ -33,7 +31,6 @@ import study.snacktrack.services.UserService;
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
-
     private final AdminRepository adminRepository;
     private final UserService userService;
     private final ReportedMealService reportedMealService;
@@ -43,9 +40,9 @@ public class AdminController {
     private final NotificationService notificationService;
 
     public AdminController(AdminRepository adminRepository, UserService userService, MealService mealService,
-            CommentService commentService, ReportedMealService reportedMealService,
-            ReportedCommentService reportedCommentService, FoodService foodService, JwtService jwtService,
-            TrainingService trainingService, NotificationService notificationService) {
+                           CommentService commentService, ReportedMealService reportedMealService,
+                           ReportedCommentService reportedCommentService, FoodService foodService, JwtService jwtService,
+                           TrainingService trainingService, NotificationService notificationService) {
         this.adminRepository = adminRepository;
         this.userService = userService;
         this.reportedMealService = reportedMealService;
@@ -69,12 +66,11 @@ public class AdminController {
         return ResponseEntity.ok(user);
     }
 
-    // admin
-    // pozniej przetestujemy bo trzeba zrestartowac
+    //dziala
     @PutMapping("/user/{userId}/info/expirationDate")
-    public ResponseEntity<User> updateExpirationDate(@PathVariable int userId, @RequestParam LocalDate date) {
-        User user = userService.getUserById(userId);
-        userService.updatePremiumExpiration(user.getId(), date);
+    public ResponseEntity<User> updateExpirationDate(@PathVariable int userId, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date)
+    {
+        User user = userService.updatePremiumExpiration(userId, date);
         return ResponseEntity.ok(user);
     }
 
@@ -88,7 +84,7 @@ public class AdminController {
     }
 
     // admin
-    // przetestujemy pozniej bo odjebalem
+    // dziala
     @GetMapping("/reports/meals/user/{userId}")
     public ResponseEntity<List<ReportedMeal>> getAllMealReportsByUser(@PathVariable int userId) {
         List<ReportedMeal> reports = reportedMealService.getAllReportsByUser(userId);
@@ -96,7 +92,7 @@ public class AdminController {
     }
 
     // admin
-    // pozniej bo trzeba zrobic report i tu tez odpierdolilem
+    //dziala
     @GetMapping("/reports/comments/user/{userId}")
     public ResponseEntity<List<ReportedComment>> getAllCommentReportsByUser(@PathVariable int userId) {
         List<ReportedComment> reports = reportedCommentService.getAllReportsByUser(userId);
@@ -112,22 +108,27 @@ public class AdminController {
         return ResponseEntity.ok(trainingService.getAllTrainings());
     }
 
-    //
+    //dziala
     @GetMapping("/trainings/{trainingId}/details")
     public ResponseEntity<TrainingDetailsResponse> getTrainingDetails(@PathVariable int trainingId) {
         return ResponseEntity.ok(trainingService.getTrainingDetails(trainingId));
     }
 
-    // dodac walidacje duration time
-    // walidacja exeercise id musi byc z bazy
-
+    //DZIALAAAAAAAAAAAA
     @PostMapping("/trainings/add")
-    public ResponseEntity<String> addTraining(@RequestBody TrainingRequest request) {
-        trainingService.createTraining(request, 1);
+    public ResponseEntity<String> addTraining(@RequestBody TrainingRequest request, @RequestHeader("Authorization") String authHeader)
+    {
+        // walidacja admina
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+        Admin admin = adminRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
+
+        trainingService.createTraining(request, admin.getId());
         return ResponseEntity.ok("Training added successfully");
     }
 
-    // dodac walidacje exercise id musi byc w bazie
+    //dzialaaaaaaaaaaaaaa
     @PutMapping("/trainings/{trainingId}/edit")
     public ResponseEntity<String> editTraining(@PathVariable int trainingId, @RequestBody TrainingRequest request,
             @RequestHeader("Authorization") String authHeader) {
@@ -141,9 +142,7 @@ public class AdminController {
         return ResponseEntity.ok("Training edited successfully");
     }
 
-    // dodawanie cwiczenia do treningu
-    // nie wykrywa trainingid a w bazie on istnieje
-    // potem przetestuj wszystko
+    // DZIALAAAAAAAAAAAAA
     @PostMapping("/trainings/addExercise")
     public ResponseEntity<TrainingDetailsResponse> addExerciseToTraining(
             @RequestBody AddExerciseToTrainingRequest request, @RequestHeader("Authorization") String authHeader) {
@@ -161,8 +160,7 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    // nie znajduje training o id 1 a jest on w bazie
-    // potem przetestuj wszystko
+    //dziala
     @DeleteMapping("/trainings/{trainingId}/delete/{exerciseId}")
     public ResponseEntity<TrainingDetailsResponse> deleteExercisesByIdFromTraining(@PathVariable int trainingId,
             @PathVariable int exerciseId) {
@@ -196,7 +194,7 @@ public class AdminController {
         return ResponseEntity.ok(trainingService.getExerciseById(exerciseId));
     }
 
-    // wszystkie pola z intami maja byc przyrownane do null i bedzie dzialac
+    //dziala
     @PostMapping("/exercises/add")
     public ResponseEntity<Exercise> addExercise(@RequestBody ExerciseRequest request) {
         Exercise exercise = trainingService.createExercise(request.getName(), request.getDescription(),
@@ -213,10 +211,12 @@ public class AdminController {
 
     ////////////////////////////////////////////////////////////////////
 
-    // wyjebac login, email, password xd
+    // login, email, password xd
     // walidacja stringow - nic nie wyrzuca exeption
     // porownanie do nulli tak samo
     // Maciej: zrobione
+    //dziala, ale dziwne te exeption troche bo wyskakuje takie cos jak recipients "brak" a widze ze w metodzie fajnie wyrzuciles wiadomosc wec nwm co tu sie zadzialo:
+    //2025-10-20T14:22:22.218Z  WARN 1 --- [snackTrack] [nio-8080-exec-8] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotReadableException: JSON parse error: Cannot deserialize value of type `study.snacktrack.entities.enums.Recipients` from String "brak": not one of the values accepted for Enum class: [all, non_premium, premium]]
     @PostMapping("/notifications/add")
     public ResponseEntity<String> createNotification(
             @RequestBody NotificationRequest request,
@@ -232,20 +232,25 @@ public class AdminController {
 
     // pola nie moga byc nullami
     // MAciej: już nie będą bo nie da się zapisać nulla ale trzeba dodać response żeby nie pokazywało autora
+    //bartek: zrobione
+    //dziala
     @GetMapping("/notifications")
-    public ResponseEntity<List<Notification>> getAllNotifications(
+    public ResponseEntity<List<NotificationResponse>> getAllNotifications(
             @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
         adminRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
 
-        List<Notification> notifications = notificationService.getAllNotifications();
+        List<NotificationResponse> notifications = notificationService.getAllNotificationsDetails();
         return ResponseEntity.ok(notifications);
     }
 
-    // recipients=gowno musi cos wyrzucac
+    // recipients=jvjhvbm musi cos wyrzucac
     // Maciej: wyrzuca już
+    //tutaj tez mozna zastosowac NotificationResponse tak jak wyzej
+    //tak zrobie i zakomentuje to sie zapoznasz
+    //dziala
     @GetMapping("/notifications/filter")
     public ResponseEntity<List<Notification>> getNotificationsByRecipients(
             @RequestHeader("Authorization") String authHeader,
@@ -258,4 +263,18 @@ public class AdminController {
         List<Notification> notifications = notificationService.getNotificationsByRecipients(recipients);
         return ResponseEntity.ok(notifications);
     }
+
+    //druga wersja jak chcesz
+    /*@GetMapping("/notifications/filter")
+    public ResponseEntity<List<NotificationResponse>> getNotificationsByRecipients2(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestParam Recipients recipients) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+        adminRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
+
+        List<NotificationResponse> notifications = notificationService.getNotificationsByRecipientsWithoutDetails(recipients);
+        return ResponseEntity.ok(notifications);
+    }*/
 }

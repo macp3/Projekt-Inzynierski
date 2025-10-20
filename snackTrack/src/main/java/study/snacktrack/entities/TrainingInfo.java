@@ -23,7 +23,7 @@ public class TrainingInfo {
     @Column(name = "duration_time", nullable = false)
     private Integer durationTime;
 
-    //ewentualnie do wypierdolenia xd
+    //ewentualnie do wyrzucenia xd
     @OneToMany(mappedBy = "trainingInfo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Training> trainings;
 

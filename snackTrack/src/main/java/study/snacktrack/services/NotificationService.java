@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import study.snacktrack.dto.NotificationRequest;
+import study.snacktrack.dto.NotificationResponse;
 import study.snacktrack.entities.Admin;
 import study.snacktrack.entities.enums.Recipients;
 import study.snacktrack.repositories.NotificationRepository;
@@ -24,15 +25,15 @@ public class NotificationService {
     public Notification createNotification(NotificationRequest request, Admin author) {
 
         if (author == null) {
-            throw new IllegalArgumentException("Author cant be null");
+            throw new IllegalArgumentException("Author cannot be null");
         }
 
         if (request.getName() == null || request.getName().isBlank() || request.getName() == "") {
-            throw new IllegalArgumentException("Name cant be null");
+            throw new IllegalArgumentException("Name cannot be null");
         }
 
         if (request.getDescription() == null || request.getDescription().isBlank() || request.getDescription() == "") {
-            throw new IllegalArgumentException("Description cant be null");
+            throw new IllegalArgumentException("Description cannot be null");
         }
 
         if (request.getRecipients() == null
@@ -42,7 +43,7 @@ public class NotificationService {
         }
 
         if (request.getSendingTime() == null) {
-            throw new IllegalArgumentException("Sending time cant be null");
+            throw new IllegalArgumentException("Sending time cannot be null");
         }
 
         Notification notification = new Notification();
@@ -59,13 +60,48 @@ public class NotificationService {
         return repository.findAll();
     }
 
-    public List<Notification> getNotificationsByRecipients(Recipients recipients) {
+    //response notifications
+    public List<NotificationResponse> getAllNotificationsDetails()
+    {
+        List<Notification> notificationList = repository.findAll();
+        List<NotificationResponse> notificationDetails = new ArrayList<>();
+        for(Notification n : notificationList)
+        {
+            NotificationResponse response = new NotificationResponse(n.getId(), n.getName(), n.getDescription(), n.getSendingTime());
+            notificationDetails.add(response);
+        }
+        return notificationDetails;
+    }
+
+    public List<Notification> getNotificationsByRecipients(Recipients recipients)
+    {
         if (recipients == null
                 || (recipients != Recipients.all && recipients != Recipients.non_premium
                         && recipients != Recipients.premium)) {
             throw new IllegalArgumentException("Wrong value of recipients");
         }
         return repository.findByRecipients(recipients);
+    }
+
+    //druga wersja
+    public List<NotificationResponse> getNotificationsByRecipientsWithoutDetails(Recipients recipients) {
+        if (recipients == null
+                || (recipients != Recipients.all && recipients != Recipients.non_premium
+                && recipients != Recipients.premium)) {
+            throw new IllegalArgumentException("Wrong value of recipients");
+        }
+
+        List<Notification> notificationList = repository.findAll();
+        List<NotificationResponse> notificationDetails = new ArrayList<>();
+        for(Notification n : notificationList)
+        {
+            if(n.getRecipients().equals(recipients))
+            {
+                NotificationResponse response = new NotificationResponse(n.getId(), n.getName(), n.getDescription(), n.getSendingTime());
+                notificationDetails.add(response);
+            }
+        }
+        return notificationDetails;
     }
 
     public List<Notification> getNotificationsForUser(boolean isPremium) {

@@ -247,17 +247,29 @@ public class UserService {
     }
 
     //admin
+    @Transactional
     public User updatePremiumExpiration(int userId, LocalDate date) {
         User user = getUserById(userId);
+        //test
+        System.out.println("Fetched user: " + user);
+        System.out.println(user.getStatus() + " " + user.getPremiumExpiration());
+
+        if(!user.getStatus().equals(Status.active))
+            throw new IllegalArgumentException("User status has to be active");
 
         LocalDate now = LocalDate.now();
 
-        if (user.getPremiumExpiration() != null && user.getPremiumExpiration().isBefore(now)) {
-            throw new IllegalArgumentException("Specified premium expiration date is before now");
-        }
+        if(date.isBefore(now))
+            throw new IllegalArgumentException("Specified date must not be before now");
 
         user.setPremiumExpiration(date);
+
+        //test
+        System.out.println("Before save: " + user.getPremiumExpiration());
         userRepository.save(user);
+        System.out.println("After save");
+        //koniec testu
+
         return user;
     }
 

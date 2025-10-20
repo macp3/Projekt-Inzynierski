@@ -87,6 +87,7 @@ public class TrainingService {
     }
 
     //admin
+
     @Transactional
     public void createTraining(TrainingRequest request, int authorId) {
         if (request == null || request.getTreningInfo() == null) {
@@ -106,7 +107,14 @@ public class TrainingService {
             throw new IllegalArgumentException("Training must contain at least one exercise");
         }
 
-        for (TrainingRequest.TrainingExercise ex : request.getTrainingExercises()) {
+        for (TrainingRequest.TrainingExercise ex : request.getTrainingExercises())
+        {
+            if (!exerciseRepository.existsById(ex.getExerciseId())) {
+                throw new IllegalArgumentException(
+                        "Exercise with ID " + ex.getExerciseId() + " does not exist"
+                );
+            }
+
             if (ex == null) {
                 throw new IllegalArgumentException("Exercise cannot be null");
             }
@@ -116,6 +124,7 @@ public class TrainingService {
             if (ex.getExerciseDay() <= 0 || ex.getExerciseDay() > info.getDurationTime()) {
                 throw new IllegalArgumentException("Day of exercise must be greater than zero and must be lesser than duration time");
             }
+
             Training training = new Training();
             training.setTrainingId(info.getId());
             training.setAuthorId(authorId);
@@ -169,7 +178,14 @@ public class TrainingService {
 
             // Walidacja duplikatów ćwiczeń w tym samym dniu
             Set<String> uniqueExerciseDayPairs = new HashSet<>();
-            for (TrainingRequest.TrainingExercise ex : request.getTrainingExercises()) {
+            for (TrainingRequest.TrainingExercise ex : request.getTrainingExercises())
+            {
+                if (!exerciseRepository.existsById(ex.getExerciseId())) {
+                    throw new IllegalArgumentException(
+                            "Exercise with ID " + ex.getExerciseId() + " does not exist"
+                    );
+                }
+
                 if (ex == null || ex.getExerciseId() <= 0 || ex.getExerciseDay() <= 0) {
                     throw new IllegalArgumentException("Invalid exercise data");
                 }
@@ -253,29 +269,30 @@ public class TrainingService {
             throw new IllegalArgumentException("This exercise is already assigned to this training on the given day");
         }
 
-        if (dayOfExercise <= 0) {
-            throw new IllegalArgumentException("Day of exercise must be greater than zero");
+        TrainingInfo info = getTrainingInfoById(trainingId);
+
+        if (dayOfExercise <= 0 || dayOfExercise > info.getDurationTime()) {
+            throw new IllegalArgumentException("Day of exercise must be greater than zero and lesser than duration time");
         }
 
         Exercise exercise = getExerciseById(exerciseId);
-        Training training = getTrainingById(trainingId);
 
         Training newTraining = new Training();
-        newTraining.setTrainingId(training.getId());
+        newTraining.setTrainingId(info.getId());
         newTraining.setAuthorId(optionalAdmin.get().getId());
         newTraining.setExerciseId(exercise.getId());
         newTraining.setDayOfExercise(dayOfExercise);
         trainingRepository.save(newTraining);
 
         System.out.println("Exercise added to training successfully");
-        return getTrainingDetails(training.getId());
+        return getTrainingDetails(info.getId());
     }
 
     //admin
     @Transactional
     public TrainingDetailsResponse deleteAllExercisesByIdFromTraining(int trainingId, int exerciseId)
     {
-        Training training = getTrainingById(trainingId);
+        TrainingInfo info = getTrainingInfoById(trainingId);
         boolean exerciseExists = exerciseRepository.existsById(exerciseId);
         if(!exerciseExists)
             throw new IllegalArgumentException("Exercise not found");
@@ -284,7 +301,7 @@ public class TrainingService {
             throw new IllegalArgumentException("This exercise is not assigned to this training");
 
         trainingRepository.deleteAll(trainings);
-        return getTrainingDetails(training.getId());
+        return getTrainingDetails(info.getId());
     }
 
     @Transactional
