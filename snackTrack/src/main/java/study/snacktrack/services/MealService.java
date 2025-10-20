@@ -85,6 +85,10 @@ public class MealService {
         }
 
         //dodac mechanizm sprawdzania czy meal o podanej nazwie stnieje juz w bazie - wymagana unikalna nazwa
+        //zrobione
+        if(mealRepository.existsByName(request.getName()))
+            throw new IllegalArgumentException("Meal with specified name already exists");
+
         if (request.getDescription() == null || "".equals(request.getDescription())) {
             throw new IllegalArgumentException("Description must not be empty");
         }
@@ -126,6 +130,8 @@ public class MealService {
         return true;
     }
 
+    //do naprawy = sprawdzic autora bo tylko autor moze dodawac zdjecie do swojego meala
+    //i przetestuj
     @Transactional
     public String uploadMealImage(int mealId, MultipartFile imageFile) throws IOException {
         Meal meal = validateMealExistance(mealId);
@@ -187,58 +193,66 @@ public class MealService {
     }
 
     //edit meal
+    //jezeli w request nie sa podane pojedyncze pola to po prostu ich nie zmienia (zostawia stare) - jezeli nie chcemy edytowac meal name to nie dodajemy do requesta w jsonie "name": *to samo*
+    //aktualizacja pol jezeli podano: zrobione
     public boolean editMealByUser(int mealId, MealRequest request, int userId) {
         Meal meal = validateMealExistance(mealId);
         if (!userRepository.existsById(userId)) {
             throw new IllegalArgumentException("User with this ID doesn't exist");
         }
 
-        if (userId != request.getAuthorId()) {
+        if (userId != meal.getAuthorId()) {
             throw new IllegalArgumentException("You are not allowed to edit this meal");
         }
 
-        if (request.getName() == null || request.getName().isBlank()) {
-            throw new IllegalArgumentException("Meal's name must not be empty");
-        }
-        if (request.getDescription() == null || request.getName().isBlank()) {
-            throw new IllegalArgumentException("Meal's description must not be empty");
-        }
-        if (request.getIngredients() == null || request.getIngredients().isEmpty()) {
-            throw new IllegalArgumentException("The meal has to have at least 1 ingredient");
+        if (request.getName() != null) {
+            if (request.getName().isBlank()) {
+                throw new IllegalArgumentException("Meal's name must not be empty");
+            }
+            meal.setName(request.getName());
         }
 
-        meal.setName(request.getName());
-        meal.setDescription(request.getDescription());
+        if (request.getDescription() != null) {
+            if (request.getDescription().isBlank()) {
+                throw new IllegalArgumentException("Meal's description must not be empty");
+            }
+            meal.setDescription(request.getDescription());
+        }
 
-        ingredientRepository.deleteAll(meal.getIngredients());
-        //nie mozna set na null bo hibernate wywali blad
-        meal.getIngredients().clear();
-
-        for (IngredientRequest ir : request.getIngredients()) {
-            EssentialFood essentialFood = null;
-            Integer essentialApiId = null;
-
-            Float amout = null;
-            Integer pieces = null;
-
-            if (ir.getEssentialFoodId() != null) {
-                essentialFood = foodRepository.findById(ir.getEssentialFoodId()).orElseThrow(() -> new IllegalArgumentException("Food not found"));
-            } else if (ir.getEssentialApiId() != null) {
-                essentialApiId = ir.getEssentialApiId();
-            } else {
-                throw new IllegalArgumentException("Food must have either essential id or API id");
+        if (request.getIngredients() != null) {
+            if (request.getIngredients().isEmpty()) {
+                throw new IllegalArgumentException("The meal has to have at least 1 ingredient");
             }
 
-            if (ir.getAmount() != null) {
-                amout = ir.getAmount();
-            } else if (ir.getPieces() != null) {
-                pieces = ir.getPieces();
-            } else {
-                throw new IllegalArgumentException("Food must have either pieces or amount");
-            }
+            ingredientRepository.deleteAll(meal.getIngredients());
+            meal.getIngredients().clear();
 
-            Ingredient ingredient = new Ingredient(meal, essentialFood, essentialApiId, amout, pieces);
-            meal.addIngredient(ingredient);
+            for (IngredientRequest ir : request.getIngredients()) {
+                EssentialFood essentialFood = null;
+                Integer essentialApiId = null;
+                Float amount = null;
+                Integer pieces = null;
+
+                if (ir.getEssentialFoodId() != null) {
+                    essentialFood = foodRepository.findById(ir.getEssentialFoodId())
+                            .orElseThrow(() -> new IllegalArgumentException("Food not found"));
+                } else if (ir.getEssentialApiId() != null) {
+                    essentialApiId = ir.getEssentialApiId();
+                } else {
+                    throw new IllegalArgumentException("Food must have either essential id or API id");
+                }
+
+                if (ir.getAmount() != null) {
+                    amount = ir.getAmount();
+                } else if (ir.getPieces() != null) {
+                    pieces = ir.getPieces();
+                } else {
+                    throw new IllegalArgumentException("Food must have either pieces or amount");
+                }
+
+                Ingredient ingredient = new Ingredient(meal, essentialFood, essentialApiId, amount, pieces);
+                meal.addIngredient(ingredient);
+            }
         }
 
         mealRepository.save(meal);

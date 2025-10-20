@@ -12,7 +12,7 @@ public interface ReportedCommentRepository extends JpaRepository<ReportedComment
 
     Optional<ReportedComment> findByCommentIdAndReportingId(int commentId, int reportingId);
 
-    Optional<List<ReportedComment>> findAllReportsByReportingId(int reportingId);
+    Optional<List<ReportedComment>> findAllByReportingId(int reportingId);
 
-    Optional<List<ReportedComment>> findAllReportsByCommentId(int commentId);
+    Optional<List<ReportedComment>> findAllByCommentId(int commentId);
 }

@@ -46,6 +46,10 @@ public class ReportedMealService {
     public ReportedMealResponse reportMeal(int mealId, int userId, String content) {
         Meal meal = validateMealExistance(mealId);
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if(userId == meal.getAuthorId())
+            throw new IllegalArgumentException("You cannot report your own meal");
+
         if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("Content must not be empty");
         }

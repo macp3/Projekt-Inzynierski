@@ -5,19 +5,12 @@ import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import study.snacktrack.dto.*;
+import study.snacktrack.entities.*;
 import study.snacktrack.entities.enums.Recipients;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import study.snacktrack.entities.Admin;
-import study.snacktrack.entities.Exercise;
-import study.snacktrack.entities.Notification;
-import study.snacktrack.entities.ReportedComment;
-import study.snacktrack.entities.ReportedMeal;
-import study.snacktrack.entities.TrainingInfo;
-import study.snacktrack.entities.User;
 import study.snacktrack.repositories.AdminRepository;
-import study.snacktrack.repositories.UserRepository;
 import study.snacktrack.services.CommentService;
 import study.snacktrack.services.FoodService;
 import study.snacktrack.services.JwtService;
@@ -35,6 +28,7 @@ public class AdminController {
     private final UserService userService;
     private final ReportedMealService reportedMealService;
     private final ReportedCommentService reportedCommentService;
+    private final CommentService commentService;
     private final JwtService jwtService;
     private final TrainingService trainingService;
     private final NotificationService notificationService;
@@ -50,6 +44,7 @@ public class AdminController {
         this.jwtService = jwtService;
         this.trainingService = trainingService;
         this.notificationService = notificationService;
+        this.commentService = commentService;
     }
 
     // dziala
@@ -277,4 +272,37 @@ public class AdminController {
         List<NotificationResponse> notifications = notificationService.getNotificationsByRecipientsWithoutDetails(recipients);
         return ResponseEntity.ok(notifications);
     }*/
+
+    ////////////////////////////////////////////////////////////////////
+
+    //dziala
+    @GetMapping("/comments/reports/comment/{commentId}")
+    public ResponseEntity<List<ReportedComment>> getAllReportsByComment(@PathVariable int commentId) {
+        Comment comment = commentService.getCommentById(commentId);
+        List<ReportedComment> reports = reportedCommentService.getAllReportsByComment(comment.getId());
+        return ResponseEntity.ok(reports);
+    }
+
+    //dziala
+    @GetMapping("/meals/reports/meal/{mealId}")
+    public ResponseEntity<List<ReportedMeal>> getAllReportsByMeal(@PathVariable int mealId) {
+        List<ReportedMeal> reports = reportedMealService.getAllReportsByMeal(mealId);
+        return ResponseEntity.ok(reports);
+    }
+
+    //dziala
+    @GetMapping("/comments/reports/all/{reportingId}")
+    public ResponseEntity<List<ReportedComment>> getAllReportedCommentsByUser(@PathVariable int reportingId)
+    {
+        List<ReportedComment> reportedComments = reportedCommentService.getAllReportsByUser(reportingId);
+        return ResponseEntity.ok(reportedComments);
+    }
+
+    //dziala
+    @GetMapping("/meals/reports/all/{reportingId}")
+    public ResponseEntity<List<ReportedMeal>> getAllReportedMealsByUser(@PathVariable int reportingId)
+    {
+        List<ReportedMeal> reportedComments = reportedMealService.getAllReportsByUser(reportingId);
+        return ResponseEntity.ok(reportedComments);
+    }
 }

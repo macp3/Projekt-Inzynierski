@@ -75,7 +75,7 @@ public class ReportedCommentService {
     public List<ReportedComment> getAllReportsByUser(int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("There is no user with specified ID"));
-        List<ReportedComment> reports = reportedCommentRepository.findAllReportsByReportingId(user.getId())
+        List<ReportedComment> reports = reportedCommentRepository.findAllByReportingId(user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("This user has not reported any meal yet"));
         return reports;
     }
@@ -85,7 +85,7 @@ public class ReportedCommentService {
         commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Couldn't find the comment with specified ID"));
 
-        List<ReportedComment> reports = reportedCommentRepository.findAllReportsByCommentId(commentId)
+        List<ReportedComment> reports = reportedCommentRepository.findAllByCommentId(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("This comment has no reports"));
         return reports;
     }

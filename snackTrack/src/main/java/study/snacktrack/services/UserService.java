@@ -9,7 +9,9 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,6 +36,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final BodyParametersRepository bodyParametersRepository;
     private final UserDeviceTokenRepository deviceTokenRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository, BodyParametersRepository bodyParametersRepository, UserDeviceTokenRepository deviceTokenRepository) {
         this.userRepository = userRepository;
@@ -41,16 +45,24 @@ public class UserService {
         this.deviceTokenRepository = deviceTokenRepository;
     }
 
+    //nie dziala XDDD
+    //tera sie nie moge zalogoiwac
     public User changePassword(int userId, String password) {
         User user = getUserById(userId);
 
-        if (password == null || password.isBlank() || user.getPassword().equals(password)) {
-            throw new IllegalArgumentException("New password cannot be empty or the same as the current password");
+        if (password == null || password.isBlank()) {
+            throw new IllegalArgumentException("New password cannot be empty");
         }
+
+        if(user.getPassword().equals(password))
+            throw new IllegalArgumentException("New password must be different from the old password");
+        String hashedPassword = passwordEncoder.encode(password);
+        user.setPassword(hashedPassword);
         user.setPassword(password);
         userRepository.save(user);
         return user;
     }
+
 
     public User changePrefferedDiet(int userId, DietTypes prefferedDiet) {
         User user = getUserById(userId);
@@ -263,12 +275,6 @@ public class UserService {
             throw new IllegalArgumentException("Specified date must not be before now");
 
         user.setPremiumExpiration(date);
-
-        //test
-        System.out.println("Before save: " + user.getPremiumExpiration());
-        userRepository.save(user);
-        System.out.println("After save");
-        //koniec testu
 
         return user;
     }

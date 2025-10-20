@@ -33,16 +33,19 @@ public class TrainingController {
         this.trainingService = trainingService;
     }
 
+    //dziala
     @GetMapping("")
     public ResponseEntity<List<TrainingInfo>> getAllTrainings() {
         return ResponseEntity.ok(trainingService.getAllTrainings());
     }
 
+    //dziala
     @GetMapping("/exercises/{exerciseId}/details")
     public ResponseEntity<Exercise> getExerciseDetails(@PathVariable int exerciseId) {
         return ResponseEntity.ok(trainingService.getExerciseById(exerciseId));
     }
 
+    //dziala
     @GetMapping("/{id}")
     public ResponseEntity<TrainingDetailsResponse> getTrainingDetails(@PathVariable int id) {
         TrainingDetailsResponse response = trainingService.getTrainingDetails(id);
@@ -50,6 +53,9 @@ public class TrainingController {
     }
 
     //zrobilem assign i potem wywolalem to i nie dziala
+    //juz dziala
+    //dziala nawet po usunieciu treningu z bazy
+    //DZIALAAAAAAA
     @GetMapping("/my")
     public ResponseEntity<TrainingInfo> getUserTraining(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
@@ -60,6 +66,7 @@ public class TrainingController {
         return ResponseEntity.ok(trainingInfo);
     }
 
+    //dziala
     @GetMapping("/my/details")
     public ResponseEntity<TrainingDetailsResponse> getUserTrainingWithDetails(@RequestHeader("Authorization") String authHeader)
     {
@@ -71,6 +78,7 @@ public class TrainingController {
         return ResponseEntity.ok(trainingService.getTrainingDetails(trainingInfo.getId()));
     }
 
+    //dziala
     @PostMapping("/assign/{trainingId}")
     public ResponseEntity<String> assignTraining(@PathVariable int trainingId, @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
@@ -81,6 +89,7 @@ public class TrainingController {
         return ResponseEntity.ok("Training successfully assigned to user");
     }
 
+    //dziala
     @DeleteMapping("/my/deprive")
     public ResponseEntity<String> depriveTrainingFromUser(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");

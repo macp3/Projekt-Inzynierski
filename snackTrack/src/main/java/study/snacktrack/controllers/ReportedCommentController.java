@@ -45,18 +45,12 @@ public class ReportedCommentController {
         return user;
     }
 
+    //dziala
     @PostMapping("/add")
     public ResponseEntity<ReportedCommentResponse> reportComment(@RequestBody ReportedCommentRequest request, @RequestHeader("Authorization") String authHeader) {
         User user = authorizeUser(authHeader);
 
         ReportedCommentResponse response = reportedCommentService.reportComment(request.getCommentId(), user.getId(), request.getContent());
         return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/comment/{commentId}")
-    public ResponseEntity<List<ReportedComment>> getAllReportsByComment(@PathVariable int commentId) {
-        Comment comment = commentService.getCommentById(commentId);
-        List<ReportedComment> reports = reportedCommentService.getAllReportsByComment(comment.getId());
-        return ResponseEntity.ok(reports);
     }
 }

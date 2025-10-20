@@ -5,15 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import study.snacktrack.dto.AssignDietTypesRequest;
@@ -59,6 +51,7 @@ public class MealController {
         return user;
     }
 
+    //dziala
     @PostMapping("/create")
     public ResponseEntity<String> createMeal(@RequestBody MealRequest request, @RequestHeader("Authorization") String authHeader) {
         User user = authorizeUser(authHeader);
@@ -71,6 +64,7 @@ public class MealController {
         }
     }
 
+    //dziala
     @PutMapping("/my/edit")
     public ResponseEntity<String> editMealByUser(@RequestParam int mealId, @RequestBody MealRequest request, @RequestHeader("Authorization") String authHeader) {
         User user = authorizeUser(authHeader);
@@ -83,8 +77,8 @@ public class MealController {
         }
     }
 
-    //tutaj tak samo - podejscie dto
-    @PutMapping("/my/delete")
+    //dziala
+    @DeleteMapping("/my/delete")
     public ResponseEntity<String> deleteMealByUser(@RequestParam int mealId, @RequestHeader("Authorization") String authHeader) {
         User user = authorizeUser(authHeader);
 
@@ -96,11 +90,13 @@ public class MealController {
         }
     }
 
+    //dziala
     @GetMapping("")
     public ResponseEntity<List<Meal>> getMeals() {
         return ResponseEntity.ok(mealService.getAllMeals());
     }
 
+    //dziala
     @GetMapping("/my")
     public ResponseEntity<List<Meal>> getUserMeals(@RequestHeader("Authorization") String authHeader) {
         User user = authorizeUser(authHeader);
@@ -108,23 +104,27 @@ public class MealController {
         return ResponseEntity.ok(userMeals);
     }
 
+    //dziala
     @GetMapping("/search")
     public ResponseEntity<List<Meal>> searchMealsByName(@RequestParam String name) {
         return ResponseEntity.ok(mealService.searchMealsByName(name));
     }
 
+    //java.lang.RuntimeException: Brak danych dla food_id: 2421
+    //czyli to samo co w FoodController
     @GetMapping("/{mealId}/details")
     public ResponseEntity<MealResponse> getMealDetails(@PathVariable int mealId) {
         MealResponse response = mealService.getMealWithIngredients(mealId);
         return ResponseEntity.ok(response);
     }
 
-    //nie wiem dobrze?????
+    //dziala
     @GetMapping("/{mealId}/comments")
     public ResponseEntity<List<Comment>> getMealComments(@PathVariable int mealId) {
         return ResponseEntity.ok(commentService.getAllMealComments(mealId));
     }
 
+    //dla maciusia w prezencie do przetestowania:)
     @PostMapping("/{mealId}/image")
     public ResponseEntity<String> uploadMealImage(
             @PathVariable int mealId,
@@ -137,6 +137,7 @@ public class MealController {
         }
     }
 
+    //przetestuje na koniec bo trzeba je do bazy dodac
     @PostMapping("/{mealId}/diet-types")
     public ResponseEntity<String> assignDietTypes(
             @PathVariable int mealId,
@@ -149,6 +150,7 @@ public class MealController {
         }
     }
 
+    //to tez na koniec bo trzeba do bazy dodac
     @GetMapping("/{mealId}/diet-types")
     public ResponseEntity<List<DietType>> getDietTypesForMeal(@PathVariable int mealId) {
         List<MealDietType> mappings = mealDietTypeRepository.findByMealId(mealId);

@@ -43,17 +43,12 @@ public class ReportedMealController {
         return user;
     }
 
+    //dziala
     @PostMapping("/add")
     public ResponseEntity<ReportedMealResponse> reportMeal(@RequestBody ReportedMealRequest request, @RequestHeader("Authorization") String authHeader) {
         User user = authorizeUser(authHeader);
 
         ReportedMealResponse response = reportedMealService.reportMeal(request.getMealId(), user.getId(), request.getContent());
         return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/meal/{mealId}")
-    public ResponseEntity<List<ReportedMeal>> getAllReportsByMeal(@PathVariable int mealId) {
-        List<ReportedMeal> reports = reportedMealService.getAllReportsByMeal(mealId);
-        return ResponseEntity.ok(reports);
     }
 }

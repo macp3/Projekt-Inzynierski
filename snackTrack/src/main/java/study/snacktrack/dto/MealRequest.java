@@ -3,19 +3,10 @@ package study.snacktrack.dto;
 import java.util.List;
 
 public class MealRequest {
-
-    private int authorId;
+    //wyrzucilem authorId
     private String name;
     private String description;
     private List<IngredientRequest> ingredients;
-
-    public int getAuthorId() {
-        return authorId;
-    }
-
-    public void setAuthorId(int authorId) {
-        this.authorId = authorId;
-    }
 
     public String getDescription() {
         return description;

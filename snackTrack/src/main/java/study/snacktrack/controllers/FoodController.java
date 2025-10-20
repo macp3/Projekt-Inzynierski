@@ -34,11 +34,15 @@ public class FoodController {
         this.jwtService = jwtService;
     }
 
+    //bledow nie ma ani errorow tylko jak wyszukuje "juice" to opdpowiada mi pusta tablicą, czyli prawdopodobnie nie mam tokena jakiesgos
+    //przetestujesz ty bo ja nie wiem jak ten klucz
+    //albo odpisz
     @GetMapping("/api/search")
     public List<ApiFoodResponse> getFoodFromApi(@RequestParam String query) {
         return foodService.getFoodFromApi(query);
     }
 
+    //tutaj podobnie, ale wyakakuja bledy
     @GetMapping("/api/{id}")
     public ApiFoodResponseDetailed getFoodFromApiById(@PathVariable("id") int id) {
         return foodService.getFoodFromApiById(id);

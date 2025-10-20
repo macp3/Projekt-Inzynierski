@@ -48,6 +48,9 @@ public class CommentService {
         Meal meal = mealRepository.findById(request.getMealId())
                 .orElseThrow(() -> new IllegalArgumentException("Meal not found"));
 
+        if(author.getId() == meal.getAuthorId())
+            throw new IllegalArgumentException("You cannot comment your own meal");
+
         if (request.getContent() == null || request.getContent().isBlank()) {
             throw new IllegalArgumentException("Content must not be empty");
         }
@@ -85,8 +88,9 @@ public class CommentService {
         return response;
     }
 
-    public void deleteCommentByUser(int authorId, int commentId) {
-        Comment comment = commentRepository.findById(commentId)
+    public void deleteCommentByUser(int authorId, int mealId)
+    {
+        Comment comment = commentRepository.findByMealIdAndAuthorId(mealId, authorId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
 
         if (comment.getAuthorId() != authorId) {
@@ -94,6 +98,7 @@ public class CommentService {
         }
 
         commentRepository.delete(comment);
+        System.out.println("Comment deleted successfully");
     }
 
     //xddddd ale glupota

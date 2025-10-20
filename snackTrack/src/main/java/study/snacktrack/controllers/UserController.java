@@ -57,6 +57,7 @@ public class UserController {
         return ResponseEntity.ok(allUsers);
     }
 
+    //dziala
     @GetMapping("/profile")
     public ResponseEntity<User> getProfileInfo(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
@@ -77,6 +78,8 @@ public class UserController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return ResponseEntity.ok(user);
     }*/
+
+    //nie dziala XD sprawdz w serwisie
     @PutMapping("/changePassword")
     public ResponseEntity<User> changePassword(@RequestHeader("Authorization") String authHeader, @RequestParam String password) {
         String token = authHeader.replace("Bearer ", "");
@@ -86,6 +89,7 @@ public class UserController {
         userService.changePassword(user.getId(), password);
         return ResponseEntity.ok(user);
     }
+
 
     @PutMapping("/changeParameters")
     public ResponseEntity<BodyParametersResponse> changeBodyParameters(@RequestHeader("Authorization") String authHeader, BodyParametersRequest request) {
@@ -110,6 +114,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    //XDDDD nie dziala - do poprawyyyyyyyyy
     @PostMapping("/addParameters")
     public ResponseEntity<BodyParameters> addBodyParameters(@RequestHeader("Authorization") String authHeader, @RequestBody BodyParametersRequest request) {
         String token = authHeader.replace("Bearer ", "");
@@ -122,6 +127,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    //dziala
     @GetMapping("/myStreak")
     public ResponseEntity<Integer> getMyStreak(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
@@ -132,6 +138,7 @@ public class UserController {
         return ResponseEntity.ok(user.getStreak());
     }
 
+    //dziala ale fajnie by bylo to do serwisu przeniesc zeby kontrolery byly czysciutkie
     @GetMapping("/notifications")
     public ResponseEntity<List<NotificationResponse>> getUserNotifications(
             @RequestHeader("Authorization") String authHeader
@@ -152,6 +159,8 @@ public class UserController {
         return ResponseEntity.ok(notificationResponses);
     }
 
+
+    //nie wiem jak to przetestowac - zostawiam
     @PostMapping("/device-token")
     public ResponseEntity<String> saveDeviceToken(
             @RequestHeader("Authorization") String authHeader,
@@ -167,6 +176,7 @@ public class UserController {
         return ResponseEntity.ok("Device token saved");
     }
 
+    //do serwisuuuuuuuuu z logika
     @PostMapping("/favourite/add")
     public ResponseEntity<Favourite> addFavourite(@RequestBody AddFavouriteRequest request,
             @RequestHeader("Authorization") String authHeader) {
@@ -189,6 +199,7 @@ public class UserController {
         return ResponseEntity.ok(saved);
     }
 
+    //do serwisu z logika
     @DeleteMapping("/favourite/remove/{mealId}")
     public ResponseEntity<String> removeFavourite(@PathVariable int mealId,
             @RequestHeader("Authorization") String authHeader) {
@@ -205,6 +216,7 @@ public class UserController {
         return ResponseEntity.ok("Favourite removed successfully");
     }
 
+    //do serwisu z logika
     @GetMapping("/favourite")
     public ResponseEntity<List<Meal>> getMyFavouriteMeals(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
@@ -226,6 +238,7 @@ public class UserController {
         return ResponseEntity.ok(meals);
     }
 
+    //do serwisu z logika
     @PostMapping("/image")
     public ResponseEntity<String> uploadMealImage(
             @RequestHeader("Authorization") String authHeader,
