@@ -62,8 +62,7 @@ public class FoodController {
 
             User currentUser = userService.getUserByEmail(email);
 
-            EssentialFood savedFood = foodService.addEssentialFood(food, currentUser);
-            return ResponseEntity.ok(savedFood);
+            return foodService.addEssentialFood(food, currentUser);
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
