@@ -43,7 +43,9 @@ public class RegisteredAlimentationController {
     private final JwtService jwtService;
     private final FoodService foodService;
 
-    public RegisteredAlimentationController(FoodRepository foodRepository, JwtService jwtService, MealRepository mealRepository, RegisteredAlimentationRepository repository, UserRepository userRepository, FoodService foodService, MealService mealService) {
+    public RegisteredAlimentationController(FoodRepository foodRepository, JwtService jwtService,
+            MealRepository mealRepository, RegisteredAlimentationRepository repository, UserRepository userRepository,
+            FoodService foodService, MealService mealService) {
         this.foodRepository = foodRepository;
         this.jwtService = jwtService;
         this.mealRepository = mealRepository;
@@ -52,8 +54,10 @@ public class RegisteredAlimentationController {
         this.foodService = foodService;
     }
 
+    // dziala
     @PostMapping("/add")
-    public ResponseEntity<RegisteredAlimentation> addEntry(@RequestBody RegisteredAlimentationRequest dto, @RequestHeader("Authorization") String authHeader, @RequestParam(required = false) String date) {
+    public ResponseEntity<String> addEntry(@RequestBody RegisteredAlimentationRequest dto,
+            @RequestHeader("Authorization") String authHeader, @RequestParam(required = false) String date) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
 
@@ -73,6 +77,10 @@ public class RegisteredAlimentationController {
             entry.setMeal(meal);
         } else if (dto.getMealApiId() != null) {
             entry.setMealApiId(dto.getMealApiId());
+        }
+
+        if (dto.getAmount() == null && dto.getPieces() == null) {
+            return ResponseEntity.badRequest().body("You have to specify amount or pieces");
         }
 
         if (dto.getAmount() != null && dto.getMealId() == null) {
@@ -97,14 +105,14 @@ public class RegisteredAlimentationController {
         entry.setTimestamp(entryDate);
 
         RegisteredAlimentation savedEntry = repository.save(entry);
-        return ResponseEntity.ok(savedEntry);
+        return ResponseEntity.ok("Meal registered");
     }
 
+    // dziala
     @GetMapping("/my")
     public ResponseEntity<List<RegisteredAlimentationResponse>> getMyEntries(
             @RequestHeader("Authorization") String authHeader,
-            @RequestParam(required = false) String date
-    ) {
+            @RequestParam(required = false) String date) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
 
@@ -140,11 +148,11 @@ public class RegisteredAlimentationController {
         return ResponseEntity.ok(responses);
     }
 
+    // dziala
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteEntry(
             @RequestHeader("Authorization") String authHeader,
-            @PathVariable Integer id
-    ) {
+            @PathVariable Integer id) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
 
@@ -162,12 +170,12 @@ public class RegisteredAlimentationController {
         return ResponseEntity.noContent().build();
     }
 
+    // dziala
     @PutMapping("/update/{id}")
-    public ResponseEntity<RegisteredAlimentation> updateEntry(
+    public ResponseEntity<?> updateEntry(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable Integer id,
-            @RequestBody RegisteredAlimentationRequest dto
-    ) {
+            @RequestBody RegisteredAlimentationRequest dto) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
 
@@ -179,6 +187,10 @@ public class RegisteredAlimentationController {
 
         if (!entry.getUserId().equals(user.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to edit this entry");
+        }
+
+        if (dto.getAmount() == null && dto.getPieces() == null) {
+            return ResponseEntity.badRequest().body("You have to specify amount or pieces");
         }
 
         if (dto.getAmount() != null) {

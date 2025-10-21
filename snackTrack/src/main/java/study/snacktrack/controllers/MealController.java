@@ -55,16 +55,11 @@ public class MealController {
 
     // dziala
     @PostMapping("/create")
-    public ResponseEntity<String> createMeal(@RequestBody MealRequest request,
+    public ResponseEntity<?> createMeal(@RequestBody MealRequest request,
             @RequestHeader("Authorization") String authHeader) {
         User user = authorizeUser(authHeader);
 
-        boolean success = mealService.createMeal(request, user.getId());
-        if (!success) {
-            return ResponseEntity.badRequest().body("Meal not created (invalid data)");
-        } else {
-            return ResponseEntity.ok("Meal successfully created");
-        }
+        return mealService.createMeal(request, user.getId());
     }
 
     // dziala

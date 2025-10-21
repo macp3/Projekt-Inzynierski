@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -70,7 +71,7 @@ public class MealService {
 
     // o to jest giga kociol - naucz sie :)
     @Transactional
-    public boolean createMeal(MealRequest request, int userId) {
+    public ResponseEntity<?> createMeal(MealRequest request, int userId) {
         if (userId <= 0) {
             throw new IllegalArgumentException("User ID must be greater than zero");
         }
@@ -113,7 +114,9 @@ public class MealService {
             } else if (ir.getEssentialApiId() != null) {
                 essentialApiId = ir.getEssentialApiId();
             } else {
-                throw new IllegalArgumentException("Food must have either essential id or API id");
+                // throw new IllegalArgumentException("Food must have either essential id or API
+                // id");
+                return ResponseEntity.badRequest().body("Food must have either essential id or API id");
             }
 
             if (ir.getAmount() != null) {
@@ -129,7 +132,7 @@ public class MealService {
         }
 
         mealRepository.save(meal);
-        return true;
+        return ResponseEntity.ok().body("Meal has been created");
     }
 
     // do naprawy = sprawdzic autora bo tylko autor moze dodawac zdjecie do swojego
