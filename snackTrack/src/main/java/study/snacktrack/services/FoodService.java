@@ -70,8 +70,7 @@ public class FoodService {
         String url = String.format(
                 "%s/rest/foods/search/v1?method=foods.search&search_expression=%s&format=json",
                 baseUrl,
-                URLEncoder.encode(query, StandardCharsets.UTF_8)
-        );
+                URLEncoder.encode(query, StandardCharsets.UTF_8));
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(apiFoodDatabaseKey);
@@ -113,8 +112,7 @@ public class FoodService {
         String apiFoodDatabaseKey = authService.getAccessToken();
         String url = String.format(
                 "%s/rest/food/v5?method=food.get.v5&food_id=%d&format=json",
-                baseUrl, foodId
-        );
+                baseUrl, foodId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(apiFoodDatabaseKey);
@@ -179,10 +177,10 @@ public class FoodService {
             throw new IllegalArgumentException("Product already exists in the database: " + food.getName());
         }
 
-        if (food.getName().isBlank()) {
+        if (food.getName() == null || food.getName().isBlank()) {
             throw new IllegalArgumentException("Field 'name' is required");
         }
-        if (food.getDescription().isBlank()) {
+        if (food.getDescription() == null || food.getDescription().isBlank()) {
             throw new IllegalArgumentException("Field 'description' is required");
         }
         if (food.getCalories() <= 0) {
@@ -196,6 +194,12 @@ public class FoodService {
         }
         if (food.getCarbohydrates() < 0) {
             throw new IllegalArgumentException("Field 'carbohydrates' must be greater or equal 0");
+        }
+        if (food.getDefaultWeight() < 0) {
+            throw new IllegalArgumentException("Field 'defaultWeight' must be greater or equal 0");
+        }
+        if (food.getServingSizeUnit() == null || food.getServingSizeUnit().isBlank()) {
+            throw new IllegalArgumentException("Field 'servingSizeUnit' is required");
         }
 
         return foodRepository.save(food);

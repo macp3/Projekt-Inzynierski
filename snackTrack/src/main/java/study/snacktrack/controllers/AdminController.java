@@ -34,9 +34,9 @@ public class AdminController {
     private final NotificationService notificationService;
 
     public AdminController(AdminRepository adminRepository, UserService userService, MealService mealService,
-                           CommentService commentService, ReportedMealService reportedMealService,
-                           ReportedCommentService reportedCommentService, FoodService foodService, JwtService jwtService,
-                           TrainingService trainingService, NotificationService notificationService) {
+            CommentService commentService, ReportedMealService reportedMealService,
+            ReportedCommentService reportedCommentService, FoodService foodService, JwtService jwtService,
+            TrainingService trainingService, NotificationService notificationService) {
         this.adminRepository = adminRepository;
         this.userService = userService;
         this.reportedMealService = reportedMealService;
@@ -61,10 +61,10 @@ public class AdminController {
         return ResponseEntity.ok(user);
     }
 
-    //dziala
+    // dziala
     @PutMapping("/user/{userId}/info/expirationDate")
-    public ResponseEntity<User> updateExpirationDate(@PathVariable int userId, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date)
-    {
+    public ResponseEntity<User> updateExpirationDate(@PathVariable int userId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         User user = userService.updatePremiumExpiration(userId, date);
         return ResponseEntity.ok(user);
     }
@@ -87,7 +87,7 @@ public class AdminController {
     }
 
     // admin
-    //dziala
+    // dziala
     @GetMapping("/reports/comments/user/{userId}")
     public ResponseEntity<List<ReportedComment>> getAllCommentReportsByUser(@PathVariable int userId) {
         List<ReportedComment> reports = reportedCommentService.getAllReportsByUser(userId);
@@ -103,16 +103,16 @@ public class AdminController {
         return ResponseEntity.ok(trainingService.getAllTrainings());
     }
 
-    //dziala
+    // dziala
     @GetMapping("/trainings/{trainingId}/details")
     public ResponseEntity<TrainingDetailsResponse> getTrainingDetails(@PathVariable int trainingId) {
         return ResponseEntity.ok(trainingService.getTrainingDetails(trainingId));
     }
 
-    //DZIALAAAAAAAAAAAA
+    // DZIALAAAAAAAAAAAA
     @PostMapping("/trainings/add")
-    public ResponseEntity<String> addTraining(@RequestBody TrainingRequest request, @RequestHeader("Authorization") String authHeader)
-    {
+    public ResponseEntity<String> addTraining(@RequestBody TrainingRequest request,
+            @RequestHeader("Authorization") String authHeader) {
         // walidacja admina
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
@@ -123,7 +123,7 @@ public class AdminController {
         return ResponseEntity.ok("Training added successfully");
     }
 
-    //dzialaaaaaaaaaaaaaa
+    // dzialaaaaaaaaaaaaaa
     @PutMapping("/trainings/{trainingId}/edit")
     public ResponseEntity<String> editTraining(@PathVariable int trainingId, @RequestBody TrainingRequest request,
             @RequestHeader("Authorization") String authHeader) {
@@ -155,7 +155,7 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    //dziala
+    // dziala
     @DeleteMapping("/trainings/{trainingId}/delete/{exerciseId}")
     public ResponseEntity<TrainingDetailsResponse> deleteExercisesByIdFromTraining(@PathVariable int trainingId,
             @PathVariable int exerciseId) {
@@ -189,7 +189,7 @@ public class AdminController {
         return ResponseEntity.ok(trainingService.getExerciseById(exerciseId));
     }
 
-    //dziala
+    // dziala
     @PostMapping("/exercises/add")
     public ResponseEntity<Exercise> addExercise(@RequestBody ExerciseRequest request) {
         Exercise exercise = trainingService.createExercise(request.getName(), request.getDescription(),
@@ -210,8 +210,15 @@ public class AdminController {
     // walidacja stringow - nic nie wyrzuca exeption
     // porownanie do nulli tak samo
     // Maciej: zrobione
-    //dziala, ale dziwne te exeption troche bo wyskakuje takie cos jak recipients "brak" a widze ze w metodzie fajnie wyrzuciles wiadomosc wec nwm co tu sie zadzialo:
-    //2025-10-20T14:22:22.218Z  WARN 1 --- [snackTrack] [nio-8080-exec-8] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotReadableException: JSON parse error: Cannot deserialize value of type `study.snacktrack.entities.enums.Recipients` from String "brak": not one of the values accepted for Enum class: [all, non_premium, premium]]
+    // dziala, ale dziwne te exeption troche bo wyskakuje takie cos jak recipients
+    // "brak" a widze ze w metodzie fajnie wyrzuciles wiadomosc wec nwm co tu sie
+    // zadzialo:
+    // 2025-10-20T14:22:22.218Z WARN 1 --- [snackTrack] [nio-8080-exec-8]
+    // .w.s.m.s.DefaultHandlerExceptionResolver : Resolved
+    // [org.springframework.http.converter.HttpMessageNotReadableException: JSON
+    // parse error: Cannot deserialize value of type
+    // `study.snacktrack.entities.enums.Recipients` from String "brak": not one of
+    // the values accepted for Enum class: [all, non_premium, premium]]
     @PostMapping("/notifications/add")
     public ResponseEntity<String> createNotification(
             @RequestBody NotificationRequest request,
@@ -226,9 +233,10 @@ public class AdminController {
     }
 
     // pola nie moga byc nullami
-    // MAciej: już nie będą bo nie da się zapisać nulla ale trzeba dodać response żeby nie pokazywało autora
-    //bartek: zrobione
-    //dziala
+    // MAciej: już nie będą bo nie da się zapisać nulla ale trzeba dodać response
+    // żeby nie pokazywało autora
+    // bartek: zrobione
+    // dziala
     @GetMapping("/notifications")
     public ResponseEntity<List<NotificationResponse>> getAllNotifications(
             @RequestHeader("Authorization") String authHeader) {
@@ -243,24 +251,25 @@ public class AdminController {
 
     // recipients=jvjhvbm musi cos wyrzucac
     // Maciej: wyrzuca już
-    //tutaj tez mozna zastosowac NotificationResponse tak jak wyzej
-    //tak zrobie i zakomentuje to sie zapoznasz
-    //dziala
+    // tutaj tez mozna zastosowac NotificationResponse tak jak wyzej
+    // tak zrobie i zakomentuje to sie zapoznasz
+    // dziala
+    // @GetMapping("/notifications/filter")
+    // public ResponseEntity<List<Notification>> getNotificationsByRecipients(
+    // @RequestHeader("Authorization") String authHeader,
+    // @RequestParam Recipients recipients) {
+    // String token = authHeader.replace("Bearer ", "");
+    // String email = jwtService.extractEmail(token);
+    // adminRepository.findByEmail(email)
+    // .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
+
+    // List<Notification> notifications =
+    // notificationService.getNotificationsByRecipients(recipients);
+    // return ResponseEntity.ok(notifications);
+    // }
+
+    // druga wersja jak chcesz
     @GetMapping("/notifications/filter")
-    public ResponseEntity<List<Notification>> getNotificationsByRecipients(
-            @RequestHeader("Authorization") String authHeader,
-            @RequestParam Recipients recipients) {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
-        adminRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
-
-        List<Notification> notifications = notificationService.getNotificationsByRecipients(recipients);
-        return ResponseEntity.ok(notifications);
-    }
-
-    //druga wersja jak chcesz
-    /*@GetMapping("/notifications/filter")
     public ResponseEntity<List<NotificationResponse>> getNotificationsByRecipients2(
             @RequestHeader("Authorization") String authHeader,
             @RequestParam Recipients recipients) {
@@ -269,13 +278,14 @@ public class AdminController {
         adminRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
 
-        List<NotificationResponse> notifications = notificationService.getNotificationsByRecipientsWithoutDetails(recipients);
+        List<NotificationResponse> notifications = notificationService
+                .getNotificationsByRecipientsWithoutDetails(recipients);
         return ResponseEntity.ok(notifications);
-    }*/
+    }
 
     ////////////////////////////////////////////////////////////////////
 
-    //dziala
+    // dziala
     @GetMapping("/comments/reports/comment/{commentId}")
     public ResponseEntity<List<ReportedComment>> getAllReportsByComment(@PathVariable int commentId) {
         Comment comment = commentService.getCommentById(commentId);
@@ -283,25 +293,23 @@ public class AdminController {
         return ResponseEntity.ok(reports);
     }
 
-    //dziala
+    // dziala
     @GetMapping("/meals/reports/meal/{mealId}")
     public ResponseEntity<List<ReportedMeal>> getAllReportsByMeal(@PathVariable int mealId) {
         List<ReportedMeal> reports = reportedMealService.getAllReportsByMeal(mealId);
         return ResponseEntity.ok(reports);
     }
 
-    //dziala
+    // dziala
     @GetMapping("/comments/reports/all/{reportingId}")
-    public ResponseEntity<List<ReportedComment>> getAllReportedCommentsByUser(@PathVariable int reportingId)
-    {
+    public ResponseEntity<List<ReportedComment>> getAllReportedCommentsByUser(@PathVariable int reportingId) {
         List<ReportedComment> reportedComments = reportedCommentService.getAllReportsByUser(reportingId);
         return ResponseEntity.ok(reportedComments);
     }
 
-    //dziala
+    // dziala
     @GetMapping("/meals/reports/all/{reportingId}")
-    public ResponseEntity<List<ReportedMeal>> getAllReportedMealsByUser(@PathVariable int reportingId)
-    {
+    public ResponseEntity<List<ReportedMeal>> getAllReportedMealsByUser(@PathVariable int reportingId) {
         List<ReportedMeal> reportedComments = reportedMealService.getAllReportsByUser(reportingId);
         return ResponseEntity.ok(reportedComments);
     }

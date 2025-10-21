@@ -1,6 +1,7 @@
 package study.snacktrack.services;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -41,7 +42,9 @@ public class MealService {
     private final MealDietTypeRepository mealDietTypeRepository;
     private final DietTypeRepository dietTypeRepository;
 
-    public MealService(UserRepository userRepository, FoodRepository foodRepository, MealRepository mealRepository, IngredientRepository ingredientRepository, FoodService foodService, MealDietTypeRepository mealDietTypeRepository, DietTypeRepository dietTypeRepository) {
+    public MealService(UserRepository userRepository, FoodRepository foodRepository, MealRepository mealRepository,
+            IngredientRepository ingredientRepository, FoodService foodService,
+            MealDietTypeRepository mealDietTypeRepository, DietTypeRepository dietTypeRepository) {
         this.userRepository = userRepository;
         this.mealRepository = mealRepository;
         this.ingredientRepository = ingredientRepository;
@@ -65,7 +68,7 @@ public class MealService {
         return optionalMeal.get();
     }
 
-    //o to jest giga kociol - naucz sie :)
+    // o to jest giga kociol - naucz sie :)
     @Transactional
     public boolean createMeal(MealRequest request, int userId) {
         if (userId <= 0) {
@@ -81,9 +84,10 @@ public class MealService {
 
         }
 
-        //dodac mechanizm sprawdzania czy meal o podanej nazwie stnieje juz w bazie - wymagana unikalna nazwa
-        //zrobione
-        if(mealRepository.existsByName(request.getName()))
+        // dodac mechanizm sprawdzania czy meal o podanej nazwie stnieje juz w bazie -
+        // wymagana unikalna nazwa
+        // zrobione
+        if (mealRepository.existsByName(request.getName()))
             throw new IllegalArgumentException("Meal with specified name already exists");
 
         if (request.getDescription() == null || "".equals(request.getDescription())) {
@@ -104,7 +108,8 @@ public class MealService {
             Integer pieces = null;
 
             if (ir.getEssentialFoodId() != null) {
-                essentialFood = foodRepository.findById(ir.getEssentialFoodId()).orElseThrow(() -> new IllegalArgumentException("Food not found"));
+                essentialFood = foodRepository.findById(ir.getEssentialFoodId())
+                        .orElseThrow(() -> new IllegalArgumentException("Food not found"));
             } else if (ir.getEssentialApiId() != null) {
                 essentialApiId = ir.getEssentialApiId();
             } else {
@@ -127,17 +132,23 @@ public class MealService {
         return true;
     }
 
-    //do naprawy = sprawdzic autora bo tylko autor moze dodawac zdjecie do swojego meala
-    //i przetestuj
+    // do naprawy = sprawdzic autora bo tylko autor moze dodawac zdjecie do swojego
+    // meala
+    // i przetestuj
+    // dziala przetestowane
     @Transactional
-    public String uploadMealImage(int mealId, MultipartFile imageFile) throws IOException {
+    public String uploadMealImage(int mealId, MultipartFile imageFile, Integer userId) throws IOException {
         Meal meal = validateMealExistance(mealId);
+
+        if (!userId.equals(meal.getAuthorId())) {
+            throw new AccessDeniedException("Only author can edit meal picture");
+        }
 
         if (imageFile == null || imageFile.isEmpty()) {
             throw new IllegalArgumentException("Image file cannot be empty");
         }
 
-        Path uploadPath = Paths.get(uploadDir);
+        Path uploadPath = Paths.get(System.getProperty("user.dir"), "uploads", "images", "meals");
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
@@ -146,8 +157,9 @@ public class MealService {
         Path filePath = uploadPath.resolve(fileName);
 
         Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        System.out.println("File saved to: " + filePath.toAbsolutePath());
 
-        String relativePath = "/images/meals/" + fileName;
+        String relativePath = "/uploads/images/meals/" + fileName;
         meal.setImageUrl(relativePath);
         mealRepository.save(meal);
 
@@ -189,9 +201,11 @@ public class MealService {
         return response;
     }
 
-    //edit meal
-    //jezeli w request nie sa podane pojedyncze pola to po prostu ich nie zmienia (zostawia stare) - jezeli nie chcemy edytowac meal name to nie dodajemy do requesta w jsonie "name": *to samo*
-    //aktualizacja pol jezeli podano: zrobione
+    // edit meal
+    // jezeli w request nie sa podane pojedyncze pola to po prostu ich nie zmienia
+    // (zostawia stare) - jezeli nie chcemy edytowac meal name to nie dodajemy do
+    // requesta w jsonie "name": *to samo*
+    // aktualizacja pol jezeli podano: zrobione
     public boolean editMealByUser(int mealId, MealRequest request, int userId) {
         Meal meal = validateMealExistance(mealId);
         if (!userRepository.existsById(userId)) {
@@ -257,7 +271,7 @@ public class MealService {
         return true;
     }
 
-    //delete meal
+    // delete meal
     public boolean deleteMealByUser(int mealId, int userId) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
@@ -289,7 +303,8 @@ public class MealService {
     }
 
     public Meal getMealById(int mealId) {
-        return mealRepository.findById(mealId).orElseThrow(() -> new IllegalArgumentException("This meal doesn't exist"));
+        return mealRepository.findById(mealId)
+                .orElseThrow(() -> new IllegalArgumentException("This meal doesn't exist"));
     }
 
     @Transactional
@@ -298,8 +313,8 @@ public class MealService {
             throw new IllegalArgumentException("Meal not found with id: " + mealId);
         }
 
-        //dodalem
-        if(dietTypeIds == null)
+        // dodalem
+        if (dietTypeIds == null)
             throw new IllegalArgumentException("Diet types must not be null");
 
         mealDietTypeRepository.deleteByMealId(mealId);
@@ -316,8 +331,7 @@ public class MealService {
         }
     }
 
-    public List<DietType> getMealDietTypes(int mealId)
-    {
+    public List<DietType> getMealDietTypes(int mealId) {
         Meal meal = validateMealExistance(mealId);
         List<MealDietType> mappings = mealDietTypeRepository.findByMealId(mealId);
         List<DietType> dietTypes = mappings.stream()

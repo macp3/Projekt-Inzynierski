@@ -34,22 +34,28 @@ public class FoodController {
         this.jwtService = jwtService;
     }
 
-    //bledow nie ma ani errorow tylko jak wyszukuje "juice" to opdpowiada mi pusta tablicą, czyli prawdopodobnie nie mam tokena jakiesgos
-    //przetestujesz ty bo ja nie wiem jak ten klucz
-    //albo odpisz
+    // bledow nie ma ani errorow tylko jak wyszukuje "juice" to opdpowiada mi pusta
+    // tablicą, czyli prawdopodobnie nie mam tokena jakiesgos
+    // przetestujesz ty bo ja nie wiem jak ten klucz
+    // albo odpisz
+
+    // MAciej: Działa
     @GetMapping("/api/search")
     public List<ApiFoodResponse> getFoodFromApi(@RequestParam String query) {
         return foodService.getFoodFromApi(query);
     }
 
-    //tutaj podobnie, ale wyakakuja bledy
+    // tutaj podobnie, ale wyakakuja bledy
+    // MAciej: Działa
     @GetMapping("/api/{id}")
     public ApiFoodResponseDetailed getFoodFromApiById(@PathVariable("id") int id) {
         return foodService.getFoodFromApiById(id);
     }
 
+    // dziala
     @PostMapping("/add")
-    public ResponseEntity<?> addEssentialFood(@RequestBody EssentialFood food, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> addEssentialFood(@RequestBody EssentialFood food,
+            @RequestHeader("Authorization") String authHeader) {
         try {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtService.extractEmail(token);
@@ -64,6 +70,7 @@ public class FoodController {
         }
     }
 
+    // dziala
     @GetMapping("/search")
     public ResponseEntity<List<EssentialFood>> searchEssentialFood(@RequestParam String query) {
         List<EssentialFood> results = foodService.searchEssentialFood(query);

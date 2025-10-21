@@ -32,7 +32,6 @@ public class AdminAuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
 
-        // 👇 token zawiera typ konta: ADMIN
         String token = jwtService.generateToken(admin.getEmail(), "ADMIN");
         return ResponseEntity.ok(token);
     }

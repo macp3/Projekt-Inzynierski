@@ -34,7 +34,9 @@ public class MealController {
     private final MealDietTypeRepository mealDietTypeRepository;
     private final DietTypeRepository dietTypeRepository;
 
-    public MealController(MealService mealService, JwtService jwtService, UserService userService, CommentService commentService, MealDietTypeRepository mealDietTypeRepository, DietTypeRepository dietTypeRepository) {
+    public MealController(MealService mealService, JwtService jwtService, UserService userService,
+            CommentService commentService, MealDietTypeRepository mealDietTypeRepository,
+            DietTypeRepository dietTypeRepository) {
         this.mealService = mealService;
         this.jwtService = jwtService;
         this.userService = userService;
@@ -51,9 +53,10 @@ public class MealController {
         return user;
     }
 
-    //dziala
+    // dziala
     @PostMapping("/create")
-    public ResponseEntity<String> createMeal(@RequestBody MealRequest request, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<String> createMeal(@RequestBody MealRequest request,
+            @RequestHeader("Authorization") String authHeader) {
         User user = authorizeUser(authHeader);
 
         boolean success = mealService.createMeal(request, user.getId());
@@ -64,9 +67,10 @@ public class MealController {
         }
     }
 
-    //dziala
+    // dziala
     @PutMapping("/my/edit")
-    public ResponseEntity<String> editMealByUser(@RequestParam int mealId, @RequestBody MealRequest request, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<String> editMealByUser(@RequestParam int mealId, @RequestBody MealRequest request,
+            @RequestHeader("Authorization") String authHeader) {
         User user = authorizeUser(authHeader);
 
         boolean success = mealService.editMealByUser(mealId, request, user.getId());
@@ -77,9 +81,10 @@ public class MealController {
         }
     }
 
-    //dziala
+    // dziala
     @DeleteMapping("/my/delete")
-    public ResponseEntity<String> deleteMealByUser(@RequestParam int mealId, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<String> deleteMealByUser(@RequestParam int mealId,
+            @RequestHeader("Authorization") String authHeader) {
         User user = authorizeUser(authHeader);
 
         boolean success = mealService.deleteMealByUser(mealId, user.getId());
@@ -90,13 +95,13 @@ public class MealController {
         }
     }
 
-    //dziala
+    // dziala
     @GetMapping("")
     public ResponseEntity<List<Meal>> getMeals() {
         return ResponseEntity.ok(mealService.getAllMeals());
     }
 
-    //dziala
+    // dziala
     @GetMapping("/my")
     public ResponseEntity<List<Meal>> getUserMeals(@RequestHeader("Authorization") String authHeader) {
         User user = authorizeUser(authHeader);
@@ -104,40 +109,44 @@ public class MealController {
         return ResponseEntity.ok(userMeals);
     }
 
-    //dziala
+    // dziala
     @GetMapping("/search")
     public ResponseEntity<List<Meal>> searchMealsByName(@RequestParam String name) {
         return ResponseEntity.ok(mealService.searchMealsByName(name));
     }
 
-    //java.lang.RuntimeException: Brak danych dla food_id: 2421
-    //czyli to samo co w FoodController
+    // java.lang.RuntimeException: Brak danych dla food_id: 2421
+    // czyli to samo co w FoodController
+    // dziala
     @GetMapping("/{mealId}/details")
     public ResponseEntity<MealResponse> getMealDetails(@PathVariable int mealId) {
         MealResponse response = mealService.getMealWithIngredients(mealId);
         return ResponseEntity.ok(response);
     }
 
-    //dziala
+    // dziala
     @GetMapping("/{mealId}/comments")
     public ResponseEntity<List<Comment>> getMealComments(@PathVariable int mealId) {
         return ResponseEntity.ok(commentService.getAllMealComments(mealId));
     }
 
-    //dla maciusia w prezencie do przetestowania:)
+    // dla maciusia w prezencie do przetestowania:)
+    // dziala, autor tez
     @PostMapping("/{mealId}/image")
     public ResponseEntity<String> uploadMealImage(
             @PathVariable int mealId,
-            @RequestParam("image") MultipartFile imageFile) {
+            @RequestParam("image") MultipartFile imageFile,
+            @RequestHeader("Authorization") String authHeader) {
         try {
-            String imageUrl = mealService.uploadMealImage(mealId, imageFile);
+            User user = authorizeUser(authHeader);
+            String imageUrl = mealService.uploadMealImage(mealId, imageFile, user.getId());
             return ResponseEntity.ok(imageUrl);
         } catch (IllegalArgumentException | IOException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    //dziala
+    // dziala
     @PostMapping("/{mealId}/diet-types")
     public ResponseEntity<String> assignDietTypes(
             @PathVariable int mealId,
@@ -150,10 +159,9 @@ public class MealController {
         }
     }
 
-    //dziala
+    // dziala
     @GetMapping("/{mealId}/diet-types")
-    public ResponseEntity<List<DietType>> getDietTypesForMeal(@PathVariable int mealId)
-    {
+    public ResponseEntity<List<DietType>> getDietTypesForMeal(@PathVariable int mealId) {
         return ResponseEntity.ok(mealService.getMealDietTypes(mealId));
     }
 }
