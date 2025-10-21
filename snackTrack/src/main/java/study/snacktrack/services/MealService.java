@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -18,11 +19,7 @@ import study.snacktrack.dto.IngredientRequest;
 import study.snacktrack.dto.IngredientResponse;
 import study.snacktrack.dto.MealRequest;
 import study.snacktrack.dto.MealResponse;
-import study.snacktrack.entities.EssentialFood;
-import study.snacktrack.entities.Ingredient;
-import study.snacktrack.entities.Meal;
-import study.snacktrack.entities.MealDietType;
-import study.snacktrack.entities.User;
+import study.snacktrack.entities.*;
 import study.snacktrack.repositories.DietTypeRepository;
 import study.snacktrack.repositories.FoodRepository;
 import study.snacktrack.repositories.IngredientRepository;
@@ -301,6 +298,10 @@ public class MealService {
             throw new IllegalArgumentException("Meal not found with id: " + mealId);
         }
 
+        //dodalem
+        if(dietTypeIds == null)
+            throw new IllegalArgumentException("Diet types must not be null");
+
         mealDietTypeRepository.deleteByMealId(mealId);
 
         for (Integer dietTypeId : dietTypeIds) {
@@ -313,5 +314,16 @@ public class MealService {
             mdt.setDietTypeId(dietTypeId);
             mealDietTypeRepository.save(mdt);
         }
+    }
+
+    public List<DietType> getMealDietTypes(int mealId)
+    {
+        Meal meal = validateMealExistance(mealId);
+        List<MealDietType> mappings = mealDietTypeRepository.findByMealId(mealId);
+        List<DietType> dietTypes = mappings.stream()
+                .map(mdt -> dietTypeRepository.findById(mdt.getDietTypeId()).orElse(null))
+                .filter(Objects::nonNull)
+                .toList();
+        return dietTypes;
     }
 }

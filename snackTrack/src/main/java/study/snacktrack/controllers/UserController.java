@@ -79,7 +79,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }*/
 
-    //nie dziala XD sprawdz w serwisie
+    //DZIALAAAAAAAAA
     @PutMapping("/changePassword")
     public ResponseEntity<User> changePassword(@RequestHeader("Authorization") String authHeader, @RequestParam String password) {
         String token = authHeader.replace("Bearer ", "");
@@ -91,8 +91,9 @@ public class UserController {
     }
 
 
+    //dziala
     @PutMapping("/changeParameters")
-    public ResponseEntity<BodyParametersResponse> changeBodyParameters(@RequestHeader("Authorization") String authHeader, BodyParametersRequest request) {
+    public ResponseEntity<BodyParametersResponse> changeBodyParameters(@RequestHeader("Authorization") String authHeader, @RequestBody BodyParametersRequest request) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
 
@@ -114,7 +115,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    //XDDDD nie dziala - do poprawyyyyyyyyy
+    //dziala
     @PostMapping("/addParameters")
     public ResponseEntity<BodyParameters> addBodyParameters(@RequestHeader("Authorization") String authHeader, @RequestBody BodyParametersRequest request) {
         String token = authHeader.replace("Bearer ", "");

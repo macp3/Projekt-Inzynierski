@@ -137,7 +137,7 @@ public class MealController {
         }
     }
 
-    //przetestuje na koniec bo trzeba je do bazy dodac
+    //dziala
     @PostMapping("/{mealId}/diet-types")
     public ResponseEntity<String> assignDietTypes(
             @PathVariable int mealId,
@@ -150,14 +150,10 @@ public class MealController {
         }
     }
 
-    //to tez na koniec bo trzeba do bazy dodac
+    //dziala
     @GetMapping("/{mealId}/diet-types")
-    public ResponseEntity<List<DietType>> getDietTypesForMeal(@PathVariable int mealId) {
-        List<MealDietType> mappings = mealDietTypeRepository.findByMealId(mealId);
-        List<DietType> dietTypes = mappings.stream()
-                .map(mdt -> dietTypeRepository.findById(mdt.getDietTypeId()).orElse(null))
-                .filter(Objects::nonNull)
-                .toList();
-        return ResponseEntity.ok(dietTypes);
+    public ResponseEntity<List<DietType>> getDietTypesForMeal(@PathVariable int mealId)
+    {
+        return ResponseEntity.ok(mealService.getMealDietTypes(mealId));
     }
 }

@@ -1,6 +1,7 @@
 package study.snacktrack.services;
 
 import java.io.IOException;
+import java.net.PasswordAuthentication;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,6 +48,7 @@ public class UserService {
 
     //nie dziala XDDD
     //tera sie nie moge zalogoiwac
+    //jednak dziala ale user3 stracony
     public User changePassword(int userId, String password) {
         User user = getUserById(userId);
 
@@ -54,11 +56,11 @@ public class UserService {
             throw new IllegalArgumentException("New password cannot be empty");
         }
 
-        if(user.getPassword().equals(password))
+        if(passwordEncoder.matches(password, user.getPassword()))
             throw new IllegalArgumentException("New password must be different from the old password");
+
         String hashedPassword = passwordEncoder.encode(password);
         user.setPassword(hashedPassword);
-        user.setPassword(password);
         userRepository.save(user);
         return user;
     }
@@ -79,142 +81,183 @@ public class UserService {
     //do rozbudowania:
     //po drugie pole estimated_time zeby nie przekraczac deficytu/nadwyzki 1000kcal (bo to niezdrowe)
     //TAK DZIALA FITATU
-    public BodyParametersResponse changeBodyParameters(Integer userId, Sex sex, Float height, Float weight, Integer age, Float dailyActivityFactor, Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo, Float goalWeight) {
-        User user = getUserById(userId);
-        BodyParameters bodyParameters = bodyParametersRepository.findById(user.getId()).orElseThrow(() -> new IllegalArgumentException("This user has no body parameters specified"));
+    @Transactional
+    public BodyParametersResponse changeBodyParameters(
+            Integer userId,
+            Sex sex,
+            Float height,
+            Float weight,
+            Integer age,
+            Float dailyActivityFactor,
+            Float dailyActivityTrainingFactor,
+            Float weeklyWeightChangeTempo,
+            Float goalWeight
+    ) {
+        // --- Pobierz istniejące dane użytkownika ---
+        BodyParameters existing = bodyParametersRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User with ID " + userId + " not found"));
 
-        if (sex == null) {
-            sex = bodyParameters.getSex();
-        }
-        if (height <= 0) {
-            height = bodyParameters.getHeight();
-        }
-        if (weight <= 0) {
-            weight = bodyParameters.getWeight();
-        }
-        if (age <= 0) {
-            age = bodyParameters.getAge();
-        }
-        if (goalWeight <= 0) {
-            goalWeight = bodyParameters.getGoalWeight();
-        }
-        if (weeklyWeightChangeTempo < 0 || weeklyWeightChangeTempo > 1) {
-            weeklyWeightChangeTempo = bodyParameters.getWeeklyWeightChangeTempo();
-        }
-
-        float formula = 0;
-        if (sex == Sex.male) {
-            formula = (float) ((10 * weight) + (6.25 * height) - (5 * age) + 5);
-        } else if (sex == Sex.female) {
-            formula = (float) ((10 * weight) + (6.25 * height) - (5 * age) - 161);
+        // --- Walidacja i aktualizacja tylko podanych wartości ---
+        if (sex != null) {
+            if (sex != Sex.male && sex != Sex.female)
+                throw new IllegalArgumentException("Sex must be male or female");
+            existing.setSex(sex);
         }
 
-        float caloricZero = 0;
-        if (dailyActivityFactor < 0.65 || dailyActivityFactor > 1.2) {
-            dailyActivityFactor = bodyParameters.getDailyActivityFactor();
-        }
-        if (dailyActivityTrainingFactor < 0.65 || dailyActivityTrainingFactor > 1.2) {
-            dailyActivityTrainingFactor = bodyParameters.getDailyActivityTrainingFactor();
+        if (height != null) {
+            if (height <= 0)
+                throw new IllegalArgumentException("Height must be greater than zero");
+            existing.setHeight(height);
         }
 
-        caloricZero = formula * (dailyActivityFactor + dailyActivityTrainingFactor);
+        if (weight != null) {
+            if (weight <= 0)
+                throw new IllegalArgumentException("Weight must be greater than zero");
+            existing.setWeight(weight);
+        }
 
+        if (age != null) {
+            if (age <= 0)
+                throw new IllegalArgumentException("Age must be greater than zero");
+            existing.setAge(age);
+        }
+
+        if (dailyActivityFactor != null) {
+            if (Float.compare(dailyActivityFactor, 0.7f) < 0 || Float.compare(dailyActivityFactor, 1.15f) > 0)
+                throw new IllegalArgumentException("Daily activity factor must be between 0.7 and 1.15");
+            existing.setDailyActivityFactor(dailyActivityFactor);
+        }
+
+        if (dailyActivityTrainingFactor != null) {
+            if (Float.compare(dailyActivityTrainingFactor, 0.5f) < 0 || Float.compare(dailyActivityTrainingFactor, 0.95f) > 0)
+                throw new IllegalArgumentException("Daily activity training factor must be between 0.5 and 0.95");
+            existing.setDailyActivityTrainingFactor(dailyActivityTrainingFactor);
+        }
+
+        if (weeklyWeightChangeTempo != null) {
+            if (weeklyWeightChangeTempo < 0 || weeklyWeightChangeTempo > 1)
+                throw new IllegalArgumentException("Weekly weight change tempo must be between 0 and 1");
+            existing.setWeeklyWeightChangeTempo(weeklyWeightChangeTempo);
+        }
+
+        if (goalWeight != null) {
+            if (goalWeight <= 0)
+                throw new IllegalArgumentException("Goal weight must be greater than zero");
+            existing.setGoalWeight(goalWeight);
+        }
+
+        // --- Pobierz końcowe wartości (po zmianach lub stare) ---
+        Sex finalSex = existing.getSex();
+        float finalHeight = existing.getHeight();
+        float finalWeight = existing.getWeight();
+        int finalAge = existing.getAge();
+        float finalDailyActivityFactor = existing.getDailyActivityFactor();
+        float finalDailyActivityTrainingFactor = existing.getDailyActivityTrainingFactor();
+        float finalWeeklyWeightChangeTempo = existing.getWeeklyWeightChangeTempo();
+        float finalGoalWeight = existing.getGoalWeight();
+
+        // --- Obliczenia ---
+        if (finalGoalWeight == finalWeight) {
+            finalWeeklyWeightChangeTempo = 0f;
+            System.out.println("SETTING WEEKLY WEIGHT CHANGE TEMPO TO 0 SINCE YOU DON'T WANT TO CHANGE YOUR WEIGHT");
+            existing.setWeeklyWeightChangeTempo(0f);
+        }
+
+        float formula = (finalSex == Sex.male)
+                ? (10 * finalWeight) + (6.25f * finalHeight) - (5 * finalAge) + 5
+                : (10 * finalWeight) + (6.25f * finalHeight) - (5 * finalAge) - 161;
+
+        float caloricZero = formula * (finalDailyActivityFactor + finalDailyActivityTrainingFactor);
         float calorieLimit = caloricZero;
-        float proteinLimit = 0;
-        float fatLimit = 0;
-        float carbohydratesLimit = 0;
-        if (goalWeight > weight) {
-            calorieLimit = caloricZero + weeklyWeightChangeTempo * 1000;
-            proteinLimit = (float) 0.2 * calorieLimit;
-            fatLimit = (float) 0.25 * calorieLimit;
-            carbohydratesLimit = (float) 0.55 * calorieLimit;
-        } else if (goalWeight < weight) {
-            calorieLimit = caloricZero - weeklyWeightChangeTempo * 1000;
-            proteinLimit = (float) 0.25 * calorieLimit;
-            fatLimit = (float) 0.2 * calorieLimit;
-            carbohydratesLimit = (float) 0.55 * calorieLimit;
+        float proteinLimit;
+        float fatLimit;
+        float carbohydratesLimit;
+
+        if (finalGoalWeight > finalWeight) {
+            calorieLimit += finalWeeklyWeightChangeTempo * 1000;
+            proteinLimit = (0.2f * calorieLimit) / 4;
+            fatLimit = (0.27f * calorieLimit) / 9;
+            carbohydratesLimit = (0.53f * calorieLimit) / 4;
+        } else if (finalGoalWeight < finalWeight) {
+            calorieLimit -= finalWeeklyWeightChangeTempo * 1000;
+            proteinLimit = (0.2f * calorieLimit) / 4;
+            fatLimit = (0.25f * calorieLimit) / 9;
+            carbohydratesLimit = (0.55f * calorieLimit) / 4;
         } else {
-            calorieLimit = caloricZero;
-            proteinLimit = (float) 0.2 * calorieLimit;
-            fatLimit = (float) 0.25 * calorieLimit;
-            carbohydratesLimit = (float) 0.55 * calorieLimit;
+            proteinLimit = (0.2f * calorieLimit) / 4;
+            fatLimit = (0.25f * calorieLimit) / 9;
+            carbohydratesLimit = (0.55f * calorieLimit) / 4;
         }
 
-        bodyParameters.setSex(sex);
-        bodyParameters.setHeight(height);
-        bodyParameters.setWeight(weight);
-        bodyParameters.setAge(age);
-        bodyParameters.setDailyActivityFactor(dailyActivityFactor);
-        bodyParameters.setDailyActivityTrainingFactor(dailyActivityTrainingFactor);
-        bodyParameters.setWeeklyWeightChangeTempo(weeklyWeightChangeTempo);
-        bodyParameters.setGoalWeight(goalWeight);
-        bodyParameters.setCalorieLimit(calorieLimit);
-        bodyParameters.setProteinLimit(proteinLimit);
-        bodyParameters.setFatLimit(fatLimit);
-        bodyParameters.setCarbohydratesLimit(carbohydratesLimit);
+        // --- Ustaw przeliczone wartości ---
+        existing.setCalorieLimit(calorieLimit);
+        existing.setProteinLimit(proteinLimit);
+        existing.setFatLimit(fatLimit);
+        existing.setCarbohydratesLimit(carbohydratesLimit);
 
-        bodyParametersRepository.save(bodyParameters);
+        // --- Zapisz do bazy ---
+        BodyParameters updated = bodyParametersRepository.save(existing);
 
-        return new BodyParametersResponse(user.getId(), bodyParameters.getSex(), bodyParameters.getHeight(), bodyParameters.getWeight(), bodyParameters.getAge(), bodyParameters.getDailyActivityFactor(), bodyParameters.getDailyActivityTrainingFactor(), bodyParameters.getWeeklyWeightChangeTempo(), bodyParameters.getGoalWeight(), bodyParameters.getCalorieLimit(), bodyParameters.getProteinLimit(), bodyParameters.getFatLimit(), bodyParameters.getCarbohydratesLimit());
+        // --- Konwersja do DTO (BodyParametersResponse) ---
+        BodyParametersResponse response = new BodyParametersResponse(updated.getUserId(), updated.getSex(), updated.getHeight(), updated.getWeight(), updated.getAge(), updated.getDailyActivityFactor(), updated.getDailyActivityTrainingFactor(), updated.getWeeklyWeightChangeTempo(), updated.getGoalWeight(), updated.getCalorieLimit(), updated.getProteinLimit(), updated.getFatLimit(), updated.getCarbohydratesLimit());
+
+        return response;
     }
 
-    @Transactional
-    public BodyParameters addBodyParameters(Integer userId, Sex sex, Float height, Float weight, Integer age, Float dailyActivityFactor, Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo, Float goalWeight) {
-        if (sex == null) {
-            throw new IllegalArgumentException("Wrong body parameters");
-        }
-        if (height <= 0) {
-            throw new IllegalArgumentException("Wrong body parameters");
-        }
-        if (weight <= 0) {
-            throw new IllegalArgumentException("Wrong body parameters");
-        }
-        if (age <= 0) {
-            throw new IllegalArgumentException("Wrong body parameters");
-        }
-        if (goalWeight <= 0) {
-            throw new IllegalArgumentException("Wrong body parameters");
-        }
-        if (weeklyWeightChangeTempo < 0 || weeklyWeightChangeTempo > 1) {
-            throw new IllegalArgumentException("Wrong body parameters");
-        }
 
+    @Transactional
+    public BodyParameters addBodyParameters(Integer userId, Sex sex, Float height, Float weight, Integer age, Float dailyActivityFactor, Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo, Float goalWeight)
+    {
+        // Walidacja parametrów wejściowych
+        if (sex == null) throw new IllegalArgumentException("Sex must not be null");
+        if(sex != Sex.female && sex != Sex.male)
+            throw new IllegalArgumentException("Sex must be male or female");
+
+        if (height == null || height <= 0) throw new IllegalArgumentException("Height must be greater than zero");
+        if (weight == null || weight <= 0) throw new IllegalArgumentException("Weight must be greater than zero");
+        if (age == null || age <= 0) throw new IllegalArgumentException("Age must be greater than zero");
+        if (goalWeight == null || goalWeight <= 0) throw new IllegalArgumentException("Goal weight must be greater than zero");
+        if (weeklyWeightChangeTempo == null || weeklyWeightChangeTempo < 0 || weeklyWeightChangeTempo > 1)
+            throw new IllegalArgumentException("Weekly weight change tempo must be between 0 and 1");
+        if(goalWeight.equals(weight))
+        {
+            weeklyWeightChangeTempo = 0f;
+            System.out.println("SETTING YOUR WEEKLY WEIGHT CHANGE TEMPO TO 0 SINCE YOU DON'T WANT TO CHANGE YOUR WEIGHT");
+        }
+        if (dailyActivityFactor == null || (Float.compare(dailyActivityFactor, 0.7f) < 0 || Float.compare(dailyActivityFactor, 1.15f) > 0))
+            throw new IllegalArgumentException("Daily activity factor must be between 0.7 and 1.15");
+        if (dailyActivityTrainingFactor == null || (Float.compare(dailyActivityTrainingFactor, 0.5f) < 0 || Float.compare(dailyActivityTrainingFactor, 0.95f) > 0))
+            throw new IllegalArgumentException("Daily activity training factor must be between 0.5 and 0.95");
+
+
+        // Obliczenia
         float formula = 0;
         if (sex == Sex.male) {
-            formula = (float) ((10 * weight) + (6.25 * height) - (5 * age) + 5);
+            formula = (10 * weight) + (6.25f * height) - (5 * age) + 5;
         } else if (sex == Sex.female) {
-            formula = (float) ((10 * weight) + (6.25 * height) - (5 * age) - 161);
+            formula = (10 * weight) + (6.25f * height) - (5 * age) - 161;
         }
 
-        float caloricZero = 0;
-        if (dailyActivityFactor < 0.65 || dailyActivityFactor > 1.2) {
-            throw new IllegalArgumentException("Wrong body parameters");
-        }
-        if (dailyActivityTrainingFactor < 0.65 || dailyActivityTrainingFactor > 1.2) {
-            throw new IllegalArgumentException("Wrong body parameters");
-        }
-
-        caloricZero = formula * (dailyActivityFactor + dailyActivityTrainingFactor);
-
+        float caloricZero = formula * (dailyActivityFactor + dailyActivityTrainingFactor);
         float calorieLimit = caloricZero;
-        float proteinLimit = 0;
-        float fatLimit = 0;
-        float carbohydratesLimit = 0;
+        float proteinLimit;
+        float fatLimit;
+        float carbohydratesLimit;
+
         if (goalWeight > weight) {
-            calorieLimit = caloricZero + weeklyWeightChangeTempo * 1000;
-            proteinLimit = (float) 0.2 * calorieLimit;
-            fatLimit = (float) 0.25 * calorieLimit;
-            carbohydratesLimit = (float) 0.55 * calorieLimit;
+            calorieLimit += weeklyWeightChangeTempo * 1000;
+            proteinLimit = (0.2f * calorieLimit) / 4;
+            fatLimit = (0.27f * calorieLimit) / 9;
+            carbohydratesLimit = (0.53f * calorieLimit) / 4;
         } else if (goalWeight < weight) {
-            calorieLimit = caloricZero - weeklyWeightChangeTempo * 1000;
-            proteinLimit = (float) 0.25 * calorieLimit;
-            fatLimit = (float) 0.2 * calorieLimit;
-            carbohydratesLimit = (float) 0.55 * calorieLimit;
+            calorieLimit -= weeklyWeightChangeTempo * 1000;
+            proteinLimit = (0.2f * calorieLimit) / 4;
+            fatLimit = (0.25f * calorieLimit) / 9;
+            carbohydratesLimit = (0.55f * calorieLimit) / 4;
         } else {
-            calorieLimit = caloricZero;
-            proteinLimit = (float) 0.2 * calorieLimit;
-            fatLimit = (float) 0.25 * calorieLimit;
-            carbohydratesLimit = (float) 0.55 * calorieLimit;
+            proteinLimit = (0.2f * calorieLimit) / 4;
+            fatLimit = (0.25f * calorieLimit) / 9;
+            carbohydratesLimit = (0.55f * calorieLimit) / 4;
         }
 
         BodyParameters bodyParameters = new BodyParameters();
