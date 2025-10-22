@@ -2,8 +2,6 @@ package study.snacktrack.controllers;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,7 +12,6 @@ import study.snacktrack.dto.MealResponse;
 import study.snacktrack.entities.Comment;
 import study.snacktrack.entities.DietType;
 import study.snacktrack.entities.Meal;
-import study.snacktrack.entities.MealDietType;
 import study.snacktrack.entities.User;
 import study.snacktrack.repositories.DietTypeRepository;
 import study.snacktrack.repositories.MealDietTypeRepository;
@@ -55,38 +52,41 @@ public class MealController {
 
     // dziala
     @PostMapping("/create")
-    public ResponseEntity<?> createMeal(@RequestBody MealRequest request,
+    public ResponseEntity<String> createMeal(@RequestBody MealRequest request,
             @RequestHeader("Authorization") String authHeader) {
-        User user = authorizeUser(authHeader);
+        try {
+            User user = authorizeUser(authHeader);
 
-        return mealService.createMeal(request, user.getId());
-    }
-
-    // dziala
-    @PutMapping("/my/edit")
-    public ResponseEntity<String> editMealByUser(@RequestParam int mealId, @RequestBody MealRequest request,
-            @RequestHeader("Authorization") String authHeader) {
-        User user = authorizeUser(authHeader);
-
-        boolean success = mealService.editMealByUser(mealId, request, user.getId());
-        if (success) {
-            return ResponseEntity.ok("Meal successfully edited");
-        } else {
-            return ResponseEntity.ok("Meal not edited (invalid data)");
+            return ResponseEntity.ok(mealService.createMeal(request, user.getId()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     // dziala
-    @DeleteMapping("/my/delete")
-    public ResponseEntity<String> deleteMealByUser(@RequestParam int mealId,
+    @PutMapping("/my/edit/{mealId}")
+    public ResponseEntity<String> editMealByUser(@PathVariable int mealId, @RequestBody MealRequest request,
             @RequestHeader("Authorization") String authHeader) {
-        User user = authorizeUser(authHeader);
 
-        boolean success = mealService.deleteMealByUser(mealId, user.getId());
-        if (success) {
-            return ResponseEntity.ok("Meal successfully deleted");
-        } else {
-            return ResponseEntity.ok("Meal not deleted (invalid data)");
+        try {
+            User user = authorizeUser(authHeader);
+
+            return ResponseEntity.ok(mealService.editMealByUser(mealId, request, user.getId()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // dziala
+    @DeleteMapping("/my/delete/{mealId}")
+    public ResponseEntity<String> deleteMealByUser(@PathVariable int mealId,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            User user = authorizeUser(authHeader);
+
+            return ResponseEntity.ok(mealService.deleteMealByUser(mealId, user.getId()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
@@ -110,23 +110,28 @@ public class MealController {
         return ResponseEntity.ok(mealService.searchMealsByName(name));
     }
 
-    // java.lang.RuntimeException: Brak danych dla food_id: 2421
-    // czyli to samo co w FoodController
     // dziala
     @GetMapping("/{mealId}/details")
-    public ResponseEntity<MealResponse> getMealDetails(@PathVariable int mealId) {
-        MealResponse response = mealService.getMealWithIngredients(mealId);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> getMealDetails(@PathVariable int mealId) {
+        try {
+            MealResponse response = mealService.getMealWithIngredients(mealId);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // dziala
     @GetMapping("/{mealId}/comments")
-    public ResponseEntity<List<Comment>> getMealComments(@PathVariable int mealId) {
-        return ResponseEntity.ok(commentService.getAllMealComments(mealId));
+    public ResponseEntity<?> getMealComments(@PathVariable int mealId) {
+        try {
+            return ResponseEntity.ok(commentService.getAllMealComments(mealId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    // dla maciusia w prezencie do przetestowania:)
-    // dziala, autor tez
+    // dziala
     @PostMapping("/{mealId}/image")
     public ResponseEntity<String> uploadMealImage(
             @PathVariable int mealId,
@@ -156,7 +161,11 @@ public class MealController {
 
     // dziala
     @GetMapping("/{mealId}/diet-types")
-    public ResponseEntity<List<DietType>> getDietTypesForMeal(@PathVariable int mealId) {
-        return ResponseEntity.ok(mealService.getMealDietTypes(mealId));
+    public ResponseEntity<?> getDietTypesForMeal(@PathVariable int mealId) {
+        try {
+            return ResponseEntity.ok(mealService.getMealDietTypes(mealId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

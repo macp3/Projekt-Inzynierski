@@ -27,7 +27,12 @@ public class RegisteredAlimentationController {
             @RequestBody RegisteredAlimentationRequest dto,
             @RequestHeader("Authorization") String authHeader,
             @RequestParam(required = false) String date) {
-        return service.addEntry(authHeader, dto, date);
+        try {
+            return ResponseEntity.ok(service.addEntry(authHeader, dto, date));
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // dziala
@@ -45,20 +50,28 @@ public class RegisteredAlimentationController {
 
     // dziala
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteEntry(
+    public ResponseEntity<String> deleteEntry(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable Integer id) {
-        service.deleteEntry(authHeader, id);
-        return ResponseEntity.noContent().build();
+        try {
+            service.deleteEntry(authHeader, id);
+            return ResponseEntity.noContent().build();
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // dziala
     @PutMapping("/update/{id}")
-    public ResponseEntity<RegisteredAlimentation> updateEntry(
+    public ResponseEntity<?> updateEntry(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable Integer id,
             @RequestBody RegisteredAlimentationRequest dto) {
-        RegisteredAlimentation updated = service.updateEntry(authHeader, id, dto);
-        return ResponseEntity.ok(updated);
+        try {
+            RegisteredAlimentation updated = service.updateEntry(authHeader, id, dto);
+            return ResponseEntity.ok(updated);
+        } catch (ResponseStatusException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

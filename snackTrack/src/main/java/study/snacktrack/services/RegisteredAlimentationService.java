@@ -45,30 +45,31 @@ public class RegisteredAlimentationService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
     }
 
-    public ResponseEntity<String> addEntry(String authHeader, RegisteredAlimentationRequest dto, String date) {
+    public String addEntry(String authHeader, RegisteredAlimentationRequest dto, String date) {
         User user = getUserFromToken(authHeader);
 
         RegisteredAlimentation entry = new RegisteredAlimentation();
         entry.setUserId(user.getId());
 
         if (dto.getEssentialId() != null) {
-            EssentialFood essential = foodRepository.findById(dto.getEssentialId()).orElse(null);
-            if (essential == null) {
-                return ResponseEntity.badRequest().body("Wrong essential ID");
-            }
+            EssentialFood essential = foodRepository.findById(dto.getEssentialId())
+                    .orElseThrow(() -> new IllegalArgumentException("Wrong essential ID"));
             entry.setEssentialFood(essential);
         } else if (dto.getMealId() != null) {
-            Meal meal = mealRepository.findById(dto.getMealId()).orElse(null);
-            if (meal == null) {
-                return ResponseEntity.badRequest().body("Wrong meal ID");
-            }
+            Meal meal = mealRepository.findById(dto.getMealId())
+                    .orElseThrow(() -> new IllegalArgumentException("Wrong meal ID"));
             entry.setMeal(meal);
         } else if (dto.getMealApiId() != null) {
+            try {
+                foodService.getFoodFromApiById(dto.getMealApiId());
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Wrong api ID");
+            }
             entry.setMealApiId(dto.getMealApiId());
         }
 
         if (dto.getAmount() == null && dto.getPieces() == null) {
-            return ResponseEntity.badRequest().body("You have to specify amount or pieces");
+            throw new IllegalArgumentException("You have to specify amount or pieces");
         }
 
         if (dto.getAmount() != null && dto.getMealId() == null) {
@@ -82,7 +83,7 @@ public class RegisteredAlimentationService {
             try {
                 entryDate = LocalDate.parse(date);
             } catch (DateTimeParseException e) {
-                return ResponseEntity.badRequest().body("Invalid date format. Use YYYY-MM-DD");
+                throw new IllegalArgumentException("Invalid date format. Use YYYY-MM-DD");
             }
         } else if (dto.getTimestamp() != null) {
             entryDate = dto.getTimestamp();
@@ -93,7 +94,7 @@ public class RegisteredAlimentationService {
         entry.setTimestamp(entryDate);
 
         repository.save(entry);
-        return ResponseEntity.ok("Meal registered");
+        return "Meal registered";
     }
 
     public List<RegisteredAlimentationResponse> getMyEntries(String authHeader, String date) {
