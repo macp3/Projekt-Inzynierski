@@ -2,6 +2,8 @@ package study.snacktrack.controllers;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
 import study.snacktrack.dto.RegisteredAlimentationRequest;
 import study.snacktrack.dto.RegisteredAlimentationResponse;
 import study.snacktrack.entities.RegisteredAlimentation;
@@ -30,11 +32,15 @@ public class RegisteredAlimentationController {
 
     // dziala
     @GetMapping("/my")
-    public ResponseEntity<List<RegisteredAlimentationResponse>> getMyEntries(
+    public ResponseEntity<?> getMyEntries(
             @RequestHeader("Authorization") String authHeader,
             @RequestParam(required = false) String date) {
-        List<RegisteredAlimentationResponse> entries = service.getMyEntries(authHeader, date);
-        return ResponseEntity.ok(entries);
+        try {
+            List<RegisteredAlimentationResponse> entries = service.getMyEntries(authHeader, date);
+            return ResponseEntity.ok(entries);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // dziala

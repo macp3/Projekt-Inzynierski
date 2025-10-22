@@ -51,8 +51,6 @@ public class DailyCheckService {
             double calorieLimit = bodyParams.getCalorieLimit();
             double totalCalories = calculateDailyCalories(user.getId(), yesterday);
 
-            System.out.println(totalCalories);
-
             if (totalCalories <= calorieLimit) {
                 userService.updateStreak(user.getId(), user.getStreak() + 1);
             } else {
@@ -63,14 +61,14 @@ public class DailyCheckService {
 
     private double calculateDailyCalories(int userId, LocalDate date) {
         List<RegisteredAlimentation> entries = alimentationRepository.findByUserIdAndTimestamp(userId, date);
-        System.out.println("entries");
 
         return entries.stream()
                 .mapToDouble(entry -> {
                     try {
                         if (entry.getEssentialFood() != null) {
                             if (entry.getAmount() != null) {
-                                return entry.getEssentialFood().getCalories() * (entry.getAmount() / entry.getEssentialFood().getDefaultWeight());
+                                return entry.getEssentialFood().getCalories()
+                                        * (entry.getAmount() / entry.getEssentialFood().getDefaultWeight());
                             } else if (entry.getPieces() != null) {
                                 return entry.getEssentialFood().getCalories() * entry.getPieces();
                             }
@@ -86,7 +84,8 @@ public class DailyCheckService {
                             }
                         }
                     } catch (Exception e) {
-                        System.err.println("Exception while counting user's calories: " + userId + ": " + e.getMessage());
+                        System.err
+                                .println("Exception while counting user's calories: " + userId + ": " + e.getMessage());
                     }
                     return 0.0;
                 })
