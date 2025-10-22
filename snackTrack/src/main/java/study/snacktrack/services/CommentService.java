@@ -21,7 +21,8 @@ public class CommentService {
     private final MealRepository mealRepository;
     private final CommentRepository commentRepository;
 
-    public CommentService(UserRepository userRepository, MealRepository mealRepository, CommentRepository commentRepository) {
+    public CommentService(UserRepository userRepository, MealRepository mealRepository,
+            CommentRepository commentRepository) {
         this.userRepository = userRepository;
         this.mealRepository = mealRepository;
         this.commentRepository = commentRepository;
@@ -48,7 +49,7 @@ public class CommentService {
         Meal meal = mealRepository.findById(request.getMealId())
                 .orElseThrow(() -> new IllegalArgumentException("Meal not found"));
 
-        if(author.getId() == meal.getAuthorId())
+        if (author.getId() == meal.getAuthorId())
             throw new IllegalArgumentException("You cannot comment your own meal");
 
         if (request.getContent() == null || request.getContent().isBlank()) {
@@ -88,8 +89,7 @@ public class CommentService {
         return response;
     }
 
-    public void deleteCommentByUser(int authorId, int mealId)
-    {
+    public void deleteCommentByUser(int authorId, int mealId) {
         Comment comment = commentRepository.findByMealIdAndAuthorId(mealId, authorId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
 
@@ -101,9 +101,9 @@ public class CommentService {
         System.out.println("Comment deleted successfully");
     }
 
-    //xddddd ale glupota
-    //NIE WIEM GDZIE TEGO UZYC - CZY W COMMENTS CZY W MEALS
-    //narazie uzylem w mealcontrollerze na dole
+    // xddddd ale glupota
+    // NIE WIEM GDZIE TEGO UZYC - CZY W COMMENTS CZY W MEALS
+    // narazie uzylem w mealcontrollerze na dole
     public List<Comment> getAllMealComments(int mealId) {
         if (!mealRepository.existsById(mealId)) {
             throw new IllegalArgumentException("Meal not found");
@@ -123,9 +123,9 @@ public class CommentService {
                 .toList();
     }
 
-    //zwraca komentarz uzytkownika pod wybranym mealem
-    //funkcja potrzebna do edycji i usuwania :)))))))))
-    //ale mi sie chce jarać oezuuuuuu
+    // zwraca komentarz uzytkownika pod wybranym mealem
+    // funkcja potrzebna do edycji i usuwania :)))))))))
+    // ale mi sie chce jarać oezuuuuuu
     public Comment getUserMealComment(int mealId, int userId) {
         return commentRepository.findByMealIdAndAuthorId(mealId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("This user has no registered comment for this meal"));

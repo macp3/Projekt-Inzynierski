@@ -115,7 +115,11 @@ public class RegisteredAlimentationService {
                 .map(entry -> {
                     RegisteredAlimentationResponse dto = new RegisteredAlimentationResponse(entry);
                     if (entry.getEssentialFood() == null && entry.getMealApiId() != null) {
-                        dto.setMealApi(foodService.getFoodFromApiById(entry.getMealApiId()));
+                        try {
+                            dto.setMealApi(foodService.getFoodFromApiById(entry.getMealApiId()));
+                        } catch (Exception e) {
+                            System.err.println(e.getMessage());
+                        }
                     }
                     return dto;
                 })

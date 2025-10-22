@@ -32,7 +32,8 @@ public class CommentController {
     private final UserService userService;
     private final CommentService commentService;
 
-    public CommentController(MealService mealService, JwtService jwtService, UserService userService, CommentService commentService) {
+    public CommentController(MealService mealService, JwtService jwtService, UserService userService,
+            CommentService commentService) {
         this.jwtService = jwtService;
         this.userService = userService;
         this.commentService = commentService;
@@ -46,19 +47,20 @@ public class CommentController {
         return user;
     }
 
-    //dziala
+    // dziala
     @PostMapping("/add")
-    public ResponseEntity<CommentResponse> addCommentToMeal(@RequestBody CommentRequest request, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<CommentResponse> addCommentToMeal(@RequestBody CommentRequest request,
+            @RequestHeader("Authorization") String authHeader) {
         User user = authorizeUser(authHeader);
 
         CommentResponse response = commentService.addCommentToMeal(user.getId(), request);
         return ResponseEntity.ok(response);
     }
 
-
-    //dziala
+    // dziala
     @PutMapping("/edit")
-    public ResponseEntity<CommentResponse> editCommentByUser(@RequestBody CommentRequest request, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<CommentResponse> editCommentByUser(@RequestBody CommentRequest request,
+            @RequestHeader("Authorization") String authHeader) {
         User user = authorizeUser(authHeader);
         Comment comment = commentService.getUserMealComment(request.getMealId(), user.getId());
 
@@ -66,15 +68,16 @@ public class CommentController {
         return ResponseEntity.ok(cr);
     }
 
-    //dziala
+    // dziala
     @GetMapping("/my")
-    public ResponseEntity<List<CommentResponse>> getAllCommentsByUser(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<List<CommentResponse>> getAllCommentsByUser(
+            @RequestHeader("Authorization") String authHeader) {
         User user = authorizeUser(authHeader);
         return ResponseEntity.ok(commentService.getAllCommentsByUser(user.getId()));
     }
 
-    //zmiana - nie bedzie comment id tylko meal id - nie wiem co ja tu zrobilem
-    //dziala
+    // zmiana - nie bedzie comment id tylko meal id - nie wiem co ja tu zrobilem
+    // dziala
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteCommentByUser(
             @RequestParam int mealId,
@@ -85,7 +88,7 @@ public class CommentController {
         return ResponseEntity.ok("Comment deleted successfully");
     }
 
-    //dziala
+    // dziala
     @GetMapping("/meal/{mealId}")
     public ResponseEntity<List<CommentResponse>> getAllCommentsForMeal(@PathVariable int mealId) {
         List<Comment> comments = commentService.getAllMealComments(mealId);
