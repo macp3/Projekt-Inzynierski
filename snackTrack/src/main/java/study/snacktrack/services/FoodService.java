@@ -169,41 +169,41 @@ public class FoodService {
         return description.trim();
     }
 
-    public ResponseEntity<?> addEssentialFood(EssentialFood food, User currentUser) {
+    public String addEssentialFood(EssentialFood food, User currentUser) {
 
         food.setAuthorId(currentUser.getId());
 
         if (foodRepository.existsByNameIgnoreCase(food.getName())) {
-            return ResponseEntity.badRequest().body("Product already exists in the database: " + food.getName());
+            throw new IllegalArgumentException("Product already exists in the database: " + food.getName());
         }
 
         if (food.getName() == null || food.getName().isBlank()) {
-            return ResponseEntity.badRequest().body("Field 'name' is required");
+            throw new IllegalArgumentException("Field 'name' is required");
         }
         if (food.getDescription() == null || food.getDescription().isBlank()) {
-            return ResponseEntity.badRequest().body("Field 'description' is required");
+            throw new IllegalArgumentException("Field 'description' is required");
         }
         if (food.getCalories() <= 0) {
-            return ResponseEntity.badRequest().body("Field 'calories' must be greater than 0");
+            throw new IllegalArgumentException("Field 'calories' must be greater than 0");
         }
         if (food.getProtein() < 0) {
-            return ResponseEntity.badRequest().body("Field 'protein' must be greater or equal 0");
+            throw new IllegalArgumentException("Field 'protein' must be greater or equal 0");
         }
         if (food.getFat() < 0) {
-            return ResponseEntity.badRequest().body("Field 'fat' must be greater or equal 0");
+            throw new IllegalArgumentException("Field 'fat' must be greater or equal 0");
         }
         if (food.getCarbohydrates() < 0) {
-            return ResponseEntity.badRequest().body("Field 'carbohydrates' must be greater or equal 0");
+            throw new IllegalArgumentException("Field 'carbohydrates' must be greater or equal 0");
         }
         if (food.getDefaultWeight() < 0) {
-            return ResponseEntity.badRequest().body("Field 'defaultWeight' must be greater or equal 0");
+            throw new IllegalArgumentException("Field 'defaultWeight' must be greater or equal 0");
         }
         if (food.getServingSizeUnit() == null || food.getServingSizeUnit().isBlank()) {
-            return ResponseEntity.badRequest().body("Field 'servingSizeUnit' is required");
+            throw new IllegalArgumentException("Field 'servingSizeUnit' is required");
         }
 
         foodRepository.save(food);
-        return ResponseEntity.ok().body("Food has been added to database");
+        return "Food has been added to database";
     }
 
     public List<EssentialFood> searchEssentialFood(String query) {

@@ -39,8 +39,9 @@ public class MealService {
     private final DietTypeRepository dietTypeRepository;
 
     public MealService(UserRepository userRepository, FoodRepository foodRepository, MealRepository mealRepository,
-                       IngredientRepository ingredientRepository, FoodService foodService,
-                       MealDietTypeRepository mealDietTypeRepository, FavouriteRepository favouriteRepository, DietTypeRepository dietTypeRepository) {
+            IngredientRepository ingredientRepository, FoodService foodService,
+            MealDietTypeRepository mealDietTypeRepository, FavouriteRepository favouriteRepository,
+            DietTypeRepository dietTypeRepository) {
         this.userRepository = userRepository;
         this.mealRepository = mealRepository;
         this.ingredientRepository = ingredientRepository;
@@ -67,7 +68,7 @@ public class MealService {
 
     // o to jest giga kociol - naucz sie :)
     @Transactional
-    public ResponseEntity<?> createMeal(MealRequest request, int userId) {
+    public String createMeal(MealRequest request, int userId) {
         if (userId <= 0) {
             throw new IllegalArgumentException("User ID must be greater than zero");
         }
@@ -76,18 +77,12 @@ public class MealService {
             throw new IllegalArgumentException("User with this ID doesn't exist");
         }
 
-        if (request.getName() == null || "".equals(request.getName())) {
+        if (request.getName() == null || request.getName().isBlank()) {
             throw new IllegalArgumentException("Meal's name must not be empty");
 
         }
 
-        // dodac mechanizm sprawdzania czy meal o podanej nazwie stnieje juz w bazie -
-        // wymagana unikalna nazwa
-        // zrobione
-        if (mealRepository.existsByName(request.getName()))
-            throw new IllegalArgumentException("Meal with specified name already exists");
-
-        if (request.getDescription() == null || "".equals(request.getDescription())) {
+        if (request.getDescription() == null || request.getDescription().isBlank()) {
             throw new IllegalArgumentException("Description must not be empty");
         }
 
@@ -110,9 +105,7 @@ public class MealService {
             } else if (ir.getEssentialApiId() != null) {
                 essentialApiId = ir.getEssentialApiId();
             } else {
-                // throw new IllegalArgumentException("Food must have either essential id or API
-                // id");
-                return ResponseEntity.badRequest().body("Food must have either essential id or API id");
+                throw new IllegalArgumentException("Food must have either essential id or API id");
             }
 
             if (ir.getAmount() != null) {
@@ -128,7 +121,7 @@ public class MealService {
         }
 
         mealRepository.save(meal);
-        return ResponseEntity.ok().body("Meal has been created");
+        return "Meal has been created";
     }
 
     // do naprawy = sprawdzic autora bo tylko autor moze dodawac zdjecie do swojego
@@ -205,10 +198,14 @@ public class MealService {
     // (zostawia stare) - jezeli nie chcemy edytowac meal name to nie dodajemy do
     // requesta w jsonie "name": *to samo*
     // aktualizacja pol jezeli podano: zrobione
-    public boolean editMealByUser(int mealId, MealRequest request, int userId) {
+    public String editMealByUser(int mealId, MealRequest request, int userId) {
         Meal meal = validateMealExistance(mealId);
         if (!userRepository.existsById(userId)) {
             throw new IllegalArgumentException("User with this ID doesn't exist");
+        }
+
+        if (meal.getAuthorId() != userId) {
+            throw new IllegalArgumentException("You can't edit this meal");
         }
 
         if (userId != meal.getAuthorId()) {
@@ -266,12 +263,11 @@ public class MealService {
         }
 
         mealRepository.save(meal);
-        System.out.println("Meal updated successfully");
-        return true;
+        return "Meal updated successfully";
     }
 
     // delete meal
-    public boolean deleteMealByUser(int mealId, int userId) {
+    public String deleteMealByUser(int mealId, int userId) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
             throw new IllegalArgumentException("There is no user with specified ID");
@@ -285,8 +281,7 @@ public class MealService {
         }
 
         mealRepository.delete(meal);
-        System.out.println("Meal successfully deleted");
-        return true;
+        return "Meal successfully deleted";
     }
 
     public List<Meal> getAllMeals() {

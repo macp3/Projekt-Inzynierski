@@ -34,22 +34,20 @@ public class FoodController {
         this.jwtService = jwtService;
     }
 
-    // bledow nie ma ani errorow tylko jak wyszukuje "juice" to opdpowiada mi pusta
-    // tablicą, czyli prawdopodobnie nie mam tokena jakiesgos
-    // przetestujesz ty bo ja nie wiem jak ten klucz
-    // albo odpisz
-
-    // MAciej: Działa
+    // dziala
     @GetMapping("/api/search")
     public List<ApiFoodResponse> getFoodFromApi(@RequestParam String query) {
         return foodService.getFoodFromApi(query);
     }
 
-    // tutaj podobnie, ale wyakakuja bledy
-    // MAciej: Działa
+    // dziala
     @GetMapping("/api/{id}")
-    public ApiFoodResponseDetailed getFoodFromApiById(@PathVariable("id") int id) {
-        return foodService.getFoodFromApiById(id);
+    public ResponseEntity<?> getFoodFromApiById(@PathVariable("id") int id) {
+        try {
+            return ResponseEntity.ok(foodService.getFoodFromApiById(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // dziala
@@ -62,7 +60,7 @@ public class FoodController {
 
             User currentUser = userService.getUserByEmail(email);
 
-            return foodService.addEssentialFood(food, currentUser);
+            return ResponseEntity.ok(foodService.addEssentialFood(food, currentUser));
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
