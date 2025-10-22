@@ -59,13 +59,23 @@ public class UserController {
         return ResponseEntity.ok(allUsers);
     }
 
-    //dziala
+    //
     @GetMapping("/profile")
-    public ResponseEntity<User> getProfileInfo(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
+    public ResponseEntity<?> getProfileInfo(@RequestHeader("Authorization") String authHeader)
+    {
+        User user;
+        try
+        {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
 
-        User user = userService.getUserByEmail(email);
+            user = userService.getUserByEmail(email);
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
         return ResponseEntity.ok(user);
     }
 
@@ -81,116 +91,186 @@ public class UserController {
         return ResponseEntity.ok(user);
     }*/
 
-    //DZIALAAAAAAAAA
+    //
     @PutMapping("/changePassword")
-    public ResponseEntity<User> changePassword(@RequestHeader("Authorization") String authHeader, @RequestParam String password) {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
+    public ResponseEntity<String> changePassword(@RequestHeader("Authorization") String authHeader, @RequestParam String password)
+    {
+        try
+        {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
 
-        User user = userService.getUserByEmail(email);
-        userService.changePassword(user.getId(), password);
-        return ResponseEntity.ok(user);
+            User user = userService.getUserByEmail(email);
+            userService.changePassword(user.getId(), password);
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return ResponseEntity.ok("Password changed successfully");
     }
 
 
-    //dziala
+    //
     @PutMapping("/changeParameters")
-    public ResponseEntity<BodyParametersResponse> changeBodyParameters(@RequestHeader("Authorization") String authHeader, @RequestBody BodyParametersRequest request) {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
+    public ResponseEntity<?> changeBodyParameters(@RequestHeader("Authorization") String authHeader, @RequestBody BodyParametersRequest request)
+    {
+        BodyParametersResponse response;
+        try
+        {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
 
-        User user = userService.getUserByEmail(email);
+            User user = userService.getUserByEmail(email);
 
-        BodyParametersResponse response
-                = userService.changeBodyParameters(user.getId(), request.getSex(), request.getHeight(), request.getWeight(), request.getAge(), request.getDailyActivityFactor(), request.getDailyActivityTrainingFactor(), request.getWeeklyWeightChangeTempo(), request.getGoalWeight());
+            response
+                    = userService.changeBodyParameters(user.getId(), request.getSex(), request.getHeight(), request.getWeight(), request.getAge(), request.getDailyActivityFactor(), request.getDailyActivityTrainingFactor(), request.getWeeklyWeightChangeTempo(), request.getGoalWeight());
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
         return ResponseEntity.ok(response);
     }
 
+    //
     @PutMapping("/changePrefferedDiet")
-    public ResponseEntity<User> changePrefferedDiet(@RequestHeader("Authorization") String authHeader, DietTypes prefferedDiet) {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
+    public ResponseEntity<String> changePrefferedDiet(@RequestHeader("Authorization") String authHeader, @RequestParam DietTypes prefferedDiet) {
+        try
+        {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
 
-        User user = userService.getUserByEmail(email);
+            User user = userService.getUserByEmail(email);
 
-        userService.changePrefferedDiet(user.getId(), prefferedDiet);
-        return ResponseEntity.ok(user);
+            userService.changePrefferedDiet(user.getId(), prefferedDiet);
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return ResponseEntity.ok("Preferred diet successfully changed");
     }
 
-    //dziala
+    //
     @PostMapping("/addParameters")
-    public ResponseEntity<BodyParameters> addBodyParameters(@RequestHeader("Authorization") String authHeader, @RequestBody BodyParametersRequest request) {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
+    public ResponseEntity<?> addBodyParameters(@RequestHeader("Authorization") String authHeader, @RequestBody BodyParametersRequest request)
+    {
+        BodyParameters response;
+        try
+        {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
 
-        User user = userService.getUserByEmail(email);
+            User user = userService.getUserByEmail(email);
 
-        BodyParameters response
-                = userService.addBodyParameters(user.getId(), request.getSex(), request.getHeight(), request.getWeight(), request.getAge(), request.getDailyActivityFactor(), request.getDailyActivityTrainingFactor(), request.getWeeklyWeightChangeTempo(), request.getGoalWeight());
+            response
+                    = userService.addBodyParameters(user.getId(), request.getSex(), request.getHeight(), request.getWeight(), request.getAge(), request.getDailyActivityFactor(), request.getDailyActivityTrainingFactor(), request.getWeeklyWeightChangeTempo(), request.getGoalWeight());
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
         return ResponseEntity.ok(response);
     }
 
-    //dziala
+    //
     @GetMapping("/myStreak")
-    public ResponseEntity<Integer> getMyStreak(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
+    public ResponseEntity<?> getMyStreak(@RequestHeader("Authorization") String authHeader)
+    {
+        User user;
+        try
+        {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
 
-        User user = userService.getUserByEmail(email);
+            user = userService.getUserByEmail(email);
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
 
         return ResponseEntity.ok(user.getStreak());
     }
 
     //dziala ale fajnie by bylo to do serwisu przeniesc zeby kontrolery byly czysciutkie
     //zmienilem - przetestowac
+    //
     @GetMapping("/notifications")
-    public ResponseEntity<List<NotificationResponse>> getUserNotifications(
+    public ResponseEntity<?> getUserNotifications(
             @RequestHeader("Authorization") String authHeader
     )
     {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
+        List<NotificationResponse> response;
+        try
+        {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
 
-        User user = userService.getUserByEmail(email);
-        List<NotificationResponse> response = notificationService.getNotificationsByUser(user.getId());
+            User user = userService.getUserByEmail(email);
+            response = notificationService.getNotificationsByUser(user.getId());
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
 
         return ResponseEntity.ok(response);
     }
 
 
     //nie wiem jak to przetestowac - zostawiam
+    //
     @PostMapping("/device-token")
     public ResponseEntity<String> saveDeviceToken(
             @RequestHeader("Authorization") String authHeader,
             @RequestBody Map<String, String> request
     ) {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
-        User user = userService.getUserByEmail(email);
+        try
+        {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
+            User user = userService.getUserByEmail(email);
 
-        String deviceToken = request.get("token");
-        userService.saveDeviceToken(user.getId(), deviceToken);
+            String deviceToken = request.get("token");
+            userService.saveDeviceToken(user.getId(), deviceToken);
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
 
         return ResponseEntity.ok("Device token saved");
     }
 
     //do serwisuuuuuuuuu z logika
     //zmienilem - przetestowac
+    //
     @PostMapping("/favourite/add")
-    public ResponseEntity<Favourite> addFavourite(@RequestParam int mealId,
+    public ResponseEntity<?> addFavourite(@RequestParam int mealId,
             @RequestHeader("Authorization") String authHeader)
     {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
-        Meal meal = mealService.getMealById(mealId);
-        User user = userService.getUserByEmail(email);
-        Favourite saved = userService.addFavourite(meal.getId(), user.getId());
-
+        Favourite saved;
+        try
+        {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
+            Meal meal = mealService.getMealById(mealId);
+            User user = userService.getUserByEmail(email);
+            saved = userService.addFavourite(meal.getId(), user.getId());
+        }
+        catch(RuntimeException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
         return ResponseEntity.ok(saved);
     }
 
     //do serwisu z logika
     //zmienilem - przetestowac
+    //
     @DeleteMapping("/favourite/remove/{mealId}")
     public ResponseEntity<String> removeFavourite(@PathVariable int mealId, @RequestHeader("Authorization") String authHeader)
     {
@@ -215,7 +295,7 @@ public class UserController {
     @GetMapping("/favourite")
     public ResponseEntity<?> getMyFavouriteMeals(@RequestHeader("Authorization") String authHeader)
     {
-        List<Meal> meals = new ArrayList<>();
+        List<Meal> meals;
         try
         {
             String token = authHeader.replace("Bearer ", "");
@@ -223,7 +303,7 @@ public class UserController {
             User user = userService.getUserByEmail(email);
             meals = userService.getMyFavouriteMeals(user.getId());
         }
-        catch(IllegalArgumentException e)
+        catch(RuntimeException e)
         {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -244,7 +324,7 @@ public class UserController {
             User user = userService.getUserByEmail(email);
             String imageUrl = userService.uploadProfileImage(user.getId(), imageFile);
             return ResponseEntity.ok(imageUrl);
-        } catch (IllegalArgumentException | IOException e) {
+        } catch (RuntimeException | IOException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

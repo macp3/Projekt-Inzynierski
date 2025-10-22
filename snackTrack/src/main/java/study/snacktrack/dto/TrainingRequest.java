@@ -56,10 +56,10 @@ public class TrainingRequest {
 
     public static class TrainingExercise {
 
-        private int exerciseDay;
-        private int exerciseId;
+        private Integer exerciseDay;
+        private Integer exerciseId;
 
-        public int getExerciseDay() {
+        public Integer getExerciseDay() {
             return exerciseDay;
         }
 
@@ -67,7 +67,7 @@ public class TrainingRequest {
             this.exerciseDay = exerciseDay;
         }
 
-        public int getExerciseId() {
+        public Integer getExerciseId() {
             return exerciseId;
         }
 

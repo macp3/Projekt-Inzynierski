@@ -45,10 +45,19 @@ public class ReportedMealController {
 
     //dziala
     @PostMapping("/add")
-    public ResponseEntity<ReportedMealResponse> reportMeal(@RequestBody ReportedMealRequest request, @RequestHeader("Authorization") String authHeader) {
-        User user = authorizeUser(authHeader);
+    public ResponseEntity<?> reportMeal(@RequestBody ReportedMealRequest request, @RequestHeader("Authorization") String authHeader)
+    {
+        ReportedMealResponse response;
+        try
+        {
+            User user = authorizeUser(authHeader);
 
-        ReportedMealResponse response = reportedMealService.reportMeal(request.getMealId(), user.getId(), request.getContent());
+            response = reportedMealService.reportMeal(request.getMealId(), user.getId(), request.getContent());
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
         return ResponseEntity.ok(response);
     }
 }

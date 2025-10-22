@@ -47,57 +47,102 @@ public class CommentController {
         return user;
     }
 
-    // dziala
+    //
     @PostMapping("/add")
-    public ResponseEntity<CommentResponse> addCommentToMeal(@RequestBody CommentRequest request,
-            @RequestHeader("Authorization") String authHeader) {
-        User user = authorizeUser(authHeader);
+    public ResponseEntity<?> addCommentToMeal(@RequestBody CommentRequest request, @RequestHeader("Authorization") String authHeader)
+    {
+        CommentResponse response;
+        try
+        {
+            User user = authorizeUser(authHeader);
 
-        CommentResponse response = commentService.addCommentToMeal(user.getId(), request);
+            response = commentService.addCommentToMeal(user.getId(), request);
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
         return ResponseEntity.ok(response);
     }
 
-    // dziala
+    //
     @PutMapping("/edit")
-    public ResponseEntity<CommentResponse> editCommentByUser(@RequestBody CommentRequest request,
-            @RequestHeader("Authorization") String authHeader) {
-        User user = authorizeUser(authHeader);
-        Comment comment = commentService.getUserMealComment(request.getMealId(), user.getId());
+    public ResponseEntity<?> editCommentByUser(@RequestBody CommentRequest request,
+            @RequestHeader("Authorization") String authHeader)
+    {
+        CommentResponse cr;
+        try
+        {
+            User user = authorizeUser(authHeader);
+            Comment comment = commentService.getUserMealComment(request.getMealId(), user.getId());
 
-        CommentResponse cr = commentService.editComment(user.getId(), comment.getId(), request.getContent());
+            cr = commentService.editComment(user.getId(), comment.getId(), request.getContent());
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
         return ResponseEntity.ok(cr);
     }
 
-    // dziala
+    //
     @GetMapping("/my")
-    public ResponseEntity<List<CommentResponse>> getAllCommentsByUser(
-            @RequestHeader("Authorization") String authHeader) {
-        User user = authorizeUser(authHeader);
-        return ResponseEntity.ok(commentService.getAllCommentsByUser(user.getId()));
+    public ResponseEntity<?> getAllCommentsByUser(
+            @RequestHeader("Authorization") String authHeader)
+    {
+        List<CommentResponse> response;
+        try
+        {
+            User user = authorizeUser(authHeader);
+            response = commentService.getAllCommentsByUser(user.getId());
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return ResponseEntity.ok(response);
     }
 
     // zmiana - nie bedzie comment id tylko meal id - nie wiem co ja tu zrobilem
-    // dziala
+    //
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteCommentByUser(
             @RequestParam int mealId,
-            @RequestHeader("Authorization") String authHeader) {
-        User user = authorizeUser(authHeader);
-        commentService.deleteCommentByUser(user.getId(), mealId);
-
+            @RequestHeader("Authorization") String authHeader)
+    {
+        try
+        {
+            User user = authorizeUser(authHeader);
+            commentService.deleteCommentByUser(user.getId(), mealId);
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
         return ResponseEntity.ok("Comment deleted successfully");
     }
 
-    // dziala
+    //
     @GetMapping("/meal/{mealId}")
-    public ResponseEntity<List<CommentResponse>> getAllCommentsForMeal(@PathVariable int mealId) {
-        List<Comment> comments = commentService.getAllMealComments(mealId);
-        List<CommentResponse> response = new ArrayList<>();
+    public ResponseEntity<?> getAllCommentsForMeal(@PathVariable int mealId)
+    {
+        List<CommentResponse> response;
+        try
+        {
+            List<Comment> comments = commentService.getAllMealComments(mealId);
+            response = new ArrayList<>();
 
-        for (Comment c : comments) {
-            CommentResponse cr = new CommentResponse(c.getId(), c.getAuthorId(), c.getContent(), c.getMealId());
-            response.add(cr);
+            for (Comment c : comments) {
+                CommentResponse cr = new CommentResponse(c.getId(), c.getAuthorId(), c.getContent(), c.getMealId());
+                response.add(cr);
+            }
         }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
         return ResponseEntity.ok(response);
     }
 }

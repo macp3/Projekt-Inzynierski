@@ -33,70 +33,133 @@ public class TrainingController {
         this.trainingService = trainingService;
     }
 
-    //dziala
+    //
     @GetMapping("")
-    public ResponseEntity<List<TrainingInfo>> getAllTrainings() {
-        return ResponseEntity.ok(trainingService.getAllTrainings());
+    public ResponseEntity<?> getAllTrainings()
+    {
+        List<TrainingInfo> trainings;
+        try
+        {
+            trainings = trainingService.getAllTrainings();
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return ResponseEntity.ok(trainings);
     }
 
-    //dziala
+    //
     @GetMapping("/exercises/{exerciseId}/details")
-    public ResponseEntity<Exercise> getExerciseDetails(@PathVariable int exerciseId) {
-        return ResponseEntity.ok(trainingService.getExerciseById(exerciseId));
+    public ResponseEntity<?> getExerciseDetails(@PathVariable int exerciseId)
+    {
+        Exercise exercise;
+        try
+        {
+            exercise = trainingService.getExerciseById(exerciseId);
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return ResponseEntity.ok(exercise);
     }
 
-    //dziala
+    //
     @GetMapping("/{id}")
-    public ResponseEntity<TrainingDetailsResponse> getTrainingDetails(@PathVariable int id) {
-        TrainingDetailsResponse response = trainingService.getTrainingDetails(id);
+    public ResponseEntity<?> getTrainingDetails(@PathVariable int id)
+    {
+        TrainingDetailsResponse response;
+        try
+        {
+            response = trainingService.getTrainingDetails(id);
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
         return ResponseEntity.ok(response);
     }
 
     //zrobilem assign i potem wywolalem to i nie dziala
     //juz dziala
     //dziala nawet po usunieciu treningu z bazy
-    //DZIALAAAAAAA
+    //
     @GetMapping("/my")
-    public ResponseEntity<TrainingInfo> getUserTraining(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
-        User user = userService.getUserByEmail(email);
-
-        TrainingInfo trainingInfo = trainingService.getUserTraining(user.getId());
-        return ResponseEntity.ok(trainingInfo);
-    }
-
-    //dziala
-    @GetMapping("/my/details")
-    public ResponseEntity<TrainingDetailsResponse> getUserTrainingWithDetails(@RequestHeader("Authorization") String authHeader)
+    public ResponseEntity<?> getUserTraining(@RequestHeader("Authorization") String authHeader)
     {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
-        User user = userService.getUserByEmail(email);
+        TrainingInfo info;
+        try
+        {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
+            User user = userService.getUserByEmail(email);
 
-        TrainingInfo trainingInfo = trainingService.getUserTraining(user.getId());
-        return ResponseEntity.ok(trainingService.getTrainingDetails(trainingInfo.getId()));
+            info = trainingService.getUserTraining(user.getId());
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return ResponseEntity.ok(info);
     }
 
-    //dziala
-    @PostMapping("/assign/{trainingId}")
-    public ResponseEntity<String> assignTraining(@PathVariable int trainingId, @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
-        User user = userService.getUserByEmail(email);
+    //
+    @GetMapping("/my/details")
+    public ResponseEntity<?> getUserTrainingWithDetails(@RequestHeader("Authorization") String authHeader)
+    {
+        TrainingDetailsResponse response;
+        try
+        {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
+            User user = userService.getUserByEmail(email);
 
-        trainingService.assignTrainingToUser(user.getId(), trainingId);
+            TrainingInfo trainingInfo = trainingService.getUserTraining(user.getId());
+            response = trainingService.getTrainingDetails(trainingInfo.getId());
+        }
+        catch(RuntimeException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    //
+    @PostMapping("/assign/{trainingId}")
+    public ResponseEntity<String> assignTraining(@PathVariable int trainingId, @RequestHeader("Authorization") String authHeader)
+    {
+        try
+        {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
+            User user = userService.getUserByEmail(email);
+
+            trainingService.assignTrainingToUser(user.getId(), trainingId);
+        }
+        catch(IllegalArgumentException | IllegalStateException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
         return ResponseEntity.ok("Training successfully assigned to user");
     }
 
-    //dziala
+    //
     @DeleteMapping("/my/deprive")
-    public ResponseEntity<String> depriveTrainingFromUser(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
-        User user = userService.getUserByEmail(email);
+    public ResponseEntity<String> depriveTrainingFromUser(@RequestHeader("Authorization") String authHeader)
+    {
+        try
+        {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
+            User user = userService.getUserByEmail(email);
 
-        trainingService.depriveTrainingFromUser(user.getId());
+            trainingService.depriveTrainingFromUser(user.getId());
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
         return ResponseEntity.ok("Training successfully deprived");
     }
 }

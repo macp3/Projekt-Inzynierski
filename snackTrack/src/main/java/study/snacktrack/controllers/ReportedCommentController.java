@@ -45,12 +45,22 @@ public class ReportedCommentController {
         return user;
     }
 
-    //dziala
+    //
     @PostMapping("/add")
-    public ResponseEntity<ReportedCommentResponse> reportComment(@RequestBody ReportedCommentRequest request, @RequestHeader("Authorization") String authHeader) {
-        User user = authorizeUser(authHeader);
+    public ResponseEntity<?> reportComment(@RequestBody ReportedCommentRequest request, @RequestHeader("Authorization") String authHeader)
+    {
+        ReportedCommentResponse response;
+        try
+        {
+            User user = authorizeUser(authHeader);
 
-        ReportedCommentResponse response = reportedCommentService.reportComment(request.getCommentId(), user.getId(), request.getContent());
+            response = reportedCommentService.reportComment(request.getCommentId(), user.getId(), request.getContent());
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
         return ResponseEntity.ok(response);
     }
 }

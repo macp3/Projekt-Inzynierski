@@ -244,7 +244,7 @@ public class TrainingService {
         }
         info.setDescription(request.getTreningInfo().getDescription());
 
-        if (request.getTreningInfo().getDurationTime() <= 0) {
+        if (request.getTreningInfo().getDurationTime() <= 0 || request.getTreningInfo().getDurationTime() == null) {
             throw new IllegalArgumentException("DurationTime must be greater than zero");
         }
         info.setDurationTime(request.getTreningInfo().getDurationTime());
@@ -316,7 +316,8 @@ public class TrainingService {
         return getTrainingDetails(trainingId);
     }
 
-    public TrainingDetailsResponse getTrainingDetails(int trainingInfoId) {
+    public TrainingDetailsResponse getTrainingDetails(int trainingInfoId)
+    {
         TrainingInfo info = trainingInfoRepository.findById(trainingInfoId)
                 .orElseThrow(() -> new RuntimeException("Training not found for ID = " +trainingInfoId));
 

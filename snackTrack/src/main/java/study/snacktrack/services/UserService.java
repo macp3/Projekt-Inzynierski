@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -304,15 +306,20 @@ public class UserService {
 
     //admin
     @Transactional
-    public User updatePremiumExpiration(int userId, LocalDate date) {
+    public User updatePremiumExpiration(int userId, String dateString)
+    {
         User user = getUserById(userId);
-        //test
-        System.out.println("Fetched user: " + user);
-        System.out.println(user.getStatus() + " " + user.getPremiumExpiration());
+        LocalDate date;
 
         if(!user.getStatus().equals(Status.active))
             throw new IllegalArgumentException("User status has to be active");
 
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            date = LocalDate.parse(dateString, formatter);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Date must be in format YYYY-MM-DD");
+        }
         LocalDate now = LocalDate.now();
 
         if(date.isBefore(now))
