@@ -34,6 +34,7 @@ import study.snacktrack.repositories.FavouriteRepository;
 import study.snacktrack.repositories.MealRepository;
 import study.snacktrack.repositories.UserRepository;
 import study.snacktrack.services.JwtService;
+import study.snacktrack.services.MealService;
 import study.snacktrack.services.NotificationService;
 import study.snacktrack.services.UserService;
 
@@ -48,6 +49,7 @@ public class UserController {
     private final UserRepository userRepository;
     private final FavouriteRepository favouriteRepository;
     private final MealRepository mealRepository;
+    private final MealService mealService;
 
     //admin
     @ResponseBody
@@ -140,24 +142,19 @@ public class UserController {
     }
 
     //dziala ale fajnie by bylo to do serwisu przeniesc zeby kontrolery byly czysciutkie
+    //zmienilem - przetestowac
     @GetMapping("/notifications")
     public ResponseEntity<List<NotificationResponse>> getUserNotifications(
             @RequestHeader("Authorization") String authHeader
-    ) {
+    )
+    {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
 
         User user = userService.getUserByEmail(email);
+        List<NotificationResponse> response = notificationService.getNotificationsByUser(user.getId());
 
-        List<Notification> notifications = notificationService.getNotificationsForUser(!(user.getPremiumExpiration() == null));
-
-        List<NotificationResponse> notificationResponses = new ArrayList<>();
-
-        for (var notif : notifications) {
-            notificationResponses.add(new NotificationResponse(notif.getId(), notif.getName(), notif.getDescription(), notif.getSendingTime()));
-        }
-
-        return ResponseEntity.ok(notificationResponses);
+        return ResponseEntity.ok(response);
     }
 
 
@@ -178,83 +175,77 @@ public class UserController {
     }
 
     //do serwisuuuuuuuuu z logika
+    //zmienilem - przetestowac
     @PostMapping("/favourite/add")
-    public ResponseEntity<Favourite> addFavourite(@RequestBody AddFavouriteRequest request,
-            @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<Favourite> addFavourite(@RequestParam int mealId,
+            @RequestHeader("Authorization") String authHeader)
+    {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
+        Meal meal = mealService.getMealById(mealId);
+        User user = userService.getUserByEmail(email);
+        Favourite saved = userService.addFavourite(meal.getId(), user.getId());
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        favouriteRepository.findByUserIdAndMealId(user.getId(), request.getMealId())
-                .ifPresent(f -> {
-                    throw new RuntimeException("Meal is already in favourites");
-                });
-
-        Favourite favourite = new Favourite();
-        favourite.setUserId(user.getId());
-        favourite.setMealId(request.getMealId());
-
-        Favourite saved = favouriteRepository.save(favourite);
         return ResponseEntity.ok(saved);
     }
 
     //do serwisu z logika
+    //zmienilem - przetestowac
     @DeleteMapping("/favourite/remove/{mealId}")
-    public ResponseEntity<String> removeFavourite(@PathVariable int mealId,
-            @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
+    public ResponseEntity<String> removeFavourite(@PathVariable int mealId, @RequestHeader("Authorization") String authHeader)
+    {
+        try
+        {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
+            User user = userService.getUserByEmail(email);
+            Meal meal = mealService.getMealById(mealId);
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Favourite favourite = favouriteRepository.findByUserIdAndMealId(user.getId(), mealId)
-                .orElseThrow(() -> new RuntimeException("Favourite not found"));
-
-        favouriteRepository.delete(favourite);
+            userService.removeFavourite(meal.getId(), user.getId());
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
         return ResponseEntity.ok("Favourite removed successfully");
     }
 
     //do serwisu z logika
+    //
     @GetMapping("/favourite")
-    public ResponseEntity<List<Meal>> getMyFavouriteMeals(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String email = jwtService.extractEmail(token);
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        List<Favourite> favourites = favouriteRepository.findByUserId(user.getId());
-
-        List<Meal> meals = favourites.stream()
-                .map(f -> {
-                    return mealRepository.findById(f.getMealId())
-                            .orElse(null);
-                })
-                .filter(m -> m != null)
-                .toList();
+    public ResponseEntity<?> getMyFavouriteMeals(@RequestHeader("Authorization") String authHeader)
+    {
+        List<Meal> meals = new ArrayList<>();
+        try
+        {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
+            User user = userService.getUserByEmail(email);
+            meals = userService.getMyFavouriteMeals(user.getId());
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
 
         return ResponseEntity.ok(meals);
     }
 
     //do serwisu z logika
+    //
     @PostMapping("/image")
     public ResponseEntity<String> uploadMealImage(
             @RequestHeader("Authorization") String authHeader,
-            @RequestParam("image") MultipartFile imageFile) {
+            @RequestParam("image") MultipartFile imageFile)
+    {
         try {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtService.extractEmail(token);
-
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+            User user = userService.getUserByEmail(email);
             String imageUrl = userService.uploadProfileImage(user.getId(), imageFile);
             return ResponseEntity.ok(imageUrl);
         } catch (IllegalArgumentException | IOException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
 }

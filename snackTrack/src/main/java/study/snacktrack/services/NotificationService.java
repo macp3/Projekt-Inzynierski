@@ -7,19 +7,23 @@ import java.util.List;
 import study.snacktrack.dto.NotificationRequest;
 import study.snacktrack.dto.NotificationResponse;
 import study.snacktrack.entities.Admin;
+import study.snacktrack.entities.User;
 import study.snacktrack.entities.enums.Recipients;
 import study.snacktrack.repositories.NotificationRepository;
 import org.springframework.stereotype.Service;
 
 import study.snacktrack.entities.Notification;
+import study.snacktrack.repositories.UserRepository;
 
 @Service
 public class NotificationService {
 
     private final NotificationRepository repository;
+    private final UserRepository userRepository;
 
-    public NotificationService(NotificationRepository repository) {
+    public NotificationService(NotificationRepository repository, UserRepository userRepository) {
         this.repository = repository;
+        this.userRepository = userRepository;
     }
 
     public Notification createNotification(NotificationRequest request, Admin author) {
@@ -104,18 +108,26 @@ public class NotificationService {
         return notificationDetails;
     }
 
-    public List<Notification> getNotificationsForUser(boolean isPremium) {
-        List<Recipients> targets = new ArrayList<>();
+    public List<NotificationResponse> getNotificationsByUser(int userId)
+    {
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        List<Notification> notifications = new ArrayList<>();
 
-        if (isPremium) {
-            targets.add(Recipients.premium);
-        } else {
-            targets.add(Recipients.non_premium);
+        if (user.getPremiumExpiration() != null) {
+            notifications = repository.findByRecipientsIn(List.of(Recipients.all, Recipients.premium));
+        }
+        else
+        {
+            notifications = repository.findByRecipientsIn(List.of(Recipients.all, Recipients.non_premium));
         }
 
-        targets.add(Recipients.all);
+        List<NotificationResponse> response = new ArrayList<>();
+        for (var notif : notifications)
+        {
+            response.add(new NotificationResponse(notif.getId(), notif.getName(), notif.getDescription(), notif.getSendingTime()));
+        }
 
-        return repository.findByRecipientsIn(targets);
+        return response;
     }
 
     public List<Notification> getNotificationsByDate(LocalDate date) {

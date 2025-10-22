@@ -13,21 +13,15 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
-import study.snacktrack.dto.EssentialFoodResponse;
-import study.snacktrack.dto.IngredientRequest;
-import study.snacktrack.dto.IngredientResponse;
-import study.snacktrack.dto.MealRequest;
-import study.snacktrack.dto.MealResponse;
+import study.snacktrack.dto.*;
 import study.snacktrack.entities.*;
-import study.snacktrack.repositories.DietTypeRepository;
-import study.snacktrack.repositories.FoodRepository;
-import study.snacktrack.repositories.IngredientRepository;
-import study.snacktrack.repositories.MealDietTypeRepository;
-import study.snacktrack.repositories.MealRepository;
-import study.snacktrack.repositories.UserRepository;
+import study.snacktrack.repositories.*;
 
 @Service
 public class MealService {
@@ -41,17 +35,19 @@ public class MealService {
     private final FoodRepository foodRepository;
     private final FoodService foodService;
     private final MealDietTypeRepository mealDietTypeRepository;
+    private final FavouriteRepository favouriteRepository;
     private final DietTypeRepository dietTypeRepository;
 
     public MealService(UserRepository userRepository, FoodRepository foodRepository, MealRepository mealRepository,
-            IngredientRepository ingredientRepository, FoodService foodService,
-            MealDietTypeRepository mealDietTypeRepository, DietTypeRepository dietTypeRepository) {
+                       IngredientRepository ingredientRepository, FoodService foodService,
+                       MealDietTypeRepository mealDietTypeRepository, FavouriteRepository favouriteRepository, DietTypeRepository dietTypeRepository) {
         this.userRepository = userRepository;
         this.mealRepository = mealRepository;
         this.ingredientRepository = ingredientRepository;
         this.foodRepository = foodRepository;
         this.foodService = foodService;
         this.mealDietTypeRepository = mealDietTypeRepository;
+        this.favouriteRepository = favouriteRepository;
         this.dietTypeRepository = dietTypeRepository;
     }
 

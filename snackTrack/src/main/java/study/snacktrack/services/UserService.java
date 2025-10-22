@@ -1,7 +1,6 @@
 package study.snacktrack.services;
 
 import java.io.IOException;
-import java.net.PasswordAuthentication;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,24 +8,22 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
 import study.snacktrack.dto.BodyParametersResponse;
-import study.snacktrack.entities.BodyParameters;
-import study.snacktrack.entities.User;
-import study.snacktrack.entities.UserDeviceToken;
+import study.snacktrack.entities.*;
 import study.snacktrack.entities.enums.DietTypes;
 import study.snacktrack.entities.enums.Sex;
 import study.snacktrack.entities.enums.Status;
-import study.snacktrack.repositories.BodyParametersRepository;
-import study.snacktrack.repositories.UserDeviceTokenRepository;
-import study.snacktrack.repositories.UserRepository;
+import study.snacktrack.repositories.*;
 
 @Service
 public class UserService {
@@ -37,13 +34,17 @@ public class UserService {
     private final UserRepository userRepository;
     private final BodyParametersRepository bodyParametersRepository;
     private final UserDeviceTokenRepository deviceTokenRepository;
+    private final FavouriteRepository favouriteRepository;
+    private final MealRepository mealRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, BodyParametersRepository bodyParametersRepository, UserDeviceTokenRepository deviceTokenRepository) {
+    public UserService(UserRepository userRepository, BodyParametersRepository bodyParametersRepository, UserDeviceTokenRepository deviceTokenRepository, FavouriteRepository favouriteRepository, MealRepository mealRepository) {
         this.userRepository = userRepository;
         this.bodyParametersRepository = bodyParametersRepository;
         this.deviceTokenRepository = deviceTokenRepository;
+        this.favouriteRepository = favouriteRepository;
+        this.mealRepository = mealRepository;
     }
 
     //nie dziala XDDD
@@ -398,5 +399,48 @@ public class UserService {
         userRepository.save(user);
 
         return relativePath;
+    }
+
+    public List<Meal> getMyFavouriteMeals(int userId)
+    {
+        List<Favourite> favourites = favouriteRepository.findByUserId(userId);
+
+        List<Meal> meals = favourites.stream()
+                .map(f -> {
+                    return mealRepository.findById(f.getMealId())
+                            .orElse(null);
+                })
+                .filter(m -> m != null)
+                .toList();
+
+        return meals;
+    }
+
+    public Favourite addFavourite(int mealId, int userId)
+    {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Optional<Favourite> existing = favouriteRepository.findByUserIdAndMealId(user.getId(), mealId);
+        if(existing.isPresent())
+            throw new IllegalArgumentException("This meal is already in favourites");
+
+        Favourite favourite = new Favourite();
+        favourite.setUserId(user.getId());
+        favourite.setMealId(mealId);
+
+        Favourite saved = favouriteRepository.save(favourite);
+        return saved;
+    }
+
+    public void removeFavourite(int mealId, int userId)
+    {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Favourite favourite = favouriteRepository.findByUserIdAndMealId(user.getId(), mealId)
+                .orElseThrow(() -> new IllegalArgumentException("Favourite not found"));
+
+        favouriteRepository.delete(favourite);
     }
 }
