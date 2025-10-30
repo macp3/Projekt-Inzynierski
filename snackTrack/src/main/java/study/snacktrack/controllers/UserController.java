@@ -59,7 +59,8 @@ public class UserController {
         return ResponseEntity.ok(allUsers);
     }
 
-    //
+    //premium expiration musi byc nullem po dacie ktora jest w bazie
+    //dziala
     @GetMapping("/profile")
     public ResponseEntity<?> getProfileInfo(@RequestHeader("Authorization") String authHeader)
     {
@@ -91,7 +92,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }*/
 
-    //
+    //dziala
     @PutMapping("/changePassword")
     public ResponseEntity<String> changePassword(@RequestHeader("Authorization") String authHeader, @RequestParam String password)
     {
@@ -111,7 +112,7 @@ public class UserController {
     }
 
 
-    //
+    //dziala
     @PutMapping("/changeParameters")
     public ResponseEntity<?> changeBodyParameters(@RequestHeader("Authorization") String authHeader, @RequestBody BodyParametersRequest request)
     {
@@ -134,8 +135,8 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    //
-    @PutMapping("/changePrefferedDiet")
+    //niepotrzebna metoda - diet type bedzie tylko w meal
+    /*@PutMapping("/changePrefferedDiet")
     public ResponseEntity<String> changePrefferedDiet(@RequestHeader("Authorization") String authHeader, @RequestParam DietTypes prefferedDiet) {
         try
         {
@@ -151,9 +152,9 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok("Preferred diet successfully changed");
-    }
+    }*/
 
-    //
+    //dziala
     @PostMapping("/addParameters")
     public ResponseEntity<?> addBodyParameters(@RequestHeader("Authorization") String authHeader, @RequestBody BodyParametersRequest request)
     {
@@ -175,7 +176,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    //
+    //dziala
     @GetMapping("/myStreak")
     public ResponseEntity<?> getMyStreak(@RequestHeader("Authorization") String authHeader)
     {
@@ -197,7 +198,7 @@ public class UserController {
 
     //dziala ale fajnie by bylo to do serwisu przeniesc zeby kontrolery byly czysciutkie
     //zmienilem - przetestowac
-    //
+    //dziala
     @GetMapping("/notifications")
     public ResponseEntity<?> getUserNotifications(
             @RequestHeader("Authorization") String authHeader
@@ -247,7 +248,7 @@ public class UserController {
 
     //do serwisuuuuuuuuu z logika
     //zmienilem - przetestowac
-    //
+    //dziala
     @PostMapping("/favourite/add")
     public ResponseEntity<?> addFavourite(@RequestParam int mealId,
             @RequestHeader("Authorization") String authHeader)
@@ -270,7 +271,7 @@ public class UserController {
 
     //do serwisu z logika
     //zmienilem - przetestowac
-    //
+    //dziala
     @DeleteMapping("/favourite/remove/{mealId}")
     public ResponseEntity<String> removeFavourite(@PathVariable int mealId, @RequestHeader("Authorization") String authHeader)
     {
@@ -290,8 +291,7 @@ public class UserController {
         return ResponseEntity.ok("Favourite removed successfully");
     }
 
-    //do serwisu z logika
-    //
+    //dziala
     @GetMapping("/favourite")
     public ResponseEntity<?> getMyFavouriteMeals(@RequestHeader("Authorization") String authHeader)
     {
@@ -311,8 +311,7 @@ public class UserController {
         return ResponseEntity.ok(meals);
     }
 
-    //do serwisu z logika
-    //
+    //dziala
     @PostMapping("/image")
     public ResponseEntity<String> uploadMealImage(
             @RequestHeader("Authorization") String authHeader,

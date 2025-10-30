@@ -47,7 +47,7 @@ public class CommentController {
         return user;
     }
 
-    //
+    //dziala
     @PostMapping("/add")
     public ResponseEntity<?> addCommentToMeal(@RequestBody CommentRequest request, @RequestHeader("Authorization") String authHeader)
     {
@@ -66,7 +66,7 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
-    //
+    //dziala
     @PutMapping("/edit")
     public ResponseEntity<?> editCommentByUser(@RequestBody CommentRequest request,
             @RequestHeader("Authorization") String authHeader)
@@ -86,7 +86,7 @@ public class CommentController {
         return ResponseEntity.ok(cr);
     }
 
-    //
+    //dziala
     @GetMapping("/my")
     public ResponseEntity<?> getAllCommentsByUser(
             @RequestHeader("Authorization") String authHeader)
@@ -105,7 +105,7 @@ public class CommentController {
     }
 
     // zmiana - nie bedzie comment id tylko meal id - nie wiem co ja tu zrobilem
-    //
+    //dziala
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteCommentByUser(
             @RequestParam int mealId,
@@ -123,7 +123,7 @@ public class CommentController {
         return ResponseEntity.ok("Comment deleted successfully");
     }
 
-    //
+    //dziala
     @GetMapping("/meal/{mealId}")
     public ResponseEntity<?> getAllCommentsForMeal(@PathVariable int mealId)
     {

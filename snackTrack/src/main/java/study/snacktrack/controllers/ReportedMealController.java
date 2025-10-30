@@ -43,7 +43,7 @@ public class ReportedMealController {
         return user;
     }
 
-    //dziala
+    //dzialaa
     @PostMapping("/add")
     public ResponseEntity<?> reportMeal(@RequestBody ReportedMealRequest request, @RequestHeader("Authorization") String authHeader)
     {

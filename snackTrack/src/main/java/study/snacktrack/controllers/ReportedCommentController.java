@@ -45,7 +45,7 @@ public class ReportedCommentController {
         return user;
     }
 
-    //
+    //dziala
     @PostMapping("/add")
     public ResponseEntity<?> reportComment(@RequestBody ReportedCommentRequest request, @RequestHeader("Authorization") String authHeader)
     {

@@ -33,7 +33,7 @@ public class TrainingController {
         this.trainingService = trainingService;
     }
 
-    //
+    //dziala
     @GetMapping("")
     public ResponseEntity<?> getAllTrainings()
     {
@@ -49,7 +49,7 @@ public class TrainingController {
         return ResponseEntity.ok(trainings);
     }
 
-    //
+    //dziala
     @GetMapping("/exercises/{exerciseId}/details")
     public ResponseEntity<?> getExerciseDetails(@PathVariable int exerciseId)
     {
@@ -65,7 +65,7 @@ public class TrainingController {
         return ResponseEntity.ok(exercise);
     }
 
-    //
+    //dziala
     @GetMapping("/{id}")
     public ResponseEntity<?> getTrainingDetails(@PathVariable int id)
     {
@@ -74,17 +74,18 @@ public class TrainingController {
         {
             response = trainingService.getTrainingDetails(id);
         }
-        catch(IllegalArgumentException e)
+        catch(RuntimeException e)
         {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+
         return ResponseEntity.ok(response);
     }
 
     //zrobilem assign i potem wywolalem to i nie dziala
     //juz dziala
     //dziala nawet po usunieciu treningu z bazy
-    //
+    //dziala
     @GetMapping("/my")
     public ResponseEntity<?> getUserTraining(@RequestHeader("Authorization") String authHeader)
     {
@@ -104,7 +105,7 @@ public class TrainingController {
         return ResponseEntity.ok(info);
     }
 
-    //
+    //dziala
     @GetMapping("/my/details")
     public ResponseEntity<?> getUserTrainingWithDetails(@RequestHeader("Authorization") String authHeader)
     {
@@ -125,7 +126,7 @@ public class TrainingController {
         return ResponseEntity.ok(response);
     }
 
-    //
+    //dziala
     @PostMapping("/assign/{trainingId}")
     public ResponseEntity<String> assignTraining(@PathVariable int trainingId, @RequestHeader("Authorization") String authHeader)
     {
@@ -144,7 +145,7 @@ public class TrainingController {
         return ResponseEntity.ok("Training successfully assigned to user");
     }
 
-    //
+    //dziala
     @DeleteMapping("/my/deprive")
     public ResponseEntity<String> depriveTrainingFromUser(@RequestHeader("Authorization") String authHeader)
     {
