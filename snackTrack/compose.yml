@@ -17,6 +17,8 @@ services:
   app:
     container_name: snacktrack-app
     build: .
+    env_file:
+      - .env
     image: snacktrack:latest
     depends_on:
       - mysql
