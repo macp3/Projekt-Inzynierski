@@ -51,14 +51,6 @@ public class UserController {
     private final MealRepository mealRepository;
     private final MealService mealService;
 
-    //admin
-    @ResponseBody
-    @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> allUsers = userService.getAllUsers();
-        return ResponseEntity.ok(allUsers);
-    }
-
     //premium expiration musi byc nullem po dacie ktora jest w bazie
     //dziala
     @GetMapping("/profile")

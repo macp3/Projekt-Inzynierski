@@ -22,6 +22,10 @@ import study.snacktrack.services.ReportedMealService;
 import study.snacktrack.services.TrainingService;
 import study.snacktrack.services.UserService;
 
+/**
+ * Controller handling admin-related functionality (users, reports, trainings, exercises, notifications).
+ * Provides administrative operations such as adding trainings, viewing reports, sending notifications, etc.
+ */
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
@@ -34,10 +38,24 @@ public class AdminController {
     private final TrainingService trainingService;
     private final NotificationService notificationService;
 
+    /**
+     * Constructs a new AdminController.
+     *
+     * @param adminRepository repository for admin data
+     * @param userService user management service
+     * @param mealService meal service (unused directly here but required for injection)
+     * @param commentService comment management service
+     * @param reportedMealService service managing reported meals
+     * @param reportedCommentService service managing reported comments
+     * @param foodService food service (unused directly here but required for injection)
+     * @param jwtService JWT token validation service
+     * @param trainingService training management service
+     * @param notificationService notification management service
+     */
     public AdminController(AdminRepository adminRepository, UserService userService, MealService mealService,
-            CommentService commentService, ReportedMealService reportedMealService,
-            ReportedCommentService reportedCommentService, FoodService foodService, JwtService jwtService,
-            TrainingService trainingService, NotificationService notificationService) {
+                           CommentService commentService, ReportedMealService reportedMealService,
+                           ReportedCommentService reportedCommentService, FoodService foodService, JwtService jwtService,
+                           TrainingService trainingService, NotificationService notificationService) {
         this.adminRepository = adminRepository;
         this.userService = userService;
         this.reportedMealService = reportedMealService;
@@ -48,185 +66,207 @@ public class AdminController {
         this.commentService = commentService;
     }
 
-    //dziala
+    /**
+     * Test endpoint to verify that admin panel is operational.
+     *
+     * @return welcome message for admin
+     */
     @GetMapping("/dashboard")
     public String getDashboard() {
         return "Witaj, ADMIN!";
     }
 
-    // nowe
-    //dziala
+    /**
+     * Retrieves user details by user ID.
+     *
+     * @param userId ID of the user
+     * @return User object or error message
+     * @throws IllegalArgumentException if user cannot be found
+     */
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUserInfo(@PathVariable int userId)
     {
         User user;
-        try
-        {
+        try {
             user = userService.getUserById(userId);
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(user);
     }
 
-    //pozniej
-    //dziala
+    /**
+     * Updates premium expiration date for selected user.
+     *
+     * @param userId user whose premium expiration date will be updated
+     * @param dateString date in string format (yyyy-MM-dd expected)
+     * @return updated User object or error message
+     * @throws IllegalArgumentException when invalid user ID or date format
+     */
     @PutMapping("/user/{userId}/info/expirationDate")
     public ResponseEntity<?> updateExpirationDate(@PathVariable int userId, @RequestParam String dateString)
     {
         User user;
-        try
-        {
+        try {
             user = userService.updatePremiumExpiration(userId, dateString);
-        }
-        catch(IllegalArgumentException | HttpMessageNotReadableException e)
-        {
+        } catch(IllegalArgumentException | HttpMessageNotReadableException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(user);
     }
 
-    // admin
-    //dziala
+    /**
+     * Returns list of all users in the database.
+     *
+     * @return list of users or error message
+     */
     @GetMapping("/users")
     public ResponseEntity<?> getAllUsers()
     {
         List<User> allUsers;
-        try
-        {
+        try {
             allUsers = userService.getAllUsers();
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(allUsers);
     }
 
-    // admin
-    //dziala
+    /**
+     * Retrieves all meal reports created by a specific user.
+     *
+     * @param userId ID of the reporting user
+     * @return list of reported meals or error message
+     */
     @GetMapping("/reports/meals/user/{userId}")
     public ResponseEntity<?> getAllMealReportsByUser(@PathVariable int userId)
     {
         List<ReportedMeal> reports;
-        try
-        {
+        try {
             reports = reportedMealService.getAllReportsByUser(userId);
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(reports);
     }
 
-    // admin
-    //dziala
+    /**
+     * Retrieves all comment reports created by a specific user.
+     *
+     * @param userId ID of user who reported comments
+     * @return list of reported comments or error message
+     */
     @GetMapping("/reports/comments/user/{userId}")
     public ResponseEntity<?> getAllCommentReportsByUser(@PathVariable int userId)
     {
         List<ReportedComment> reports;
-        try
-        {
+        try {
             reports = reportedCommentService.getAllReportsByUser(userId);
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(reports);
     }
 
-    ////////////////////////////////////////////////////////////////////////
+    // ========================================================================
+    // TRAININGS
+    // ========================================================================
 
-    //dziala
+    /**
+     * Returns all Trainings without exercises and details.
+     *
+     * @return list of training summaries
+     */
     @GetMapping("/trainings")
     public ResponseEntity<?> getAllTrainings()
     {
         List<TrainingInfo> allTrainings;
-        try
-        {
+        try {
             allTrainings = trainingService.getAllTrainings();
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(allTrainings);
     }
 
-    //dziala
+    /**
+     * Returns detailed information about training including exercises and assigned days.
+     *
+     * @param trainingId ID of the training
+     * @return training details or error message
+     */
     @GetMapping("/trainings/{trainingId}/details")
     public ResponseEntity<?> getTrainingDetails(@PathVariable int trainingId)
     {
         TrainingDetailsResponse response;
-        try
-        {
+        try {
             response = trainingService.getTrainingDetails(trainingId);
-        }
-        catch (RuntimeException e)
-        {
+        } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(response);
     }
 
-    //pozniej - duration time do nulla porownaj
-    //dziala
+    /**
+     * Creates and assigns a new training plan.
+     *
+     * @param request training creation payload
+     * @param authHeader Authorization token (Bearer)
+     * @return success message or error
+     */
     @PostMapping("/trainings/add")
     public ResponseEntity<String> addTraining(@RequestBody TrainingRequest request, @RequestHeader("Authorization") String authHeader)
     {
-        try
-        {
-            // walidacja admina
+        try {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtService.extractEmail(token);
             Admin admin = adminRepository.findByEmail(email)
                     .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
             trainingService.createTraining(request, admin.getId());
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
-        }
-        catch(NullPointerException e)
-        {
+        } catch(NullPointerException e) {
             return ResponseEntity.badRequest().body("Something went wrong: " + e.getMessage());
         }
         return ResponseEntity.ok("Training added successfully");
     }
 
-    //dziala
+    /**
+     * Edits an existing training plan.
+     *
+     * @param trainingId ID of training to edit
+     * @param request updated training data
+     * @param authHeader Authorization token
+     * @return success or error message
+     */
     @PutMapping("/trainings/{trainingId}/edit")
     public ResponseEntity<String> editTraining(@PathVariable int trainingId, @RequestBody TrainingRequest request, @RequestHeader("Authorization") String authHeader)
     {
-        try
-        {
-            // walidacja admina
+        try {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtService.extractEmail(token);
             Admin admin = adminRepository.findByEmail(email)
                     .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
 
             trainingService.editTraining(request, admin.getId(), trainingId);
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok("Training edited successfully");
     }
 
-    //dziala
+    /**
+     * Adds an exercise to an existing training.
+     *
+     * @param request request containing exerciseId, trainingId, and day of exercise
+     * @param authHeader Authorization token
+     * @return modified training details or error
+     */
     @PostMapping("/trainings/addExercise")
     public ResponseEntity<?> addExerciseToTraining(@RequestBody AddExerciseToTrainingRequest request, @RequestHeader("Authorization") String authHeader)
     {
         TrainingDetailsResponse response;
-        try
-        {
-            // walidacja admina
+        try {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtService.extractEmail(token);
             Admin admin = adminRepository.findByEmail(email)
@@ -237,213 +277,201 @@ public class AdminController {
                     request.getTrainingId(),
                     admin.getId(),
                     request.getDayOfExercise());
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(response);
     }
 
-    //dziala
+    /**
+     * Deletes ALL occurrences of a specific exercise from training.
+     *
+     * @param trainingId training identifier
+     * @param exerciseId exercise identifier
+     * @return updated training or error message
+     */
     @DeleteMapping("/trainings/{trainingId}/delete/{exerciseId}")
     public ResponseEntity<?> deleteExercisesByIdFromTraining(@PathVariable int trainingId, @PathVariable int exerciseId)
     {
         TrainingDetailsResponse response;
-        try
-        {
+        try {
             response = trainingService.deleteAllExercisesByIdFromTraining(trainingId, exerciseId);
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(response);
     }
 
-    //dziala
+    /**
+     * Deletes an exercise from a training on a specific day.
+     *
+     * @param trainingId training identifier
+     * @param exerciseId exercise identifier
+     * @param dayOfExercise day in the workout plan
+     * @return updated training details
+     */
     @DeleteMapping("/trainings/{trainingId}/delete/{exerciseId}/{dayOfExercise}")
     public ResponseEntity<?> deleteExerciseByIdAndDayFromTraining(@PathVariable int trainingId, @PathVariable int exerciseId, @PathVariable int dayOfExercise)
     {
         TrainingDetailsResponse response;
-        try
-        {
+        try {
             response = trainingService.deleteExerciseByIdAndDayFromTraining(trainingId, exerciseId, dayOfExercise);
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(response);
     }
 
-    //dziala
+    /**
+     * Deletes an entire training plan.
+     *
+     * @param trainingId ID of training to be deleted
+     * @return success or error message
+     */
     @DeleteMapping("/trainings/{trainingId}/delete")
     public ResponseEntity<String> deleteTraining(@PathVariable int trainingId)
     {
-        try
-        {
+        try {
             trainingService.deleteTraining(trainingId);
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok("Training deleted successfully");
     }
 
-    //dziala
+    /**
+     * Returns all exercises.
+     *
+     * @return list of exercises
+     */
     @GetMapping("/exercises")
     public ResponseEntity<?> getAllExercises()
     {
         List<Exercise> exercises;
-        try
-        {
+        try {
             exercises = trainingService.getAllExercises();
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(exercises);
     }
 
-    //dziala
+    /**
+     * Retrieves full exercise details.
+     *
+     * @param exerciseId ID of exercise to retrieve
+     * @return exercise or error
+     */
     @GetMapping("/exercises/{exerciseId}/details")
     public ResponseEntity<?> getExerciseDetails(@PathVariable int exerciseId)
     {
         Exercise exercise;
-        try
-        {
+        try {
             exercise = trainingService.getExerciseById(exerciseId);
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(exercise);
     }
 
-    //dziala
+    /**
+     * Creates a new exercise.
+     *
+     * @param request exercise payload
+     * @return created exercise or error
+     */
     @PostMapping("/exercises/add")
     public ResponseEntity<?> addExercise(@RequestBody ExerciseRequest request)
     {
         Exercise exercise;
-        try
-        {
+        try {
             exercise = trainingService.createExercise(request.getName(), request.getDescription(),
                     request.getType(), request.getDifficulty(), request.getNumberOfSets(), request.getRepetitionsPerSet());
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(exercise);
     }
 
-    //dziala
+    /**
+     * Deletes exercise by ID.
+     *
+     * @param exerciseId ID of exercise
+     * @return success message or error
+     */
     @DeleteMapping("/exercises/delete/{exerciseId}")
     public ResponseEntity<String> deleteExercise(@PathVariable int exerciseId)
     {
-        try
-        {
+        try {
             trainingService.deleteExercise(exerciseId);
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok("Exercise deleted successfully");
     }
 
-    ////////////////////////////////////////////////////////////////////
+    // ========================================================================
+    // NOTIFICATIONS
+    // ========================================================================
 
-    // login, email, password xd
-    // walidacja stringow - nic nie wyrzuca exeption
-    // porownanie do nulli tak samo
-    // Maciej: zrobione
-    // dziala, ale dziwne te exeption troche bo wyskakuje takie cos jak recipients
-    // "brak" a widze ze w metodzie fajnie wyrzuciles wiadomosc wec nwm co tu sie
-    // zadzialo:
-    // 2025-10-20T14:22:22.218Z WARN 1 --- [snackTrack] [nio-8080-exec-8]
-    // .w.s.m.s.DefaultHandlerExceptionResolver : Resolved
-    // [org.springframework.http.converter.HttpMessageNotReadableException: JSON
-    // parse error: Cannot deserialize value of type
-    // `study.snacktrack.entities.enums.Recipients` from String "brak": not one of
-    // the values accepted for Enum class: [all, non_premium, premium]]
-
-    //dziala
+    /**
+     * Creates a notification and sends it to selected recipients.
+     *
+     * @param request notification content and recipients
+     * @param authHeader Authorization token
+     * @return success message or error
+     */
     @PostMapping("/notifications/add")
     public ResponseEntity<String> createNotification(@RequestBody NotificationRequest request, @RequestHeader("Authorization") String authHeader)
     {
-        try
-        {
+        try {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtService.extractEmail(token);
             Admin admin = adminRepository.findByEmail(email)
                     .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
 
             notificationService.createNotification(request, admin);
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok("Notification created successfully");
     }
 
-    // pola nie moga byc nullami
-    // MAciej: już nie będą bo nie da się zapisać nulla ale trzeba dodać response
-    // żeby nie pokazywało autora
-    // bartek: zrobione
-    //dziala
+    /**
+     * Returns all notifications without exposing admin author details.
+     *
+     * @param authHeader Authorization token
+     * @return list of notifications
+     */
     @GetMapping("/notifications")
     public ResponseEntity<?> getAllNotifications(@RequestHeader("Authorization") String authHeader)
     {
         List<NotificationResponse> notifications;
-        try
-        {
+        try {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtService.extractEmail(token);
             adminRepository.findByEmail(email)
                     .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
 
             notifications = notificationService.getAllNotificationsDetails();
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(notifications);
     }
 
-    // recipients=jvjhvbm musi cos wyrzucac
-    // Maciej: wyrzuca już
-    // tutaj tez mozna zastosowac NotificationResponse tak jak wyzej
-    // tak zrobie i zakomentuje to sie zapoznasz
-    // dziala
-    // @GetMapping("/notifications/filter")
-    // public ResponseEntity<List<Notification>> getNotificationsByRecipients(
-    // @RequestHeader("Authorization") String authHeader,
-    // @RequestParam Recipients recipients) {
-    // String token = authHeader.replace("Bearer ", "");
-    // String email = jwtService.extractEmail(token);
-    // adminRepository.findByEmail(email)
-    // .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
-
-    // List<Notification> notifications =
-    // notificationService.getNotificationsByRecipients(recipients);
-    // return ResponseEntity.ok(notifications);
-    // }
-
-    // druga wersja jak chcesz
-    //dziala
+    /**
+     * Filters notifications by recipient category (premium, non_premium, all).
+     *
+     * @param authHeader Authorization token
+     * @param recipients enum defining target notification recipients
+     * @return filtered list of notifications
+     */
     @GetMapping("/notifications/filter")
     public ResponseEntity<?> getNotificationsByRecipients2(@RequestHeader("Authorization") String authHeader, @RequestParam Recipients recipients)
     {
         List<NotificationResponse> notifications;
-        try
-        {
+        try {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtService.extractEmail(token);
             adminRepository.findByEmail(email)
@@ -451,76 +479,84 @@ public class AdminController {
 
             notifications = notificationService
                     .getNotificationsByRecipientsWithoutDetails(recipients);
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(notifications);
     }
 
-    ////////////////////////////////////////////////////////////////////
+    // ========================================================================
+    // REPORTS (COMMENTS & MEALS)
+    // ========================================================================
 
-    //dziala
+    /**
+     * Retrieves all reports related to a specific comment.
+     *
+     * @param commentId ID of comment
+     * @return list of reports or error
+     */
     @GetMapping("/comments/reports/comment/{commentId}")
     public ResponseEntity<?> getAllReportsByComment(@PathVariable int commentId)
     {
         List<ReportedComment> reports;
-        try
-        {
+        try {
             Comment comment = commentService.getCommentById(commentId);
             reports = reportedCommentService.getAllReportsByComment(comment.getId());
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(reports);
     }
 
-    //dziala
+    /**
+     * Retrieves all reports related to a specific meal.
+     *
+     * @param mealId ID of meal
+     * @return list of reports or error
+     */
     @GetMapping("/meals/reports/meal/{mealId}")
     public ResponseEntity<?> getAllReportsByMeal(@PathVariable int mealId)
     {
         List<ReportedMeal> reports;
-        try
-        {
+        try {
             reports = reportedMealService.getAllReportsByMeal(mealId);
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(reports);
     }
 
-    //dziala
+    /**
+     * Retrieves all comment reports submitted by a specific user.
+     *
+     * @param reportingId ID of reporting user
+     * @return list of reported comments
+     */
     @GetMapping("/comments/reports/all/{reportingId}")
     public ResponseEntity<?> getAllReportedCommentsByUser(@PathVariable int reportingId)
     {
         List<ReportedComment> reportedComments;
-        try
-        {
+        try {
             reportedComments = reportedCommentService.getAllReportsByUser(reportingId);
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(reportedComments);
     }
 
-    //dziala
+    /**
+     * Retrieves all meal reports submitted by a specific user.
+     *
+     * @param reportingId ID of reporting user
+     * @return list of reported meals
+     */
     @GetMapping("/meals/reports/all/{reportingId}")
     public ResponseEntity<?> getAllReportedMealsByUser(@PathVariable int reportingId)
     {
         List<ReportedMeal> reportedComments;
-        try
-        {
+        try {
             reportedComments = reportedMealService.getAllReportsByUser(reportingId);
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(reportedComments);
