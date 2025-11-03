@@ -41,7 +41,9 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, BodyParametersRepository bodyParametersRepository, UserDeviceTokenRepository deviceTokenRepository, FavouriteRepository favouriteRepository, MealRepository mealRepository) {
+    public UserService(UserRepository userRepository, BodyParametersRepository bodyParametersRepository,
+            UserDeviceTokenRepository deviceTokenRepository, FavouriteRepository favouriteRepository,
+            MealRepository mealRepository) {
         this.userRepository = userRepository;
         this.bodyParametersRepository = bodyParametersRepository;
         this.deviceTokenRepository = deviceTokenRepository;
@@ -49,9 +51,9 @@ public class UserService {
         this.mealRepository = mealRepository;
     }
 
-    //nie dziala XDDD
-    //tera sie nie moge zalogoiwac
-    //jednak dziala ale user3 stracony
+    // nie dziala XDDD
+    // tera sie nie moge zalogoiwac
+    // jednak dziala ale user3 stracony
     public User changePassword(int userId, String password) {
         User user = getUserById(userId);
 
@@ -59,7 +61,7 @@ public class UserService {
             throw new IllegalArgumentException("New password cannot be empty");
         }
 
-        if(passwordEncoder.matches(password, user.getPassword()))
+        if (passwordEncoder.matches(password, user.getPassword()))
             throw new IllegalArgumentException("New password must be different from the old password");
 
         String hashedPassword = passwordEncoder.encode(password);
@@ -67,7 +69,6 @@ public class UserService {
         userRepository.save(user);
         return user;
     }
-
 
     public User changePrefferedDiet(int userId, DietTypes prefferedDiet) {
         User user = getUserById(userId);
@@ -81,9 +82,10 @@ public class UserService {
         return user;
     }
 
-    //do rozbudowania:
-    //po drugie pole estimated_time zeby nie przekraczac deficytu/nadwyzki 1000kcal (bo to niezdrowe)
-    //TAK DZIALA FITATU
+    // do rozbudowania:
+    // po drugie pole estimated_time zeby nie przekraczac deficytu/nadwyzki 1000kcal
+    // (bo to niezdrowe)
+    // TAK DZIALA FITATU
     @Transactional
     public BodyParametersResponse changeBodyParameters(
             Integer userId,
@@ -94,13 +96,10 @@ public class UserService {
             Float dailyActivityFactor,
             Float dailyActivityTrainingFactor,
             Float weeklyWeightChangeTempo,
-            Float goalWeight
-    ) {
-        // --- Pobierz istniejące dane użytkownika ---
+            Float goalWeight) {
         BodyParameters existing = bodyParametersRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User with ID " + userId + " not found"));
 
-        // --- Walidacja i aktualizacja tylko podanych wartości ---
         if (sex != null) {
             if (sex != Sex.male && sex != Sex.female)
                 throw new IllegalArgumentException("Sex must be male or female");
@@ -132,7 +131,8 @@ public class UserService {
         }
 
         if (dailyActivityTrainingFactor != null) {
-            if (Float.compare(dailyActivityTrainingFactor, 0.5f) < 0 || Float.compare(dailyActivityTrainingFactor, 0.95f) > 0)
+            if (Float.compare(dailyActivityTrainingFactor, 0.5f) < 0
+                    || Float.compare(dailyActivityTrainingFactor, 0.95f) > 0)
                 throw new IllegalArgumentException("Daily activity training factor must be between 0.5 and 0.95");
             existing.setDailyActivityTrainingFactor(dailyActivityTrainingFactor);
         }
@@ -149,7 +149,6 @@ public class UserService {
             existing.setGoalWeight(goalWeight);
         }
 
-        // --- Pobierz końcowe wartości (po zmianach lub stare) ---
         Sex finalSex = existing.getSex();
         float finalHeight = existing.getHeight();
         float finalWeight = existing.getWeight();
@@ -159,7 +158,6 @@ public class UserService {
         float finalWeeklyWeightChangeTempo = existing.getWeeklyWeightChangeTempo();
         float finalGoalWeight = existing.getGoalWeight();
 
-        // --- Obliczenia ---
         if (finalGoalWeight == finalWeight) {
             finalWeeklyWeightChangeTempo = 0f;
             System.out.println("SETTING WEEKLY WEIGHT CHANGE TEMPO TO 0 SINCE YOU DON'T WANT TO CHANGE YOUR WEIGHT");
@@ -192,48 +190,51 @@ public class UserService {
             carbohydratesLimit = (0.55f * calorieLimit) / 4;
         }
 
-        // --- Ustaw przeliczone wartości ---
         existing.setCalorieLimit(calorieLimit);
         existing.setProteinLimit(proteinLimit);
         existing.setFatLimit(fatLimit);
         existing.setCarbohydratesLimit(carbohydratesLimit);
 
-        // --- Zapisz do bazy ---
         BodyParameters updated = bodyParametersRepository.save(existing);
 
-        // --- Konwersja do DTO (BodyParametersResponse) ---
-        BodyParametersResponse response = new BodyParametersResponse(updated.getUserId(), updated.getSex(), updated.getHeight(), updated.getWeight(), updated.getAge(), updated.getDailyActivityFactor(), updated.getDailyActivityTrainingFactor(), updated.getWeeklyWeightChangeTempo(), updated.getGoalWeight(), updated.getCalorieLimit(), updated.getProteinLimit(), updated.getFatLimit(), updated.getCarbohydratesLimit());
+        BodyParametersResponse response = new BodyParametersResponse(updated.getUserId(), updated.getSex(),
+                updated.getHeight(), updated.getWeight(), updated.getAge(), updated.getDailyActivityFactor(),
+                updated.getDailyActivityTrainingFactor(), updated.getWeeklyWeightChangeTempo(), updated.getGoalWeight(),
+                updated.getCalorieLimit(), updated.getProteinLimit(), updated.getFatLimit(),
+                updated.getCarbohydratesLimit());
 
         return response;
     }
 
-
     @Transactional
-    public BodyParameters addBodyParameters(Integer userId, Sex sex, Float height, Float weight, Integer age, Float dailyActivityFactor, Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo, Float goalWeight)
-    {
-        // Walidacja parametrów wejściowych
-        if (sex == null) throw new IllegalArgumentException("Sex must not be null");
-        if(sex != Sex.female && sex != Sex.male)
+    public BodyParameters addBodyParameters(Integer userId, Sex sex, Float height, Float weight, Integer age,
+            Float dailyActivityFactor, Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo,
+            Float goalWeight) {
+        if (sex == null)
+            throw new IllegalArgumentException("Sex must not be null");
+        if (sex != Sex.female && sex != Sex.male)
             throw new IllegalArgumentException("Sex must be male or female");
 
-        if (height == null || height <= 0) throw new IllegalArgumentException("Height must be greater than zero");
-        if (weight == null || weight <= 0) throw new IllegalArgumentException("Weight must be greater than zero");
-        if (age == null || age <= 0) throw new IllegalArgumentException("Age must be greater than zero");
-        if (goalWeight == null || goalWeight <= 0) throw new IllegalArgumentException("Goal weight must be greater than zero");
+        if (height == null || height <= 0)
+            throw new IllegalArgumentException("Height must be greater than zero");
+        if (weight == null || weight <= 0)
+            throw new IllegalArgumentException("Weight must be greater than zero");
+        if (age == null || age <= 0)
+            throw new IllegalArgumentException("Age must be greater than zero");
+        if (goalWeight == null || goalWeight <= 0)
+            throw new IllegalArgumentException("Goal weight must be greater than zero");
         if (weeklyWeightChangeTempo == null || weeklyWeightChangeTempo < 0 || weeklyWeightChangeTempo > 1)
             throw new IllegalArgumentException("Weekly weight change tempo must be between 0 and 1");
-        if(goalWeight.equals(weight))
-        {
+        if (goalWeight.equals(weight)) {
             weeklyWeightChangeTempo = 0f;
-            System.out.println("SETTING YOUR WEEKLY WEIGHT CHANGE TEMPO TO 0 SINCE YOU DON'T WANT TO CHANGE YOUR WEIGHT");
         }
-        if (dailyActivityFactor == null || (Float.compare(dailyActivityFactor, 0.7f) < 0 || Float.compare(dailyActivityFactor, 1.15f) > 0))
+        if (dailyActivityFactor == null
+                || (Float.compare(dailyActivityFactor, 0.7f) < 0 || Float.compare(dailyActivityFactor, 1.15f) > 0))
             throw new IllegalArgumentException("Daily activity factor must be between 0.7 and 1.15");
-        if (dailyActivityTrainingFactor == null || (Float.compare(dailyActivityTrainingFactor, 0.5f) < 0 || Float.compare(dailyActivityTrainingFactor, 0.95f) > 0))
+        if (dailyActivityTrainingFactor == null || (Float.compare(dailyActivityTrainingFactor, 0.5f) < 0
+                || Float.compare(dailyActivityTrainingFactor, 0.95f) > 0))
             throw new IllegalArgumentException("Daily activity training factor must be between 0.5 and 0.95");
 
-
-        // Obliczenia
         float formula = 0;
         if (sex == Sex.male) {
             formula = (10 * weight) + (6.25f * height) - (5 * age) + 5;
@@ -282,7 +283,7 @@ public class UserService {
         return bodyParametersRepository.save(bodyParameters);
     }
 
-    //admin
+    // admin
     public boolean updateStreak(int userId, int streak) {
 
         User user = userRepository.findById(userId).orElse(null);
@@ -295,7 +296,7 @@ public class UserService {
         return true;
     }
 
-    //admin
+    // admin
     public User updateStatus(int userId, Status status) {
         User user = getUserById(userId);
         user.setStatus(status);
@@ -304,14 +305,13 @@ public class UserService {
         return user;
     }
 
-    //admin
+    // admin
     @Transactional
-    public User updatePremiumExpiration(int userId, String dateString)
-    {
+    public User updatePremiumExpiration(int userId, String dateString) {
         User user = getUserById(userId);
         LocalDate date;
 
-        if(!user.getStatus().equals(Status.active))
+        if (!user.getStatus().equals(Status.active))
             throw new IllegalArgumentException("User status has to be active");
 
         try {
@@ -322,7 +322,7 @@ public class UserService {
         }
         LocalDate now = LocalDate.now();
 
-        if(date.isBefore(now))
+        if (date.isBefore(now))
             throw new IllegalArgumentException("Specified date must not be before now");
 
         user.setPremiumExpiration(date);
@@ -330,7 +330,7 @@ public class UserService {
         return user;
     }
 
-    //admin
+    // admin
     public void deleteUser(int userId) {
         User user = getUserById(userId);
         userRepository.delete(user);
@@ -347,7 +347,8 @@ public class UserService {
 
     public BodyParameters getUserBodyParameters(int userId) {
         User user = getUserById(userId);
-        return bodyParametersRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("There is no body parameters for this user"));
+        return bodyParametersRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("There is no body parameters for this user"));
     }
 
     public User getUserByEmail(String email) {
@@ -408,8 +409,7 @@ public class UserService {
         return relativePath;
     }
 
-    public List<Meal> getMyFavouriteMeals(int userId)
-    {
+    public List<Meal> getMyFavouriteMeals(int userId) {
         List<Favourite> favourites = favouriteRepository.findByUserId(userId);
 
         List<Meal> meals = favourites.stream()
@@ -423,13 +423,12 @@ public class UserService {
         return meals;
     }
 
-    public Favourite addFavourite(int mealId, int userId)
-    {
+    public Favourite addFavourite(int mealId, int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Optional<Favourite> existing = favouriteRepository.findByUserIdAndMealId(user.getId(), mealId);
-        if(existing.isPresent())
+        if (existing.isPresent())
             throw new IllegalArgumentException("This meal is already in favourites");
 
         Favourite favourite = new Favourite();
@@ -440,8 +439,7 @@ public class UserService {
         return saved;
     }
 
-    public void removeFavourite(int mealId, int userId)
-    {
+    public void removeFavourite(int mealId, int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 

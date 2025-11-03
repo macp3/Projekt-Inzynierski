@@ -19,7 +19,8 @@ public class NotificationScheduler {
     private final UserService userService;
     private final PushNotificationService pushService;
 
-    public NotificationScheduler(NotificationService notificationService, UserService userService, PushNotificationService pushService) {
+    public NotificationScheduler(NotificationService notificationService, UserService userService,
+            PushNotificationService pushService) {
         this.notificationService = notificationService;
         this.userService = userService;
         this.pushService = pushService;
@@ -37,11 +38,13 @@ public class NotificationScheduler {
         for (Notification n : todaysNotifications) {
             List<User> recipients = userService.getUsersByRecipientType(n.getRecipients().name().toLowerCase());
 
-            for (User u : recipients) {
-                List<String> tokens = userService.getDeviceTokens(u.getId());
-                for (String token : tokens) {
-                    pushService.sendPush(token, n.getName(), n.getDescription());
-                }
+            List<String> allTokens = recipients.stream()
+                    .flatMap(user -> userService.getDeviceTokens(user.getId()).stream())
+                    .distinct()
+                    .toList();
+
+            if (!allTokens.isEmpty()) {
+                pushService.sendMulticastPush(allTokens, n.getName(), n.getDescription());
             }
         }
     }

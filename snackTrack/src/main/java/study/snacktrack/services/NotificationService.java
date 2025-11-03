@@ -64,21 +64,19 @@ public class NotificationService {
         return repository.findAll();
     }
 
-    //response notifications
-    public List<NotificationResponse> getAllNotificationsDetails()
-    {
+    // response notifications
+    public List<NotificationResponse> getAllNotificationsDetails() {
         List<Notification> notificationList = repository.findAll();
         List<NotificationResponse> notificationDetails = new ArrayList<>();
-        for(Notification n : notificationList)
-        {
-            NotificationResponse response = new NotificationResponse(n.getId(), n.getName(), n.getDescription(), n.getSendingTime());
+        for (Notification n : notificationList) {
+            NotificationResponse response = new NotificationResponse(n.getId(), n.getName(), n.getDescription(),
+                    n.getSendingTime());
             notificationDetails.add(response);
         }
         return notificationDetails;
     }
 
-    public List<Notification> getNotificationsByRecipients(Recipients recipients)
-    {
+    public List<Notification> getNotificationsByRecipients(Recipients recipients) {
         if (recipients == null
                 || (recipients != Recipients.all && recipients != Recipients.non_premium
                         && recipients != Recipients.premium)) {
@@ -87,44 +85,41 @@ public class NotificationService {
         return repository.findByRecipients(recipients);
     }
 
-    //druga wersja
+    // druga wersja
     public List<NotificationResponse> getNotificationsByRecipientsWithoutDetails(Recipients recipients) {
         if (recipients == null
                 || (recipients != Recipients.all && recipients != Recipients.non_premium
-                && recipients != Recipients.premium)) {
+                        && recipients != Recipients.premium)) {
             throw new IllegalArgumentException("Wrong value of recipients");
         }
 
         List<Notification> notificationList = repository.findAll();
         List<NotificationResponse> notificationDetails = new ArrayList<>();
-        for(Notification n : notificationList)
-        {
-            if(n.getRecipients().equals(recipients))
-            {
-                NotificationResponse response = new NotificationResponse(n.getId(), n.getName(), n.getDescription(), n.getSendingTime());
+        for (Notification n : notificationList) {
+            if (n.getRecipients().equals(recipients)) {
+                NotificationResponse response = new NotificationResponse(n.getId(), n.getName(), n.getDescription(),
+                        n.getSendingTime());
                 notificationDetails.add(response);
             }
         }
         return notificationDetails;
     }
 
-    public List<NotificationResponse> getNotificationsByUser(int userId)
-    {
+    public List<NotificationResponse> getNotificationsByUser(int userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
         List<Notification> notifications = new ArrayList<>();
 
         if (user.getPremiumExpiration() != null) {
             notifications = repository.findByRecipientsIn(List.of(Recipients.all, Recipients.premium));
-        }
-        else
-        {
+        } else {
             notifications = repository.findByRecipientsIn(List.of(Recipients.all, Recipients.non_premium));
         }
 
         List<NotificationResponse> response = new ArrayList<>();
-        for (var notif : notifications)
-        {
-            response.add(new NotificationResponse(notif.getId(), notif.getName(), notif.getDescription(), notif.getSendingTime()));
+        for (var notif : notifications) {
+            if (notif.getSendingTime().isEqual(LocalDate.now()))
+                response.add(new NotificationResponse(notif.getId(), notif.getName(), notif.getDescription(),
+                        notif.getSendingTime()));
         }
 
         return response;

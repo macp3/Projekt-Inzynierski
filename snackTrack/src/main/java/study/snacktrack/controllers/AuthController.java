@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import study.snacktrack.dto.LoginRequest;
+import study.snacktrack.dto.LoginResponse;
 import study.snacktrack.dto.RegisterRequest;
 import study.snacktrack.entities.User;
 import study.snacktrack.entities.VerificationToken;
 import study.snacktrack.entities.enums.Status;
+import study.snacktrack.repositories.BodyParametersRepository;
 import study.snacktrack.repositories.UserRepository;
 import study.snacktrack.repositories.VerificationTokenRepository;
 import study.snacktrack.services.EmailService;
@@ -34,6 +36,7 @@ public class AuthController {
     private final JwtService jwtService;
     private final VerificationTokenRepository tokenRepository;
     private final EmailService emailService;
+    private final BodyParametersRepository bodyParametersRepository;
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
@@ -42,7 +45,6 @@ public class AuthController {
         }
 
         User user = new User();
-        user.setLogin(request.getLogin());
         user.setEmail(request.getEmail());
         user.setSurname(request.getSurname());
         user.setStatus(Status.inactive);
@@ -61,8 +63,7 @@ public class AuthController {
         emailService.sendEmail(
                 user.getEmail(),
                 "Activate your SnackTrack account",
-                "Hi " + user.getName() + ",\n\nClick here to activate your account:\n" + activationLink
-        );
+                "Hi " + user.getName() + ",\n\nClick here to activate your account:\n" + activationLink);
 
         return ResponseEntity.ok("User registered successfully! Check your email for activation link.");
     }
@@ -86,20 +87,30 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new LoginResponse(null, false, "Invalid credentials"));
         }
 
-        if (user.getStatus() != Status.active) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Account not activated or banned");
+        if (user.getStatus() == Status.inactive) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new LoginResponse(null, false, "Account not activated"));
+        }
+
+        if (user.getStatus() == Status.banned) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new LoginResponse(null, false, "Account has been banned"));
         }
 
         String token = jwtService.generateToken(user.getEmail(), "USER");
-        return ResponseEntity.ok(token);
+
+        boolean isFirstLogin = bodyParametersRepository.findByUserId(user.getId()).isPresent();
+
+        return ResponseEntity.ok(new LoginResponse(token, isFirstLogin, null));
     }
 
 }

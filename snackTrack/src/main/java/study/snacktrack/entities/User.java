@@ -32,9 +32,6 @@ public class User {
     @Column(unique = true)
     private String email;
     @NotNull
-    @Column(unique = true)
-    private String login;
-    @NotNull
     private String password;
 
     @Column(name = "image_url")
@@ -86,15 +83,6 @@ public class User {
 
     public void setEmail(@NotNull String email) {
         this.email = email;
-    }
-
-    @NotNull
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(@NotNull String login) {
-        this.login = login;
     }
 
     @NotNull

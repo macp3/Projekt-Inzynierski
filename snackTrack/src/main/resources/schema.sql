@@ -49,7 +49,6 @@ CREATE TABLE `users` (
   `name` varchar(30) NOT NULL,
   `surname` varchar(30) NOT NULL,
   `email` varchar(40) NOT NULL UNIQUE,
-  `login` varchar(40) NOT NULL UNIQUE,
   `password` varchar(500) NOT NULL,
   `image_url` VARCHAR(255) DEFAULT NULL,
   `premium_expiration` date DEFAULT NULL,
