@@ -356,8 +356,16 @@ public class UserService {
     }
 
     public void saveDeviceToken(int userId, String deviceToken) {
-        UserDeviceToken token = new UserDeviceToken(userId, deviceToken);
-        deviceTokenRepository.save(token);
+        List<UserDeviceToken> tokens = deviceTokenRepository.findByUserId(userId);
+
+        if (!tokens.isEmpty()) {
+            UserDeviceToken token = tokens.get(0);
+            token.setDeviceToken(deviceToken);
+            deviceTokenRepository.save(token);
+        } else {
+            UserDeviceToken newToken = new UserDeviceToken(userId, deviceToken);
+            deviceTokenRepository.save(newToken);
+        }
     }
 
     public List<String> getDeviceTokens(int userId) {

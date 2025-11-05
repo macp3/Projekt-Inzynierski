@@ -62,6 +62,8 @@ public class PushNotificationService {
                         .setTitle(title)
                         .setBody(body)
                         .build())
+                .putData("title", title)
+                .putData("body", body)
                 .build();
 
         try {

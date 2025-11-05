@@ -108,7 +108,7 @@ public class AuthController {
 
         String token = jwtService.generateToken(user.getEmail(), "USER");
 
-        boolean isFirstLogin = bodyParametersRepository.findByUserId(user.getId()).isPresent();
+        boolean isFirstLogin = !bodyParametersRepository.findByUserId(user.getId()).isPresent();
 
         return ResponseEntity.ok(new LoginResponse(token, isFirstLogin, null));
     }
