@@ -44,11 +44,11 @@ public class PushNotificationService {
             default -> throw new IllegalArgumentException("Invalid target group: " + targetGroup);
         };
 
-        List<String> tokens = tokenRepository.findAll().stream()
+        Set<String> tokens = tokenRepository.findAll().stream()
                 .filter(t -> userIds.contains(t.getUserId()))
                 .map(UserDeviceToken::getDeviceToken)
                 .filter(token -> token != null && !token.isBlank())
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
         System.out.println(tokens);
 
@@ -57,7 +57,7 @@ public class PushNotificationService {
         }
 
         MulticastMessage message = MulticastMessage.builder()
-                .addAllTokens(tokens)
+                .addAllTokens(new ArrayList<>(tokens))
                 .setNotification(Notification.builder()
                         .setTitle(title)
                         .setBody(body)
@@ -67,10 +67,23 @@ public class PushNotificationService {
                 .build();
 
         try {
-            FirebaseMessaging.getInstance().sendEachForMulticast(message);
+            BatchResponse batchResponse = FirebaseMessaging.getInstance().sendEachForMulticast(message);
+
+            List<SendResponse> responses = batchResponse.getResponses();
+            List<String> tokenList = new ArrayList<>(tokens);
+
+            for (int i = 0; i < responses.size(); i++) {
+                SendResponse response = responses.get(i);
+                if (!response.isSuccessful()) {
+                    String failedToken = tokenList.get(i);
+                    tokenRepository.deleteByDeviceToken(failedToken);
+                }
+            }
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to send notifications: " + e.getMessage());
         }
+
     }
 
     public void sendMulticastPush(List<String> deviceTokens, String title, String body) {
