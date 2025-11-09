@@ -2,15 +2,8 @@ package study.snacktrack.entities;
 
 import java.time.LocalDate;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import study.snacktrack.entities.enums.MealNames;
 
 @Entity
 @Table(name = "registered_alimentation")
@@ -36,6 +29,9 @@ public class RegisteredAlimentation {
 
     @Column(name = "timestamp", nullable = false)
     private LocalDate timestamp;
+    @Column(name = "meal", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MealNames mealName;
 
     @Column(name = "amount")
     private Float amount;
@@ -83,6 +79,18 @@ public class RegisteredAlimentation {
         this.timestamp = timestamp;
     }
 
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public MealNames getMealName() {
+        return mealName;
+    }
+
+    public void setMealName(MealNames mealName) {
+        this.mealName = mealName;
+    }
+
     public Float getAmount() {
         return amount;
     }
@@ -101,9 +109,5 @@ public class RegisteredAlimentation {
 
     public Integer getUserId() {
         return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 }

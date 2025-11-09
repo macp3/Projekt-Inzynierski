@@ -4,6 +4,8 @@
  */
 package study.snacktrack.dto;
 
+import study.snacktrack.entities.enums.MealNames;
+
 import java.time.LocalDate;
 
 public class RegisteredAlimentationRequest {
@@ -12,6 +14,8 @@ public class RegisteredAlimentationRequest {
     private Integer mealApiId;
     private Integer mealId;
     private LocalDate timestamp;
+    private MealNames mealName;
+
     private Float amount;
     private Integer pieces;
 
@@ -45,6 +49,14 @@ public class RegisteredAlimentationRequest {
 
     public void setTimestamp(LocalDate timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public MealNames getMealName() {
+        return mealName;
+    }
+
+    public void setMealName(MealNames mealName) {
+        this.mealName = mealName;
     }
 
     public Float getAmount() {

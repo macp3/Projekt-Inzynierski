@@ -199,6 +199,7 @@ CREATE TABLE `registered_alimentation` (
   `meal_api_id` int(11) DEFAULT NULL,
   `meal_id` int(11) DEFAULT NULL,
   `timestamp` date NOT NULL,
+  `meal` enum('breakfast', 'lunch', 'dinner', 'supper', 'snack') NOT NULL,
   `amount` float DEFAULT NULL,
   `pieces` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),

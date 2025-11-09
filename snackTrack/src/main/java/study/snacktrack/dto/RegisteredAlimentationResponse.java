@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import study.snacktrack.entities.Meal;
 import study.snacktrack.entities.RegisteredAlimentation;
+import study.snacktrack.entities.enums.MealNames;
 
 public class RegisteredAlimentationResponse {
 
@@ -13,6 +14,7 @@ public class RegisteredAlimentationResponse {
     private ApiFoodResponseDetailed mealApi;
     private Meal meal;
     private LocalDate timestamp;
+    private MealNames mealName;
     private Float amount;
     private Integer pieces;
 
@@ -26,6 +28,7 @@ public class RegisteredAlimentationResponse {
         this.amount = ra.getAmount();
         this.pieces = ra.getPieces();
         this.meal = ra.getMeal();
+        this.mealName = ra.getMealName();
 
         if (ra.getEssentialFood() != null) {
             this.essentialFood = new EssentialFoodResponse(ra.getEssentialFood());
@@ -95,5 +98,13 @@ public class RegisteredAlimentationResponse {
 
     public ApiFoodResponseDetailed getMealApi() {
         return mealApi;
+    }
+
+    public MealNames getMealName() {
+        return mealName;
+    }
+
+    public void setMealName(MealNames mealName) {
+        this.mealName = mealName;
     }
 }

@@ -7,11 +7,15 @@ import org.springframework.web.server.ResponseStatusException;
 import study.snacktrack.dto.RegisteredAlimentationRequest;
 import study.snacktrack.dto.RegisteredAlimentationResponse;
 import study.snacktrack.entities.*;
+import study.snacktrack.entities.enums.DietTypes;
+import study.snacktrack.entities.enums.MealNames;
 import study.snacktrack.repositories.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RegisteredAlimentationService {
@@ -43,6 +47,15 @@ public class RegisteredAlimentationService {
         String email = jwtService.extractEmail(token);
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+    }
+
+    private Optional<LocalDate> parseDate(String date) {
+        if (date == null || date.isEmpty()) return Optional.empty();
+        try {
+            return Optional.of(LocalDate.parse(date));
+        } catch (DateTimeParseException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date format. Use YYYY-MM-DD");
+        }
     }
 
     public String addEntry(String authHeader, RegisteredAlimentationRequest dto, String date) {
@@ -90,8 +103,14 @@ public class RegisteredAlimentationService {
         } else {
             entryDate = LocalDate.now();
         }
-
         entry.setTimestamp(entryDate);
+
+        boolean exists = Arrays.asList(MealNames.values()).contains(dto.getMealName());
+        if (dto.getMealName() == null || !exists) {
+            throw new IllegalArgumentException("There is no such meal");
+        }
+
+        entry.setMealName(dto.getMealName());
 
         repository.save(entry);
         return "Meal registered";
@@ -99,29 +118,31 @@ public class RegisteredAlimentationService {
 
     public List<RegisteredAlimentationResponse> getMyEntries(String authHeader, String date) {
         User user = getUserFromToken(authHeader);
-        List<RegisteredAlimentation> myEntries;
 
-        if (date != null && !date.isEmpty()) {
-            try {
-                LocalDate parsedDate = LocalDate.parse(date);
-                myEntries = repository.findByUserIdAndTimestamp(user.getId(), parsedDate);
-            } catch (DateTimeParseException e) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date format. Use YYYY-MM-DD");
-            }
-        } else {
-            myEntries = repository.findByUserId(user.getId());
-        }
+        List<RegisteredAlimentation> myEntries = parseDate(date)
+                .map(parsedDate -> repository.findByUserIdAndTimestamp(user.getId(), parsedDate))
+                .orElseGet(() -> repository.findByUserId(user.getId()));
 
         return myEntries.stream()
                 .map(entry -> {
                     RegisteredAlimentationResponse dto = new RegisteredAlimentationResponse(entry);
+
+                    // mealName przypisane bezpośrednio (enum)
+                    if (entry.getMealName() != null) {
+                        dto.setMealName(entry.getMealName());
+                    } else {
+                        dto.setMealName(MealNames.snack); // fallback
+                    }
+
+                    // Pobranie danych z Meal API jeśli essentialFood jest null
                     if (entry.getEssentialFood() == null && entry.getMealApiId() != null) {
                         try {
                             dto.setMealApi(foodService.getFoodFromApiById(entry.getMealApiId()));
                         } catch (Exception e) {
-                            System.err.println(e.getMessage());
+                            System.err.println("Error fetching from API: " + e.getMessage());
                         }
                     }
+
                     return dto;
                 })
                 .toList();
