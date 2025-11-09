@@ -2,8 +2,8 @@ version: '3.8'
 
 services:
   mysql:
-    image: mysql:8.0
     container_name: guide-mysql
+    image: mysql:latest
     environment:
       MYSQL_DATABASE: snackTrackDB
       MYSQL_USER: myuser
@@ -17,9 +17,9 @@ services:
   app:
     container_name: snacktrack-app
     build: .
-    image: snacktrack:latest
     env_file:
       - .env
+    image: snacktrack:latest
     depends_on:
       - mysql
     ports:
