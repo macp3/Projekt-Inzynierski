@@ -2,6 +2,7 @@ package study.snacktrack.services;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import study.snacktrack.dto.ApiFoodResponseDetailed;
+import study.snacktrack.dto.EssentialFoodRequest;
+import study.snacktrack.dto.EssentialFoodResponse;
 import study.snacktrack.entities.EssentialFood;
 import study.snacktrack.repositories.FoodRepository;
 import org.springframework.http.HttpEntity;
@@ -63,6 +66,18 @@ public class FoodService {
         } catch (NumberFormatException e) {
             return defaultValue;
         }
+    }
+
+    public List<EssentialFoodResponse> getAllEssentials()
+    {
+        List<EssentialFood> essentials = foodRepository.findAll();
+        List<EssentialFoodResponse> response = new ArrayList<>();
+        for(EssentialFood e: essentials)
+        {
+            EssentialFoodResponse r = new EssentialFoodResponse(e);
+            response.add(r);
+        }
+        return response;
     }
 
     public List<ApiFoodResponse> getFoodFromApi(String query) {
@@ -169,38 +184,50 @@ public class FoodService {
         return description.trim();
     }
 
-    public String addEssentialFood(EssentialFood food, User currentUser) {
+    public String addEssentialFood(EssentialFoodRequest request, User currentUser) {
 
-        food.setAuthorId(currentUser.getId());
-
-        if (foodRepository.existsByNameIgnoreCase(food.getName())) {
-            throw new IllegalArgumentException("Product already exists in the database: " + food.getName());
+        if (foodRepository.existsByNameIgnoreCase(request.getName())) {
+            throw new IllegalArgumentException("Product already exists in the database: " + request.getName());
         }
 
-        if (food.getName() == null || food.getName().isBlank()) {
+        if (request.getName() == null || request.getName().isBlank()) {
             throw new IllegalArgumentException("Field 'name' is required");
         }
-        if (food.getDescription() == null || food.getDescription().isBlank()) {
+        if (request.getDescription() == null || request.getDescription().isBlank()) {
             throw new IllegalArgumentException("Field 'description' is required");
         }
-        if (food.getCalories() <= 0) {
+        if (request.getCalories() <= 0) {
             throw new IllegalArgumentException("Field 'calories' must be greater than 0");
         }
-        if (food.getProtein() < 0) {
+        if (request.getProtein() < 0) {
             throw new IllegalArgumentException("Field 'protein' must be greater or equal 0");
         }
-        if (food.getFat() < 0) {
+        if (request.getFat() < 0) {
             throw new IllegalArgumentException("Field 'fat' must be greater or equal 0");
         }
-        if (food.getCarbohydrates() < 0) {
+        if (request.getCarbohydrates() < 0) {
             throw new IllegalArgumentException("Field 'carbohydrates' must be greater or equal 0");
         }
-        if (food.getDefaultWeight() < 0) {
+        if (request.getDefaultWeight() < 0) {
             throw new IllegalArgumentException("Field 'defaultWeight' must be greater or equal 0");
         }
-        if (food.getServingSizeUnit() == null || food.getServingSizeUnit().isBlank()) {
+        if (request.getServingSizeUnit() == null || request.getServingSizeUnit().isBlank()) {
             throw new IllegalArgumentException("Field 'servingSizeUnit' is required");
         }
+
+        EssentialFood food = new EssentialFood();
+
+        food.setId(food.getId());
+        food.setAuthorId(currentUser.getId());
+        food.setName(request.getName());
+        food.setCalories(request.getCalories());
+        food.setCarbohydrates(request.getCarbohydrates());
+        food.setDescription(request.getDescription());
+        food.setFat(request.getFat());
+        food.setProtein(request.getProtein());
+        food.setBrandName(request.getBrandName());
+        food.setDefaultWeight(request.getDefaultWeight());
+        food.setServingSizeUnit(request.getServingSizeUnit());
 
         foodRepository.save(food);
         return "Food has been added to database";

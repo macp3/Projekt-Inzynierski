@@ -3,6 +3,8 @@ package study.snacktrack.controllers;
 import java.util.List;
 
 import study.snacktrack.dto.ApiFoodResponseDetailed;
+import study.snacktrack.dto.EssentialFoodRequest;
+import study.snacktrack.dto.EssentialFoodResponse;
 import study.snacktrack.entities.EssentialFood;
 import study.snacktrack.services.FoodService;
 import study.snacktrack.services.JwtService;
@@ -34,6 +36,12 @@ public class FoodController {
         this.jwtService = jwtService;
     }
 
+    @GetMapping("/all")
+    public List<EssentialFoodResponse> getAllEssentials()
+    {
+            return foodService.getAllEssentials();
+    }
+
     // dziala
     @GetMapping("/api/search")
     public List<ApiFoodResponse> getFoodFromApi(@RequestParam String query) {
@@ -52,7 +60,7 @@ public class FoodController {
 
     // dziala
     @PostMapping("/add")
-    public ResponseEntity<?> addEssentialFood(@RequestBody EssentialFood food,
+    public ResponseEntity<?> addEssentialFood(@RequestBody EssentialFoodRequest request,
             @RequestHeader("Authorization") String authHeader) {
         try {
             String token = authHeader.replace("Bearer ", "");
@@ -60,7 +68,7 @@ public class FoodController {
 
             User currentUser = userService.getUserByEmail(email);
 
-            return ResponseEntity.ok(foodService.addEssentialFood(food, currentUser));
+            return ResponseEntity.ok(foodService.addEssentialFood(request, currentUser));
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

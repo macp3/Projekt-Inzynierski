@@ -43,6 +43,23 @@ public class EssentialFood {
     @Column(name = "brand_name")
     private String brandName;
 
+    public EssentialFood() {
+    }
+
+    public EssentialFood(int id, @NotNull String name, int authorId, @NotNull String description, float calories, float protein, float fat, float carbohydrates, String servingSizeUnit, float defaultWeight, String brandName) {
+        this.id = id;
+        this.name = name;
+        this.authorId = authorId;
+        this.description = description;
+        this.calories = calories;
+        this.protein = protein;
+        this.fat = fat;
+        this.carbohydrates = carbohydrates;
+        this.servingSizeUnit = servingSizeUnit;
+        this.defaultWeight = defaultWeight;
+        this.brandName = brandName;
+    }
+
     public int getId() {
         return id;
     }
