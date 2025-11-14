@@ -1,6 +1,5 @@
 package study.snacktrack.entities;
 
-import study.snacktrack.entities.enums.DietType;
 import study.snacktrack.entities.enums.Sex;
 import org.jetbrains.annotations.NotNull;
 
@@ -52,16 +51,6 @@ public class BodyParameters {
     @Column(name = "carbohydrates_limit")
     @NotNull
     private Float carbohydratesLimit;
-    @Enumerated(EnumType.STRING)
-    private DietType preferredDiet;
-
-    public DietType getPreferredDiet() {
-        return preferredDiet;
-    }
-
-    public void setPreferredDiet(DietType preferredDiet) {
-        this.preferredDiet = preferredDiet;
-    }
 
     @NotNull
     public Integer getUserId() {

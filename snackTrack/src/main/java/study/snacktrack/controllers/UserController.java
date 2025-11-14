@@ -29,7 +29,6 @@ import study.snacktrack.entities.Favourite;
 import study.snacktrack.entities.Meal;
 import study.snacktrack.entities.Notification;
 import study.snacktrack.entities.User;
-import study.snacktrack.entities.enums.DietType;
 import study.snacktrack.repositories.FavouriteRepository;
 import study.snacktrack.repositories.MealRepository;
 import study.snacktrack.repositories.UserRepository;
@@ -113,7 +112,7 @@ public class UserController {
             response = userService.changeBodyParameters(user.getId(), request.getSex(), request.getHeight(),
                     request.getWeight(), request.getAge(), request.getDailyActivityFactor(),
                     request.getDailyActivityTrainingFactor(), request.getWeeklyWeightChangeTempo(),
-                    request.getGoalWeight(), request.getPreferredDiet());
+                    request.getGoalWeight());
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -121,29 +120,6 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
-
-    // niepotrzebna metoda - diet type bedzie tylko w meal
-    /*
-     * @PutMapping("/changePrefferedDiet")
-     * public ResponseEntity<String>
-     * changePrefferedDiet(@RequestHeader("Authorization") String
-     * authHeader, @RequestParam DietTypes prefferedDiet) {
-     * try
-     * {
-     * String token = authHeader.replace("Bearer ", "");
-     * String email = jwtService.extractEmail(token);
-     * 
-     * User user = userService.getUserByEmail(email);
-     * 
-     * userService.changePrefferedDiet(user.getId(), prefferedDiet);
-     * }
-     * catch(IllegalArgumentException e)
-     * {
-     * return ResponseEntity.badRequest().body(e.getMessage());
-     * }
-     * return ResponseEntity.ok("Preferred diet successfully changed");
-     * }
-     */
 
     // dziala
     @PostMapping("/addParameters")
@@ -159,7 +135,7 @@ public class UserController {
             response = userService.addBodyParameters(user.getId(), request.getSex(), request.getHeight(),
                     request.getWeight(), request.getAge(), request.getDailyActivityFactor(),
                     request.getDailyActivityTrainingFactor(), request.getWeeklyWeightChangeTempo(),
-                    request.getGoalWeight(), request.getPreferredDiet());
+                    request.getGoalWeight());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

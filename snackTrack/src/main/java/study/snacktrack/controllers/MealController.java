@@ -12,7 +12,6 @@ import study.snacktrack.dto.MealResponse;
 import study.snacktrack.entities.Comment;
 import study.snacktrack.entities.Meal;
 import study.snacktrack.entities.User;
-import study.snacktrack.repositories.MealDietTypeRepository;
 import study.snacktrack.services.CommentService;
 import study.snacktrack.services.JwtService;
 import study.snacktrack.services.MealService;
@@ -26,15 +25,13 @@ public class MealController {
     private final JwtService jwtService;
     private final UserService userService;
     private final CommentService commentService;
-    private final MealDietTypeRepository mealDietTypeRepository;
 
     public MealController(MealService mealService, JwtService jwtService, UserService userService,
-            CommentService commentService, MealDietTypeRepository mealDietTypeRepository) {
+            CommentService commentService) {
         this.mealService = mealService;
         this.jwtService = jwtService;
         this.userService = userService;
         this.commentService = commentService;
-        this.mealDietTypeRepository = mealDietTypeRepository;
     }
 
     private User authorizeUser(String authHeader) {
@@ -140,27 +137,4 @@ public class MealController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-    // // dziala
-    // @PostMapping("/{mealId}/diet-types")
-    // public ResponseEntity<String> assignDietTypes(
-    // @PathVariable int mealId,
-    // @RequestBody AssignDietTypesRequest request) {
-    // try {
-    // mealService.assignDietTypesToMeal(mealId, request.getDietTypeIds());
-    // return ResponseEntity.ok("Diet types assigned successfully");
-    // } catch (IllegalArgumentException e) {
-    // return ResponseEntity.badRequest().body(e.getMessage());
-    // }
-    // }
-
-    // // dziala
-    // @GetMapping("/{mealId}/diet-types")
-    // public ResponseEntity<?> getDietTypesForMeal(@PathVariable int mealId) {
-    // try {
-    // return ResponseEntity.ok(mealService.getMealDietTypes(mealId));
-    // } catch (IllegalArgumentException e) {
-    // return ResponseEntity.badRequest().body(e.getMessage());
-    // }
-    // }
 }

@@ -33,15 +33,6 @@ CREATE TABLE `admins` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
--- TABLE: diet_types
--- --------------------------------------------------------
-CREATE TABLE `diet_types` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` enum('balanced','keto','low_carb','high_protein','low_fat','vegan','vegetarian','gluten_free','lactose_free') NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
 -- TABLE: users
 -- --------------------------------------------------------
 CREATE TABLE `users` (
@@ -74,7 +65,6 @@ CREATE TABLE `body_parameters` (
   `protein_limit` float NOT NULL,
   `fat_limit` float NOT NULL,
   `carbohydrates_limit` float NOT NULL,
-  `preferred_diet` enum('balanced','keto','low_carb','high_protein','low_fat','vegan','vegetarian','gluten_free','lactose_free') DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   CONSTRAINT `body_parameters_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -123,17 +113,6 @@ CREATE TABLE `meals` (
   CONSTRAINT `meals_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- --------------------------------------------------------
--- TABLE: meal_diet_types
--- --------------------------------------------------------
-CREATE TABLE `meal_diet_types` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `meal_id` int(11) NOT NULL,
-  `diet_type_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  CONSTRAINT `meal_diet_types_meal_fk` FOREIGN KEY (`meal_id`) REFERENCES `meals`(`id`) ON DELETE CASCADE,
-  CONSTRAINT `meal_diet_types_diet_fk` FOREIGN KEY (`diet_type_id`) REFERENCES `diet_types`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 -- TABLE: ingredients

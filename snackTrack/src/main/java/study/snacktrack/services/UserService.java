@@ -22,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.transaction.Transactional;
 import study.snacktrack.dto.BodyParametersResponse;
 import study.snacktrack.entities.*;
-import study.snacktrack.entities.enums.DietType;
 import study.snacktrack.entities.enums.Sex;
 import study.snacktrack.entities.enums.Status;
 import study.snacktrack.repositories.*;
@@ -84,8 +83,7 @@ public class UserService {
             Float dailyActivityFactor,
             Float dailyActivityTrainingFactor,
             Float weeklyWeightChangeTempo,
-            Float goalWeight,
-            DietType dietType) {
+            Float goalWeight) {
         BodyParameters existing = bodyParametersRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User with ID " + userId + " not found"));
 
@@ -146,7 +144,6 @@ public class UserService {
         float finalDailyActivityTrainingFactor = existing.getDailyActivityTrainingFactor();
         float finalWeeklyWeightChangeTempo = existing.getWeeklyWeightChangeTempo();
         float finalGoalWeight = existing.getGoalWeight();
-        DietType preferredDiet = existing.getPreferredDiet();
 
         if (finalGoalWeight == finalWeight) {
             finalWeeklyWeightChangeTempo = 0f;
@@ -184,7 +181,6 @@ public class UserService {
         existing.setProteinLimit(proteinLimit);
         existing.setFatLimit(fatLimit);
         existing.setCarbohydratesLimit(carbohydratesLimit);
-        existing.setPreferredDiet(preferredDiet);
 
         System.out.println(existing);
 
@@ -194,7 +190,7 @@ public class UserService {
                 updated.getHeight(), updated.getWeight(), updated.getAge(), updated.getDailyActivityFactor(),
                 updated.getDailyActivityTrainingFactor(), updated.getWeeklyWeightChangeTempo(), updated.getGoalWeight(),
                 updated.getCalorieLimit(), updated.getProteinLimit(), updated.getFatLimit(),
-                updated.getCarbohydratesLimit(), updated.getPreferredDiet());
+                updated.getCarbohydratesLimit());
 
         return response;
     }
@@ -202,7 +198,7 @@ public class UserService {
     @Transactional
     public BodyParameters addBodyParameters(Integer userId, Sex sex, Float height, Float weight, Integer age,
             Float dailyActivityFactor, Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo,
-            Float goalWeight, DietType dietType) {
+            Float goalWeight) {
         if (sex == null)
             throw new IllegalArgumentException("Sex must not be null");
         if (sex != Sex.female && sex != Sex.male)
@@ -227,9 +223,6 @@ public class UserService {
         if (dailyActivityTrainingFactor == null || (Float.compare(dailyActivityTrainingFactor, 0.5f) < 0
                 || Float.compare(dailyActivityTrainingFactor, 0.95f) > 0))
             throw new IllegalArgumentException("Daily activity training factor must be between 0.5 and 0.95");
-        if (dietType == null) {
-            throw new IllegalArgumentException("Diet type cant be null");
-        }
 
         float formula = 0;
         if (sex == Sex.male) {
@@ -275,7 +268,6 @@ public class UserService {
         bodyParameters.setProteinLimit(proteinLimit);
         bodyParameters.setFatLimit(fatLimit);
         bodyParameters.setCarbohydratesLimit(carbohydratesLimit);
-        bodyParameters.setPreferredDiet(dietType);
 
         return bodyParametersRepository.save(bodyParameters);
     }
@@ -359,8 +351,7 @@ public class UserService {
                 bp.getCalorieLimit(),
                 bp.getProteinLimit(),
                 bp.getFatLimit(),
-                bp.getCarbohydratesLimit(),
-                bp.getPreferredDiet());
+                bp.getCarbohydratesLimit());
     }
 
     public User getUserByEmail(String email) {

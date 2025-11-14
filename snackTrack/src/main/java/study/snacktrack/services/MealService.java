@@ -21,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.transaction.Transactional;
 import study.snacktrack.dto.*;
 import study.snacktrack.entities.*;
-import study.snacktrack.entities.enums.DietType;
 import study.snacktrack.repositories.*;
 
 @Service
@@ -35,18 +34,16 @@ public class MealService {
     private final IngredientRepository ingredientRepository;
     private final FoodRepository foodRepository;
     private final FoodService foodService;
-    private final MealDietTypeRepository mealDietTypeRepository;
     private final FavouriteRepository favouriteRepository;
 
     public MealService(UserRepository userRepository, FoodRepository foodRepository, MealRepository mealRepository,
             IngredientRepository ingredientRepository, FoodService foodService,
-            MealDietTypeRepository mealDietTypeRepository, FavouriteRepository favouriteRepository) {
+            FavouriteRepository favouriteRepository) {
         this.userRepository = userRepository;
         this.mealRepository = mealRepository;
         this.ingredientRepository = ingredientRepository;
         this.foodRepository = foodRepository;
         this.foodService = foodService;
-        this.mealDietTypeRepository = mealDietTypeRepository;
         this.favouriteRepository = favouriteRepository;
     }
 
@@ -298,39 +295,4 @@ public class MealService {
         return mealRepository.findById(mealId)
                 .orElseThrow(() -> new IllegalArgumentException("This meal doesn't exist"));
     }
-
-    // @Transactional
-    // public void assignDietTypesToMeal(int mealId, List<Integer> dietTypeIds) {
-    // if (!mealRepository.existsById(mealId)) {
-    // throw new IllegalArgumentException("Meal not found with id: " + mealId);
-    // }
-
-    // // dodalem
-    // if (dietTypeIds == null)
-    // throw new IllegalArgumentException("Diet types must not be null");
-
-    // mealDietTypeRepository.deleteByMealId(mealId);
-
-    // for (Integer dietTypeId : dietTypeIds) {
-    // if (!dietTypeRepository.existsById(dietTypeId)) {
-    // throw new IllegalArgumentException("DietType not found with id: " +
-    // dietTypeId);
-    // }
-
-    // MealDietType mdt = new MealDietType();
-    // mdt.setMealId(mealId);
-    // mdt.setDietTypeId(dietTypeId);
-    // mealDietTypeRepository.save(mdt);
-    // }
-    // }
-
-    // public List<DietType> getMealDietTypes(int mealId) {
-    // Meal meal = validateMealExistance(mealId);
-    // List<MealDietType> mappings = mealDietTypeRepository.findByMealId(mealId);
-    // List<DietType> dietTypes = mappings.stream()
-    // .map(mdt -> dietTypeRepository.findById(mdt.getDietTypeId()).orElse(null))
-    // .filter(Objects::nonNull)
-    // .toList();
-    // return dietTypes;
-    // }
 }

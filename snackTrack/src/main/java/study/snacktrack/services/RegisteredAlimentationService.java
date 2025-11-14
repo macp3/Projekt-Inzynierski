@@ -7,7 +7,6 @@ import org.springframework.web.server.ResponseStatusException;
 import study.snacktrack.dto.RegisteredAlimentationRequest;
 import study.snacktrack.dto.RegisteredAlimentationResponse;
 import study.snacktrack.entities.*;
-import study.snacktrack.entities.enums.DietType;
 import study.snacktrack.entities.enums.MealNames;
 import study.snacktrack.repositories.*;
 

@@ -2,7 +2,6 @@ package study.snacktrack.entities;
 
 import java.time.LocalDate;
 
-import study.snacktrack.entities.enums.DietType;
 import study.snacktrack.entities.enums.Status;
 import org.jetbrains.annotations.NotNull;
 
