@@ -53,7 +53,6 @@ CREATE TABLE `users` (
   `image_url` VARCHAR(255) DEFAULT NULL,
   `premium_expiration` date DEFAULT NULL,
   `status` enum('banned','active','inactive') NOT NULL,
-  `preffered_diet` enum('balanced','keto','low_carb','high_protein','low_fat','vegan','vegetarian','gluten_free','lactose_free') DEFAULT NULL,
   `streak` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -75,6 +74,7 @@ CREATE TABLE `body_parameters` (
   `protein_limit` float NOT NULL,
   `fat_limit` float NOT NULL,
   `carbohydrates_limit` float NOT NULL,
+  `preferred_diet` enum('balanced','keto','low_carb','high_protein','low_fat','vegan','vegetarian','gluten_free','lactose_free') DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   CONSTRAINT `body_parameters_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

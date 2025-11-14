@@ -7,7 +7,7 @@ import org.springframework.web.server.ResponseStatusException;
 import study.snacktrack.dto.RegisteredAlimentationRequest;
 import study.snacktrack.dto.RegisteredAlimentationResponse;
 import study.snacktrack.entities.*;
-import study.snacktrack.entities.enums.DietTypes;
+import study.snacktrack.entities.enums.DietType;
 import study.snacktrack.entities.enums.MealNames;
 import study.snacktrack.repositories.*;
 
@@ -50,7 +50,8 @@ public class RegisteredAlimentationService {
     }
 
     private Optional<LocalDate> parseDate(String date) {
-        if (date == null || date.isEmpty()) return Optional.empty();
+        if (date == null || date.isEmpty())
+            return Optional.empty();
         try {
             return Optional.of(LocalDate.parse(date));
         } catch (DateTimeParseException e) {

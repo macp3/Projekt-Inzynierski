@@ -2,7 +2,7 @@ package study.snacktrack.entities;
 
 import java.time.LocalDate;
 
-import study.snacktrack.entities.enums.DietTypes;
+import study.snacktrack.entities.enums.DietType;
 import study.snacktrack.entities.enums.Status;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,10 +43,6 @@ public class User {
     @NotNull
     @Enumerated(EnumType.STRING)
     private Status status;
-    @Column(name = "preffered_diet")
-    @Enumerated(EnumType.STRING)
-    @Nullable
-    private DietTypes prefferedDiet;
     @NotNull
     private int streak;
 
@@ -110,15 +106,6 @@ public class User {
 
     public void setStatus(@NotNull Status status) {
         this.status = status;
-    }
-
-    @Nullable
-    public DietTypes getPrefferedDiet() {
-        return prefferedDiet;
-    }
-
-    public void setPrefferedDiet(@Nullable DietTypes prefferedDiet) {
-        this.prefferedDiet = prefferedDiet;
     }
 
     public int getStreak() {

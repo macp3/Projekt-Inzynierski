@@ -1,5 +1,6 @@
 package study.snacktrack.dto;
 
+import study.snacktrack.entities.enums.DietType;
 import study.snacktrack.entities.enums.Sex;
 
 public class BodyParametersResponse {
@@ -17,8 +18,20 @@ public class BodyParametersResponse {
     private Float proteinLimit;
     private Float fatLimit;
     private Float carbohydratesLimit;
+    private DietType preferredDiet;
 
-    public BodyParametersResponse(int userId, Sex sex, Float height, Float weight, Integer age, Float dailyActivityFactor, Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo, Float goalWeight, Float calorieLimit, Float proteinLimit, Float fatLimit, Float carbohydratesLimit) {
+    public DietType getPreferredDiet() {
+        return preferredDiet;
+    }
+
+    public void setPreferredDiet(DietType preferredDiet) {
+        this.preferredDiet = preferredDiet;
+    }
+
+    public BodyParametersResponse(int userId, Sex sex, Float height, Float weight, Integer age,
+            Float dailyActivityFactor, Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo,
+            Float goalWeight, Float calorieLimit, Float proteinLimit, Float fatLimit, Float carbohydratesLimit,
+            DietType preferredDiet) {
         this.userId = userId;
         this.sex = sex;
         this.height = height;
@@ -32,6 +45,7 @@ public class BodyParametersResponse {
         this.proteinLimit = proteinLimit;
         this.fatLimit = fatLimit;
         this.carbohydratesLimit = carbohydratesLimit;
+        this.preferredDiet = preferredDiet;
     }
 
     public int getUserId() {

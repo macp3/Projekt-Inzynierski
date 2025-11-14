@@ -1,6 +1,6 @@
 package study.snacktrack.entities.enums;
 
-public enum DietTypes {
+public enum DietType {
     balanced,
     keto,
     low_carb,

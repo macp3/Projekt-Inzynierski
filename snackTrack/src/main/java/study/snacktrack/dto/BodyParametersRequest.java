@@ -1,5 +1,6 @@
 package study.snacktrack.dto;
 
+import study.snacktrack.entities.enums.DietType;
 import study.snacktrack.entities.enums.Sex;
 
 public class BodyParametersRequest {
@@ -12,8 +13,19 @@ public class BodyParametersRequest {
     private Float dailyActivityTrainingFactor;
     private Float weeklyWeightChangeTempo;
     private Float goalWeight;
+    private DietType preferredDiet;
 
-    public BodyParametersRequest(Sex sex, Float height, Float weight, Integer age, Float dailyActivityFactor, Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo, Float goalWeight) {
+    public DietType getPreferredDiet() {
+        return preferredDiet;
+    }
+
+    public void setPreferredDiet(DietType preferredDiet) {
+        this.preferredDiet = preferredDiet;
+    }
+
+    public BodyParametersRequest(Sex sex, Float height, Float weight, Integer age, Float dailyActivityFactor,
+            Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo, Float goalWeight,
+            DietType preferredDiet) {
         this.sex = sex;
         this.height = height;
         this.weight = weight;
@@ -22,6 +34,7 @@ public class BodyParametersRequest {
         this.dailyActivityTrainingFactor = dailyActivityTrainingFactor;
         this.weeklyWeightChangeTempo = weeklyWeightChangeTempo;
         this.goalWeight = goalWeight;
+        this.preferredDiet = preferredDiet;
     }
 
     public Sex getSex() {
