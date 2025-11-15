@@ -2,7 +2,6 @@ package study.snacktrack.controllers;
 
 import java.util.List;
 
-import study.snacktrack.dto.ApiFoodResponseDetailed;
 import study.snacktrack.dto.EssentialFoodRequest;
 import study.snacktrack.dto.EssentialFoodResponse;
 import study.snacktrack.entities.EssentialFood;
@@ -37,9 +36,8 @@ public class FoodController {
     }
 
     @GetMapping("/all")
-    public List<EssentialFoodResponse> getAllEssentials()
-    {
-            return foodService.getAllEssentials();
+    public List<EssentialFoodResponse> getAllEssentials() {
+        return foodService.getAllEssentials();
     }
 
     // dziala

@@ -39,3 +39,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+snackTrack/uploads/profiles/*
+snackTrack/uploads/meals/*

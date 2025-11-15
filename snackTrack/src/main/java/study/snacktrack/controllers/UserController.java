@@ -252,7 +252,7 @@ public class UserController {
 
     // dziala
     @PostMapping("/image")
-    public ResponseEntity<String> uploadMealImage(
+    public ResponseEntity<String> uploadProfileImage(
             @RequestHeader("Authorization") String authHeader,
             @RequestParam("image") MultipartFile imageFile) {
         try {

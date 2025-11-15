@@ -6,10 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import study.snacktrack.dto.AssignDietTypesRequest;
 import study.snacktrack.dto.MealRequest;
 import study.snacktrack.dto.MealResponse;
-import study.snacktrack.entities.Comment;
 import study.snacktrack.entities.Meal;
 import study.snacktrack.entities.User;
 import study.snacktrack.services.CommentService;

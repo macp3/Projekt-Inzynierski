@@ -6,6 +6,7 @@ target/
 
 .env
 !**/src/main/resource/firebase/
+!**/uploads/
 
 ### STS ###
 .apt_generated

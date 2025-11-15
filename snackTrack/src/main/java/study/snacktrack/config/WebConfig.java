@@ -9,10 +9,14 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String uploadPath = System.getProperty("user.dir") + "/uploads/";
 
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + uploadPath)
+        // foldery w kontenerze podpięte z volume
+        registry.addResourceHandler("/images/profiles/**")
+                .addResourceLocations("file:/app/uploads/profiles/")
+                .setCachePeriod(3600);
+
+        registry.addResourceHandler("/images/meals/**")
+                .addResourceLocations("file:/app/uploads/meals/")
                 .setCachePeriod(3600);
     }
 }

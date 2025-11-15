@@ -400,20 +400,23 @@ public class UserService {
             throw new IllegalArgumentException("Image file cannot be empty");
         }
 
-        Path uploadPath = Paths.get(uploadDir);
+        Path uploadPath = Paths.get("/app/uploads/profiles");
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String fileName = "profile_" + userId + ".jpg";
         Path filePath = uploadPath.resolve(fileName);
 
         Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        String relativePath = "/images/meals/" + fileName;
+        long ts = System.currentTimeMillis();
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        String relativePath = "/images/profiles/" + fileName + "?t=" + ts;
+
         user.setImageUrl(relativePath);
         userRepository.save(user);
 
