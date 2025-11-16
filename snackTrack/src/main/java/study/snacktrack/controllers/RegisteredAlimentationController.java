@@ -7,6 +7,7 @@ import org.springframework.web.server.ResponseStatusException;
 import study.snacktrack.dto.RegisteredAlimentationRequest;
 import study.snacktrack.dto.RegisteredAlimentationResponse;
 import study.snacktrack.entities.RegisteredAlimentation;
+import study.snacktrack.entities.enums.MealNames;
 import study.snacktrack.services.RegisteredAlimentationService;
 
 import java.util.List;
@@ -74,4 +75,20 @@ public class RegisteredAlimentationController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PostMapping("/copy")
+    public ResponseEntity<String> copyMeal(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestParam String fromDate,
+            @RequestParam MealNames fromMealName,
+            @RequestParam String toDate,
+            @RequestParam MealNames toMealName) {
+        try {
+            String result = service.copyMeal(authHeader, fromDate, fromMealName, toDate, toMealName);
+            return ResponseEntity.ok(result);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+        }
+    }
+
 }

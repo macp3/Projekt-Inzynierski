@@ -1,5 +1,6 @@
 package study.snacktrack.services;
 
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -193,4 +194,45 @@ public class RegisteredAlimentationService {
 
         return repository.save(entry);
     }
+
+    @Transactional
+    public String copyMeal(String authHeader,
+                           String fromDate,
+                           MealNames fromMealName,
+                           String toDate,
+                           MealNames toMealName) {
+        User user = getUserFromToken(authHeader);
+
+        LocalDate from = parseDate(fromDate)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid source date"));
+        LocalDate to = parseDate(toDate)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid target date"));
+
+        // pobierz wszystkie wpisy dla posiłku źródłowego
+        List<RegisteredAlimentation> sourceEntries =
+                repository.findByUserIdAndTimestampAndMealName(user.getId(), from, fromMealName);
+
+        if (sourceEntries.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No entries to copy");
+        }
+
+        // skopiuj każdy wpis do nowego posiłku
+        for (RegisteredAlimentation entry : sourceEntries) {
+            RegisteredAlimentation copy = new RegisteredAlimentation();
+            copy.setUserId(user.getId());
+            copy.setEssentialFood(entry.getEssentialFood());
+            copy.setMeal(entry.getMeal());
+            copy.setMealApiId(entry.getMealApiId());
+            copy.setAmount(entry.getAmount());
+            copy.setPieces(entry.getPieces());
+            copy.setTimestamp(to);
+            copy.setMealName(toMealName);
+
+            repository.save(copy);
+        }
+
+        return "Meal copied successfully from " + fromMealName + " " + fromDate +
+                " to " + toMealName + " " + toDate;
+    }
+
 }
