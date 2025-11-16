@@ -119,12 +119,9 @@ public class MealService {
         return "Meal has been created";
     }
 
-    // do naprawy = sprawdzic autora bo tylko autor moze dodawac zdjecie do swojego
-    // meala
-    // i przetestuj
-    // dziala przetestowane
     @Transactional
     public String uploadMealImage(int mealId, MultipartFile imageFile, Integer userId) throws IOException {
+
         Meal meal = validateMealExistance(mealId);
 
         if (!userId.equals(meal.getAuthorId())) {
@@ -135,18 +132,24 @@ public class MealService {
             throw new IllegalArgumentException("Image file cannot be empty");
         }
 
-        Path uploadPath = Paths.get(System.getProperty("user.dir"), "uploads", "images", "meals");
+        // docker path: /app/uploads/meals
+        Path uploadPath = Paths.get("/app/uploads/meals");
+
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
+        // always same file for same meal (no duplicates)
+        String fileName = "meal_" + mealId + ".jpg";
         Path filePath = uploadPath.resolve(fileName);
 
+        // overwrite existing file
         Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        System.out.println("File saved to: " + filePath.toAbsolutePath());
 
-        String relativePath = "/uploads/images/meals/" + fileName;
+        // add timestamp for cache refresh
+        long ts = System.currentTimeMillis();
+        String relativePath = "/images/meals/" + fileName + "?t=" + ts;
+
         meal.setImageUrl(relativePath);
         mealRepository.save(meal);
 

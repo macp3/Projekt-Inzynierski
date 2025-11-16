@@ -33,7 +33,7 @@ services:
       SPRING_SQL_INIT_MODE: never
     restart: always
     volumes:
-      - ./uploads:/app/uploads   # <--- podpinamy lokalny folder
+      - ./uploads:/app/uploads
 
 volumes:
   mysql_data:
