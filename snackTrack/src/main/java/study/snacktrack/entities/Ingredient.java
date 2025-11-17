@@ -36,13 +36,13 @@ public class Ingredient {
     @Nullable
     private Float amount;
     @Nullable
-    private Integer pieces;
+    private Float pieces;
 
     public Ingredient() {
 
     }
 
-    public Ingredient(Meal meal, EssentialFood essentialFood, @Nullable Integer essentialApiId, Float amount, Integer pieces) {
+    public Ingredient(Meal meal, EssentialFood essentialFood, @Nullable Integer essentialApiId, Float amount, Float pieces) {
         this.meal = meal;
         this.essentialFood = essentialFood;
         this.essentialApiId = essentialApiId;
@@ -91,11 +91,12 @@ public class Ingredient {
         this.amount = amount;
     }
 
-    public Integer getPieces() {
+    @Nullable
+    public Float getPieces() {
         return pieces;
     }
 
-    public void setPieces(Integer pieces) {
+    public void setPieces(@Nullable Float pieces) {
         this.pieces = pieces;
     }
 }

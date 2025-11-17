@@ -92,7 +92,7 @@ public class MealService {
             Integer essentialApiId = null;
 
             Float amount = null;
-            Integer pieces = null;
+            Float pieces = null;
 
             if (ir.getEssentialFoodId() != null) {
                 essentialFood = foodRepository.findById(ir.getEssentialFoodId())
@@ -236,7 +236,7 @@ public class MealService {
                 EssentialFood essentialFood = null;
                 Integer essentialApiId = null;
                 Float amount = null;
-                Integer pieces = null;
+                Float pieces = null;
 
                 if (ir.getEssentialFoodId() != null) {
                     essentialFood = foodRepository.findById(ir.getEssentialFoodId())
