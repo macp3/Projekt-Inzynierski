@@ -82,7 +82,7 @@ public class MealController {
 
     // dziala
     @GetMapping("")
-    public ResponseEntity<List<Meal>> getMeals() {
+    public ResponseEntity<List<Meal>> getMeals(@RequestHeader("Authorization") String authHeader) {
         return ResponseEntity.ok(mealService.getAllMeals());
     }
 
