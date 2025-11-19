@@ -5,7 +5,7 @@ public class IngredientRequest {
     private Integer essentialFoodId;
     private Integer essentialApiId;
     private Float amount;
-    private Integer pieces;
+    private Float pieces;
     private String defaultUnit;
 
     public Integer getEssentialFoodId() {
@@ -40,11 +40,11 @@ public class IngredientRequest {
         this.defaultUnit = defaultUnit;
     }
 
-    public Integer getPieces() {
+    public Float getPieces() {
         return pieces;
     }
 
-    public void setPieces(int pieces) {
+    public void setPieces(Float pieces) {
         this.pieces = pieces;
     }
 }

@@ -9,7 +9,7 @@ public class IngredientResponse {
 
     private int id;
     private Float amount;
-    private Integer pieces;
+    private Float pieces;
     private ApiFoodResponseDetailed essentialApi;
     private EssentialFoodResponse essentialFood;
 

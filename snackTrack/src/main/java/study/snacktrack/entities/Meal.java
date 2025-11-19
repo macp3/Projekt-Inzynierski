@@ -3,6 +3,7 @@ package study.snacktrack.entities;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.Nullable;
 import study.snacktrack.dto.ApiFoodResponseDetailed;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,6 +38,7 @@ public class Meal {
     @JsonManagedReference
     private List<Ingredient> ingredients;
     @Column(name = "image_url")
+    @Nullable
     private String imageUrl;
 
     public Meal() {
