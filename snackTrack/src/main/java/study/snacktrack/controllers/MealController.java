@@ -42,7 +42,7 @@ public class MealController {
 
     // dziala
     @PostMapping("/create")
-    public ResponseEntity<String> createMeal(@RequestBody MealRequest request,
+    public ResponseEntity<?> createMeal(@RequestBody MealRequest request,
             @RequestHeader("Authorization") String authHeader) {
         try {
             User user = authorizeUser(authHeader);

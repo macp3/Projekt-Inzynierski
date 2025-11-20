@@ -63,7 +63,7 @@ public class MealService {
 
     // o to jest giga kociol - naucz sie :)
     @Transactional
-    public String createMeal(MealRequest request, int userId) {
+    public Integer createMeal(MealRequest request, int userId) {
         if (userId <= 0) {
             throw new IllegalArgumentException("User ID must be greater than zero");
         }
@@ -116,7 +116,7 @@ public class MealService {
         }
 
         mealRepository.save(meal);
-        return "Meal has been created";
+        return meal.getId();
     }
 
     @Transactional

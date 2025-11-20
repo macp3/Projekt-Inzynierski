@@ -67,6 +67,22 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @GetMapping("/getId")
+    public ResponseEntity<?> getUserId(@RequestHeader("Authorization") String authHeader)
+    {
+        User user;
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
+
+            user = userService.getUserByEmail(email);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
+        return ResponseEntity.ok(user.getId());
+    }
+
     // funkcja wylacznie dla admina
     /*
      * @GetMapping("/{id}")
