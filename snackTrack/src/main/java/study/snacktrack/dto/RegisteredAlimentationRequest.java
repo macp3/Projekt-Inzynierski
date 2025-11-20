@@ -17,7 +17,7 @@ public class RegisteredAlimentationRequest {
     private MealNames mealName;
 
     private Float amount;
-    private Integer pieces;
+    private Float pieces;
 
     public Integer getEssentialId() {
         return essentialId;
@@ -67,11 +67,11 @@ public class RegisteredAlimentationRequest {
         this.amount = amount;
     }
 
-    public Integer getPieces() {
+    public Float getPieces() {
         return pieces;
     }
 
-    public void setPieces(Integer pieces) {
+    public void setPieces(Float pieces) {
         this.pieces = pieces;
     }
 }

@@ -16,7 +16,7 @@ public class RegisteredAlimentationResponse {
     private LocalDate timestamp;
     private MealNames mealName;
     private Float amount;
-    private Integer pieces;
+    private Float pieces;
 
     public RegisteredAlimentationResponse() {
     }
@@ -84,11 +84,11 @@ public class RegisteredAlimentationResponse {
         this.amount = amount;
     }
 
-    public Integer getPieces() {
+    public Float getPieces() {
         return pieces;
     }
 
-    public void setPieces(Integer pieces) {
+    public void setPieces(Float pieces) {
         this.pieces = pieces;
     }
 

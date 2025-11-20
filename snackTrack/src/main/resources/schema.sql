@@ -180,7 +180,7 @@ CREATE TABLE `registered_alimentation` (
   `timestamp` date NOT NULL,
   `meal` enum('breakfast', 'lunch', 'dinner', 'supper', 'snack') NOT NULL,
   `amount` float DEFAULT NULL,
-  `pieces` int(11) DEFAULT NULL,
+  `pieces` float DEFAULT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `registered_alimentation_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
   CONSTRAINT `registered_alimentation_ibfk_2` FOREIGN KEY (`essential_id`) REFERENCES `essential_food`(`id`) ON DELETE SET NULL,

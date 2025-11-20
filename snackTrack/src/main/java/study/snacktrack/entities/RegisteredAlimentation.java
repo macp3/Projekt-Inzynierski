@@ -37,7 +37,7 @@ public class RegisteredAlimentation {
     private Float amount;
 
     @Column(name = "pieces")
-    private Integer pieces;
+    private Float pieces;
 
     public Integer getId() {
         return id;
@@ -99,11 +99,11 @@ public class RegisteredAlimentation {
         this.amount = amount;
     }
 
-    public Integer getPieces() {
+    public Float getPieces() {
         return pieces;
     }
 
-    public void setPieces(Integer pieces) {
+    public void setPieces(Float pieces) {
         this.pieces = pieces;
     }
 
