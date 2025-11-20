@@ -296,4 +296,24 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    // Maciej: Funkcja testowa. W finalnej wersji powinna być zabezpieczona
+    // sprawdzeniem płatności
+    @PutMapping("/premium")
+    public ResponseEntity<?> updatePremium(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestParam("expiration") String expirationDate) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
+            User user = userService.getUserByEmail(email);
+
+            User updated = userService.updatePremiumExpiration(user.getId(), expirationDate);
+            userRepository.save(updated);
+
+            return ResponseEntity.ok("Premium updated");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

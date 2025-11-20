@@ -4,6 +4,7 @@ import java.util.List;
 
 import study.snacktrack.dto.EssentialFoodRequest;
 import study.snacktrack.dto.EssentialFoodResponse;
+import study.snacktrack.dto.UnifiedSearchResponse;
 import study.snacktrack.entities.EssentialFood;
 import study.snacktrack.services.FoodService;
 import study.snacktrack.services.JwtService;
@@ -78,5 +79,13 @@ public class FoodController {
     public ResponseEntity<List<EssentialFood>> searchEssentialFood(@RequestParam String query) {
         List<EssentialFood> results = foodService.searchEssentialFood(query);
         return ResponseEntity.ok(results);
+    }
+
+    @GetMapping("/search/unified")
+    public ResponseEntity<UnifiedSearchResponse> searchUnified(@RequestParam String query) {
+        List<EssentialFood> localResults = foodService.searchEssentialFood(query);
+        List<ApiFoodResponse> apiResults = foodService.getFoodFromApi(query);
+
+        return ResponseEntity.ok(new UnifiedSearchResponse(localResults, apiResults));
     }
 }
