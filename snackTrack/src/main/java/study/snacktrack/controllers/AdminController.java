@@ -72,16 +72,6 @@ public class AdminController {
     }
 
     /**
-     * Test endpoint to verify that admin panel is operational.
-     *
-     * @return welcome message for admin
-     */
-    @GetMapping("/dashboard")
-    public String getDashboard() {
-        return "Witaj, ADMIN!";
-    }
-
-    /**
      * Retrieves user details by user ID.
      *
      * @param userId ID of the user
@@ -124,14 +114,17 @@ public class AdminController {
      * @return list of users or error message
      */
     @GetMapping("/users")
-    public ResponseEntity<?> getAllUsers() {
-        List<User> allUsers;
+    public ResponseEntity<?> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "25") int size,
+            @RequestParam(required = false) String query) {
+
         try {
-            allUsers = userService.getAllUsers();
+            var userPage = userService.getUsersPage(page, size, query);
+            return ResponseEntity.ok(userPage);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.ok(allUsers);
     }
 
     /**
@@ -566,6 +559,16 @@ public class AdminController {
             pushNotificationService.sendToGroup(group, title, body);
             return ResponseEntity.ok("Notification sent to group: " + group);
         } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/user/{userId}/toggle-ban")
+    public ResponseEntity<?> toggleUserBan(@PathVariable int userId) {
+        try {
+            userService.toggleUserBan(userId);
+            return ResponseEntity.ok("Pomyślnie zmieniono status blokady użytkownika.");
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

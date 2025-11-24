@@ -14,6 +14,9 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -461,5 +464,32 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("Favourite not found"));
 
         favouriteRepository.delete(favourite);
+    }
+
+    public void toggleUserBan(int userId) {
+        User user = getUserById(userId); // Ta metoda już istnieje w Twoim serwisie
+
+        // Zakładam, że Twój Enum w Javie (study.snacktrack.entities.enums.Status)
+        // ma wartości odpowiadające bazie danych (active, banned).
+
+        if (user.getStatus() == Status.banned) {
+            // Jeśli zbanowany -> Odblokuj (Active)
+            user.setStatus(Status.active);
+        } else {
+            // Jeśli aktywny (lub inactive) -> Zbanuj
+            user.setStatus(Status.banned);
+        }
+
+        userRepository.save(user);
+    }
+
+    public Page<User> getUsersPage(int page, int size, String query) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        if (query != null && !query.isBlank()) {
+            return userRepository.searchUsers(query, pageable);
+        } else {
+            return userRepository.findAll(pageable);
+        }
     }
 }
