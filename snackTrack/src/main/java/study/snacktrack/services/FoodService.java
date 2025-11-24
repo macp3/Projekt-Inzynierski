@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import jakarta.transaction.Transactional;
 import study.snacktrack.dto.ApiFoodResponseDetailed;
 import study.snacktrack.dto.EssentialFoodRequest;
 import study.snacktrack.dto.EssentialFoodResponse;
@@ -184,6 +185,7 @@ public class FoodService {
         return description.trim();
     }
 
+    @Transactional
     public String addEssentialFood(EssentialFoodRequest request, User currentUser) {
 
         if (foodRepository.existsByNameIgnoreCase(request.getName())) {
