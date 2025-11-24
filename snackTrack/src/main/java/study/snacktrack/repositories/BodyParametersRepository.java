@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface BodyParametersRepository extends JpaRepository<BodyParameters, Integer> {
 
     Optional<BodyParameters> findByUserId(int userId);
+    boolean existsByUserId(Integer userId);
 }

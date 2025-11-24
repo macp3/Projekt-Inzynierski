@@ -20,15 +20,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
-import study.snacktrack.dto.AddFavouriteRequest;
-import study.snacktrack.dto.BodyParametersRequest;
-import study.snacktrack.dto.BodyParametersResponse;
-import study.snacktrack.dto.NotificationResponse;
+import study.snacktrack.dto.*;
 import study.snacktrack.entities.BodyParameters;
 import study.snacktrack.entities.Favourite;
 import study.snacktrack.entities.Meal;
 import study.snacktrack.entities.Notification;
 import study.snacktrack.entities.User;
+import study.snacktrack.repositories.BodyParametersRepository;
 import study.snacktrack.repositories.FavouriteRepository;
 import study.snacktrack.repositories.MealRepository;
 import study.snacktrack.repositories.UserRepository;
@@ -46,8 +44,7 @@ public class UserController {
     private final JwtService jwtService;
     private final NotificationService notificationService;
     private final UserRepository userRepository;
-    private final FavouriteRepository favouriteRepository;
-    private final MealRepository mealRepository;
+    private final BodyParametersRepository bodyParametersRepository;
     private final MealService mealService;
 
     // premium expiration musi byc nullem po dacie ktora jest w bazie
@@ -156,6 +153,26 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/refreshSurvey")
+    public ResponseEntity<?> refreshSurvey(@RequestHeader("Authorization") String authHeader) {
+        String token;
+        boolean showSurvey;
+        try {
+
+            token = authHeader.replace("Bearer ", "");
+            String email = jwtService.extractEmail(token);
+            User user = userService.getUserByEmail(email);
+
+            showSurvey = !bodyParametersRepository.existsByUserId(user.getId());
+        }
+        catch (Exception e)
+        {
+            return ResponseEntity.badRequest().body("Something went wrong");
+        }
+
+        return ResponseEntity.ok(new LoginResponse(token, showSurvey, null));
     }
 
     // dziala
