@@ -2,9 +2,9 @@ package study.snacktrack.services;
 
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import study.snacktrack.dto.MealResponse; // Upewnij się, że masz ten import
 import study.snacktrack.dto.RegisteredAlimentationRequest;
 import study.snacktrack.dto.RegisteredAlimentationResponse;
 import study.snacktrack.entities.*;
@@ -26,6 +26,8 @@ public class RegisteredAlimentationService {
     private final RegisteredAlimentationRepository repository;
     private final JwtService jwtService;
     private final FoodService foodService;
+    // 1. DODAJEMY MEAL SERVICE
+    private final MealService mealService;
 
     public RegisteredAlimentationService(
             UserRepository userRepository,
@@ -33,13 +35,15 @@ public class RegisteredAlimentationService {
             MealRepository mealRepository,
             RegisteredAlimentationRepository repository,
             JwtService jwtService,
-            FoodService foodService) {
+            FoodService foodService,
+            MealService mealService) { // 2. DODAJEMY DO KONSTRUKTORA
         this.userRepository = userRepository;
         this.foodRepository = foodRepository;
         this.mealRepository = mealRepository;
         this.repository = repository;
         this.jwtService = jwtService;
         this.foodService = foodService;
+        this.mealService = mealService;
     }
 
     private User getUserFromToken(String authHeader) {
@@ -60,6 +64,7 @@ public class RegisteredAlimentationService {
     }
 
     public String addEntry(String authHeader, RegisteredAlimentationRequest dto, String date) {
+        // ... (Ta metoda pozostaje bez zmian) ...
         User user = getUserFromToken(authHeader);
 
         RegisteredAlimentation entry = new RegisteredAlimentation();
@@ -135,7 +140,20 @@ public class RegisteredAlimentationService {
                         dto.setMealName(MealNames.snack); // fallback
                     }
 
-                    // Pobranie danych z Meal API jeśli essentialFood jest null
+                    // 3. NOWA LOGIKA DLA PRZEPISÓW (MEALS)
+                    if (entry.getMeal() != null) {
+                        try {
+                            // Używamy MealService, który ma logikę pobierania danych z API dla składników
+                            MealResponse fullMeal = mealService.getMealWithIngredients(entry.getMeal().getId());
+                            // Nadpisujemy 'pusty' obiekt Meal w DTO tym pełnym, zawierającym dane z API
+                            dto.setMeal(fullMeal);
+                        } catch (Exception e) {
+                            System.err.println("Error fetching full meal details: " + e.getMessage());
+                        }
+                    }
+
+                    // Pobranie danych z Meal API jeśli essentialFood jest null (Dla pojedynczych
+                    // produktów z API)
                     if (entry.getEssentialFood() == null && entry.getMealApiId() != null) {
                         try {
                             dto.setMealApi(foodService.getFoodFromApiById(entry.getMealApiId()));
@@ -150,6 +168,7 @@ public class RegisteredAlimentationService {
     }
 
     public void deleteEntry(String authHeader, Integer id) {
+        // ... (Bez zmian)
         User user = getUserFromToken(authHeader);
 
         RegisteredAlimentation entry = repository.findById(id)
@@ -163,6 +182,7 @@ public class RegisteredAlimentationService {
     }
 
     public RegisteredAlimentation updateEntry(String authHeader, Integer id, RegisteredAlimentationRequest dto) {
+        // ... (Bez zmian)
         User user = getUserFromToken(authHeader);
 
         RegisteredAlimentation entry = repository.findById(id)
@@ -197,10 +217,11 @@ public class RegisteredAlimentationService {
 
     @Transactional
     public String copyMeal(String authHeader,
-                           String fromDate,
-                           MealNames fromMealName,
-                           String toDate,
-                           MealNames toMealName) {
+            String fromDate,
+            MealNames fromMealName,
+            String toDate,
+            MealNames toMealName) {
+        // ... (Bez zmian)
         User user = getUserFromToken(authHeader);
 
         LocalDate from = parseDate(fromDate)
@@ -209,8 +230,8 @@ public class RegisteredAlimentationService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid target date"));
 
         // pobierz wszystkie wpisy dla posiłku źródłowego
-        List<RegisteredAlimentation> sourceEntries =
-                repository.findByUserIdAndTimestampAndMealName(user.getId(), from, fromMealName);
+        List<RegisteredAlimentation> sourceEntries = repository.findByUserIdAndTimestampAndMealName(user.getId(), from,
+                fromMealName);
 
         if (sourceEntries.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No entries to copy");

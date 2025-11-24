@@ -1,110 +1,48 @@
 package study.snacktrack.dto;
 
-import java.time.LocalDate;
-
-import study.snacktrack.entities.Meal;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import study.snacktrack.entities.RegisteredAlimentation;
 import study.snacktrack.entities.enums.MealNames;
 
+@Data
+@NoArgsConstructor
 public class RegisteredAlimentationResponse {
 
     private int id;
     private int userId;
     private EssentialFoodResponse essentialFood;
+
+    // 🔹 ZMIANA: Z ApiFoodResponse na ApiFoodResponseDetailed
     private ApiFoodResponseDetailed mealApi;
-    private Meal meal;
-    private LocalDate timestamp;
-    private MealNames mealName;
+
+    private MealResponse meal;
+
+    private String timestamp;
     private Float amount;
     private Float pieces;
+    private MealNames mealName;
 
-    public RegisteredAlimentationResponse() {
-    }
+    public RegisteredAlimentationResponse(RegisteredAlimentation entry) {
+        this.id = entry.getId();
+        this.userId = entry.getUserId();
+        this.timestamp = entry.getTimestamp().toString();
+        this.amount = entry.getAmount();
+        this.pieces = entry.getPieces();
+        this.mealName = entry.getMealName();
 
-    public RegisteredAlimentationResponse(RegisteredAlimentation ra) {
-        this.id = ra.getId();
-        this.userId = ra.getUserId();
-        this.timestamp = ra.getTimestamp();
-        this.amount = ra.getAmount();
-        this.pieces = ra.getPieces();
-        this.meal = ra.getMeal();
-        this.mealName = ra.getMealName();
-
-        if (ra.getEssentialFood() != null) {
-            this.essentialFood = new EssentialFoodResponse(ra.getEssentialFood());
+        if (entry.getEssentialFood() != null) {
+            this.essentialFood = new EssentialFoodResponse(entry.getEssentialFood());
         }
-    }
 
-    // gettery i settery
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    public EssentialFoodResponse getEssentialFood() {
-        return essentialFood;
-    }
-
-    public void setEssentialFood(EssentialFoodResponse essentialFood) {
-        this.essentialFood = essentialFood;
-    }
-
-    public Meal getMeal() {
-        return meal;
-    }
-
-    public void setMeal(Meal meal) {
-        this.meal = meal;
-    }
-
-    public LocalDate getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(LocalDate timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public Float getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Float amount) {
-        this.amount = amount;
-    }
-
-    public Float getPieces() {
-        return pieces;
-    }
-
-    public void setPieces(Float pieces) {
-        this.pieces = pieces;
-    }
-
-    public void setMealApi(ApiFoodResponseDetailed foodFromApiById) {
-        this.mealApi = foodFromApiById;
-    }
-
-    public ApiFoodResponseDetailed getMealApi() {
-        return mealApi;
-    }
-
-    public MealNames getMealName() {
-        return mealName;
-    }
-
-    public void setMealName(MealNames mealName) {
-        this.mealName = mealName;
+        if (entry.getMeal() != null) {
+            MealResponse mDto = new MealResponse();
+            mDto.setId(entry.getMeal().getId());
+            mDto.setName(entry.getMeal().getName());
+            mDto.setDescription(entry.getMeal().getDescription());
+            mDto.setAuthorId(entry.getMeal().getAuthorId());
+            mDto.setImageUrl(entry.getMeal().getImageUrl());
+            this.meal = mDto;
+        }
     }
 }
