@@ -298,4 +298,11 @@ public class MealService {
         return mealRepository.findById(mealId)
                 .orElseThrow(() -> new IllegalArgumentException("This meal doesn't exist"));
     }
+
+    public void deleteMealAsAdmin(int mealId) {
+        Meal meal = mealRepository.findById(mealId)
+                .orElseThrow(() -> new IllegalArgumentException("Meal not found"));
+
+        mealRepository.delete(meal);
+    }
 }

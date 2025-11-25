@@ -1,17 +1,21 @@
 package study.snacktrack.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import study.snacktrack.dto.CommentRequest;
 import study.snacktrack.dto.CommentResponse;
 import study.snacktrack.entities.Comment;
+import study.snacktrack.entities.CommentLike;
 import study.snacktrack.entities.Meal;
 import study.snacktrack.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
 import study.snacktrack.entities.User;
 import study.snacktrack.repositories.CommentRepository;
+import study.snacktrack.repositories.CommentLikeRepository;
 import study.snacktrack.repositories.MealRepository;
 
 @Service
@@ -20,12 +24,14 @@ public class CommentService {
     private final UserRepository userRepository;
     private final MealRepository mealRepository;
     private final CommentRepository commentRepository;
+    private final CommentLikeRepository commentLikeRepository;
 
     public CommentService(UserRepository userRepository, MealRepository mealRepository,
-            CommentRepository commentRepository) {
+            CommentRepository commentRepository, CommentLikeRepository commentLikeRepository) {
         this.userRepository = userRepository;
         this.mealRepository = mealRepository;
         this.commentRepository = commentRepository;
+        this.commentLikeRepository = commentLikeRepository;
     }
 
     private Comment validateCommentExistance(int commentId) {
@@ -49,8 +55,9 @@ public class CommentService {
         Meal meal = mealRepository.findById(request.getMealId())
                 .orElseThrow(() -> new IllegalArgumentException("Meal not found"));
 
-        if (author.getId() == meal.getAuthorId())
-            throw new IllegalArgumentException("You cannot comment your own meal");
+        // Uncomment if you want to prevent authors from commenting on their own meals
+        // if (author.getId() == meal.getAuthorId())
+        // throw new IllegalArgumentException("You cannot comment your own meal");
 
         if (request.getContent() == null || request.getContent().isBlank()) {
             throw new IllegalArgumentException("Content must not be empty");
@@ -64,9 +71,11 @@ public class CommentService {
         comment.setAuthorId(author.getId());
         comment.setMealId(meal.getId());
         comment.setContent(request.getContent());
+        // Default likes is 0
         commentRepository.save(comment);
 
-        return new CommentResponse(comment.getId(), author.getId(), comment.getContent(), meal.getId());
+        // Return basic response (likes=0, isLiked=false)
+        return new CommentResponse(comment.getId(), author.getId(), comment.getContent(), meal.getId(), 0, false);
     }
 
     public CommentResponse editComment(int authorId, int commentId, String content) {
@@ -83,10 +92,20 @@ public class CommentService {
             throw new IllegalArgumentException("Content must not be empty");
         }
 
-        CommentResponse response = new CommentResponse(commentId, authorId, content, comment.getMealId());
-        comment.setContent(response.getContent());
+        comment.setContent(content);
         commentRepository.save(comment);
-        return response;
+
+        // We need to check if the user liked their own comment (unlikely but possible
+        // via API)
+        boolean isLiked = commentLikeRepository.existsByUserIdAndCommentId(authorId, commentId);
+
+        return new CommentResponse(
+                comment.getId(),
+                authorId,
+                comment.getContent(),
+                comment.getMealId(),
+                comment.getLikes(),
+                isLiked);
     }
 
     public void deleteCommentByUser(int authorId, int mealId) {
@@ -101,17 +120,6 @@ public class CommentService {
         System.out.println("Comment deleted successfully");
     }
 
-    // xddddd ale glupota
-    // NIE WIEM GDZIE TEGO UZYC - CZY W COMMENTS CZY W MEALS
-    // narazie uzylem w mealcontrollerze na dole
-    public List<Comment> getAllMealComments(int mealId) {
-        if (!mealRepository.existsById(mealId)) {
-            throw new IllegalArgumentException("Meal not found");
-        }
-
-        return commentRepository.findByMealId(mealId);
-    }
-
     public List<CommentResponse> getAllCommentsByUser(int userId) {
         if (!userRepository.existsById(userId)) {
             throw new IllegalArgumentException("User not found");
@@ -119,13 +127,15 @@ public class CommentService {
 
         return commentRepository.findByAuthorId(userId)
                 .stream()
-                .map(c -> new CommentResponse(c.getId(), c.getAuthorId(), c.getContent(), c.getMealId()))
+                .map(c -> {
+                    // For "my comments", we check if I liked them myself
+                    boolean isLiked = commentLikeRepository.existsByUserIdAndCommentId(userId, c.getId());
+                    return new CommentResponse(c.getId(), c.getAuthorId(), c.getContent(), c.getMealId(), c.getLikes(),
+                            isLiked);
+                })
                 .toList();
     }
 
-    // zwraca komentarz uzytkownika pod wybranym mealem
-    // funkcja potrzebna do edycji i usuwania :)))))))))
-    // ale mi sie chce jarać oezuuuuuu
     public Comment getUserMealComment(int mealId, int userId) {
         return commentRepository.findByMealIdAndAuthorId(mealId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("This user has no registered comment for this meal"));
@@ -134,5 +144,50 @@ public class CommentService {
     public Comment getCommentById(int commentId) {
         return commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("There is no comment with specified ID"));
+    }
+
+    // Main method to get comments for a meal with 'isLiked' status for the current
+    // user
+    public List<CommentResponse> getAllMealComments(int mealId, int currentUserId) {
+        if (!mealRepository.existsById(mealId)) {
+            throw new IllegalArgumentException("Meal not found");
+        }
+
+        List<Comment> comments = commentRepository.findByMealId(mealId);
+        List<CommentResponse> response = new ArrayList<>();
+
+        for (Comment c : comments) {
+            // Check if the current user liked this comment
+            boolean isLiked = commentLikeRepository.existsByUserIdAndCommentId(currentUserId, c.getId());
+
+            response.add(new CommentResponse(
+                    c.getId(),
+                    c.getAuthorId(),
+                    c.getContent(),
+                    c.getMealId(),
+                    c.getLikes(),
+                    isLiked));
+        }
+        return response;
+    }
+
+    @Transactional
+    public void toggleLike(int userId, int commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
+
+        Optional<CommentLike> existingLike = commentLikeRepository.findByUserIdAndCommentId(userId, commentId);
+
+        if (existingLike.isPresent()) {
+            // Unlike
+            commentLikeRepository.delete(existingLike.get());
+            comment.setLikes(Math.max(0, comment.getLikes() - 1));
+        } else {
+            // Like
+            CommentLike newLike = new CommentLike(userId, comment);
+            commentLikeRepository.save(newLike);
+            comment.setLikes(comment.getLikes() + 1);
+        }
+        commentRepository.save(comment);
     }
 }
