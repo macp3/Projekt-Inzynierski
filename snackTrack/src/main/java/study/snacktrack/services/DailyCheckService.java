@@ -51,7 +51,7 @@ public class DailyCheckService {
             double calorieLimit = bodyParams.getCalorieLimit();
             double totalCalories = calculateDailyCalories(user.getId(), yesterday);
 
-            if (totalCalories <= calorieLimit) {
+            if (totalCalories <= calorieLimit && totalCalories >= 0.7*calorieLimit) {
                 userService.updateStreak(user.getId(), user.getStreak() + 1);
             } else {
                 userService.updateStreak(user.getId(), 0);
