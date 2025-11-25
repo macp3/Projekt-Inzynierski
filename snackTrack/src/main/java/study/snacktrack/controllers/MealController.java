@@ -100,23 +100,16 @@ public class MealController {
         return ResponseEntity.ok(mealService.searchMealsByName(name));
     }
 
-    // dziala
     @GetMapping("/{mealId}/details")
-    public ResponseEntity<?> getMealDetails(@PathVariable int mealId) {
+    public ResponseEntity<?> getMealDetails(
+            @PathVariable int mealId,
+            @RequestHeader("Authorization") String authHeader) { // <--- DODAJ TO
         try {
+            authorizeUser(authHeader);
+
             MealResponse response = mealService.getMealWithIngredients(mealId);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    // dziala
-    @GetMapping("/{mealId}/comments")
-    public ResponseEntity<?> getMealComments(@PathVariable int mealId) {
-        try {
-            return ResponseEntity.ok(commentService.getAllMealComments(mealId));
-        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

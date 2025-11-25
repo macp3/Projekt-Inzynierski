@@ -22,7 +22,8 @@ public class ReportedMealService {
     private final CommentRepository commentRepository;
     private final ReportedMealRepository reportedMealRepository;
 
-    public ReportedMealService(UserRepository userRepository, MealRepository mealRepository, CommentRepository commentRepository, ReportedMealRepository reportedMealRepository) {
+    public ReportedMealService(UserRepository userRepository, MealRepository mealRepository,
+            CommentRepository commentRepository, ReportedMealRepository reportedMealRepository) {
         this.userRepository = userRepository;
         this.mealRepository = mealRepository;
         this.commentRepository = commentRepository;
@@ -47,7 +48,7 @@ public class ReportedMealService {
         Meal meal = validateMealExistance(mealId);
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        if(userId == meal.getAuthorId())
+        if (userId == meal.getAuthorId())
             throw new IllegalArgumentException("You cannot report your own meal");
 
         if (content == null || content.isBlank()) {
@@ -56,8 +57,7 @@ public class ReportedMealService {
         reportedMealRepository.findByMealIdAndReportingId(mealId, userId)
                 .ifPresent(x -> {
                     throw new IllegalArgumentException("You have already reported this meal");
-                }
-                );
+                });
 
         ReportedMeal reportedMeal = new ReportedMeal();
         reportedMeal.setReportingId(user.getId());
@@ -65,10 +65,11 @@ public class ReportedMealService {
         reportedMeal.setContent(content);
 
         reportedMealRepository.save(reportedMeal);
-        return new ReportedMealResponse(reportedMeal.getId(), reportedMeal.getReportingId(), reportedMeal.getMealId(), reportedMeal.getContent());
+        return new ReportedMealResponse(reportedMeal.getId(), reportedMeal.getReportingId(), reportedMeal.getMealId(),
+                reportedMeal.getContent());
     }
 
-    //admin
+    // admin
     public List<ReportedMeal> getAllReportsByUser(int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("There is no user with specified ID"));
@@ -77,10 +78,43 @@ public class ReportedMealService {
         return rm;
     }
 
-    //admin
+    // admin
     public List<ReportedMeal> getAllReportsByMeal(int mealId) {
         List<ReportedMeal> rm = reportedMealRepository.findByMealId(mealId)
                 .orElseThrow(() -> new IllegalArgumentException("This user have not reported any meal yet"));
         return rm;
+    }
+
+    /**
+     * Zwraca listę WSZYSTKICH zgłoszonych posiłków w systemie.
+     */
+    public List<ReportedMeal> getAllReports() {
+        // findAll() jest wbudowaną metodą JpaRepository
+        return reportedMealRepository.findAll();
+    }
+
+    /**
+     * Usuwa zgłoszenie (np. po rozpatrzeniu przez admina).
+     */
+    public void deleteReport(int reportId) {
+        if (reportId <= 0) {
+            throw new IllegalArgumentException("Report ID must be greater than zero");
+        }
+
+        ReportedMeal report = reportedMealRepository.findById(reportId)
+                .orElseThrow(() -> new IllegalArgumentException("Report with ID " + reportId + " not found"));
+
+        reportedMealRepository.delete(report);
+    }
+
+    /**
+     * Usuwa zgłoszenie PO ID POSIŁKU (przydatne przy usuwaniu posiłku).
+     * Uwaga: To jest opcjonalne, bo masz ON DELETE CASCADE w bazie,
+     * więc usunięcie posiłku automatycznie usunie zgłoszenia!
+     * Ale warto mieć w kodzie dla porządku.
+     */
+    public void deleteReportsByMealId(int mealId) {
+        List<ReportedMeal> reports = reportedMealRepository.findByMealId(mealId).orElse(List.of());
+        reportedMealRepository.deleteAll(reports);
     }
 }

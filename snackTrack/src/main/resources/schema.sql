@@ -88,7 +88,7 @@ CREATE TABLE `essential_food` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL UNIQUE,
   `author_id` int(11) NOT NULL,
-  `description` varchar(100) NOT NULL,
+  `description` varchar(255) NOT NULL,
   `calories` float NOT NULL,
   `protein` float NOT NULL,
   `fat` float NOT NULL,
@@ -107,7 +107,7 @@ CREATE TABLE `meals` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `author_id` int(11) NOT NULL,
   `name` varchar(50) NOT NULL,
-  `description` varchar(1024) NOT NULL,
+  `description` varchar(1023) NOT NULL,
   `image_url` VARCHAR(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `meals_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
@@ -135,11 +135,23 @@ CREATE TABLE `ingredients` (
 CREATE TABLE `comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `author_id` int(11) NOT NULL,
-  `content` varchar(100) NOT NULL,
+  `content` varchar(1023) NOT NULL,
   `meal_id` int(11) NOT NULL,
+  `likes` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
   CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`meal_id`) REFERENCES `meals`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE `comment_likes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `comment_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_like` (`user_id`, `comment_id`), -- Zapobiega duplikatom
+  CONSTRAINT `fk_cl_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_cl_comment` FOREIGN KEY (`comment_id`) REFERENCES `comments`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -194,7 +206,7 @@ CREATE TABLE `reported_comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `reporting_id` int(11) NOT NULL,
   `comment_id` int(11) NOT NULL,
-  `content` varchar(100) NOT NULL,
+  `content` varchar(1023) NOT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `reported_comments_ibfk_1` FOREIGN KEY (`reporting_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
   CONSTRAINT `reported_comments_ibfk_2` FOREIGN KEY (`comment_id`) REFERENCES `comments`(`id`) ON DELETE CASCADE
@@ -207,7 +219,7 @@ CREATE TABLE `reported_meals` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `reporting_id` int(11) NOT NULL,
   `meal_id` int(11) NOT NULL,
-  `content` varchar(100) NOT NULL,
+  `content` varchar(1023) NOT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `reported_meals_ibfk_1` FOREIGN KEY (`reporting_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
   CONSTRAINT `reported_meals_ibfk_2` FOREIGN KEY (`meal_id`) REFERENCES `meals`(`id`) ON DELETE CASCADE
@@ -233,7 +245,7 @@ CREATE TABLE `exercises` (
 CREATE TABLE `trainings_info` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
-  `description` varchar(100) NOT NULL,
+  `description` varchar(255) NOT NULL,
   `duration_time` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

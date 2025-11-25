@@ -23,7 +23,9 @@ public class ReportedCommentService {
     private final ReportedMealRepository reportedMealRepository;
     private final ReportedCommentRepository reportedCommentRepository;
 
-    public ReportedCommentService(UserRepository userRepository, MealRepository mealRepository, CommentRepository commentRepository, ReportedMealRepository reportedMealRepository, ReportedCommentRepository reportedCommentRepository) {
+    public ReportedCommentService(UserRepository userRepository, MealRepository mealRepository,
+            CommentRepository commentRepository, ReportedMealRepository reportedMealRepository,
+            ReportedCommentRepository reportedCommentRepository) {
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
         this.reportedMealRepository = reportedMealRepository;
@@ -56,11 +58,9 @@ public class ReportedCommentService {
         }
 
         reportedCommentRepository.findByCommentIdAndReportingId(comment.getId(), user.getId())
-                .ifPresent(x
-                        -> {
+                .ifPresent(x -> {
                     throw new IllegalArgumentException("You have already reported this comment");
-                }
-                );
+                });
 
         ReportedComment reportedComment = new ReportedComment();
         reportedComment.setCommentId(comment.getId());
@@ -68,10 +68,11 @@ public class ReportedCommentService {
         reportedComment.setContent(content);
 
         reportedCommentRepository.save(reportedComment);
-        return new ReportedCommentResponse(reportedComment.getId(), reportedComment.getReportingId(), reportedComment.getCommentId(), reportedComment.getContent());
+        return new ReportedCommentResponse(reportedComment.getId(), reportedComment.getReportingId(),
+                reportedComment.getCommentId(), reportedComment.getContent());
     }
 
-    //admin
+    // admin
     public List<ReportedComment> getAllReportsByUser(int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("There is no user with specified ID"));
@@ -80,7 +81,7 @@ public class ReportedCommentService {
         return reports;
     }
 
-    //admin
+    // admin
     public List<ReportedComment> getAllReportsByComment(int commentId) {
         commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Couldn't find the comment with specified ID"));
@@ -88,5 +89,26 @@ public class ReportedCommentService {
         List<ReportedComment> reports = reportedCommentRepository.findAllByCommentId(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("This comment has no reports"));
         return reports;
+    }
+
+    /**
+     * Zwraca listę WSZYSTKICH zgłoszonych komentarzy w systemie.
+     */
+    public List<ReportedComment> getAllReports() {
+        return reportedCommentRepository.findAll();
+    }
+
+    /**
+     * Usuwa zgłoszenie komentarza.
+     */
+    public void deleteReport(int reportId) {
+        if (reportId <= 0) {
+            throw new IllegalArgumentException("Report ID must be greater than zero");
+        }
+
+        ReportedComment report = reportedCommentRepository.findById(reportId)
+                .orElseThrow(() -> new IllegalArgumentException("Report with ID " + reportId + " not found"));
+
+        reportedCommentRepository.delete(report);
     }
 }

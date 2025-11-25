@@ -26,6 +26,18 @@ public class Comment {
     @Column(name = "meal_id")
     private int mealId;
 
+    @Column(columnDefinition = "integer default 0")
+    private int likes = 0;
+
+    // Gettery i Settery
+    public int getLikes() {
+        return likes;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
+    }
+
     public int getId() {
         return id;
     }

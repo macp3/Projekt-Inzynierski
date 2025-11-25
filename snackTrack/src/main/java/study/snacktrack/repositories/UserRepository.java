@@ -1,5 +1,6 @@
 package study.snacktrack.repositories;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import study.snacktrack.entities.User;
+import study.snacktrack.entities.enums.Status;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
@@ -30,4 +32,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             "LOWER(u.name) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
             "LOWER(u.surname) LIKE LOWER(CONCAT('%', :query, '%'))")
     Page<User> searchUsers(String query, Pageable pageable);
+
+    long countByStatus(Status status);
+
+    long countByPremiumExpirationAfter(LocalDate date);
 }
