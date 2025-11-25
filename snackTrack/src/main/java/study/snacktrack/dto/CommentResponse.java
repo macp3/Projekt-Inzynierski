@@ -1,17 +1,25 @@
 package study.snacktrack.dto;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class CommentResponse {
     private int id;
     private int authorId;
+    private String authorName;
+
+    // 🔹 NOWE POLE
+    private String authorImageUrl;
+
     private String content;
     private int mealId;
-
-    // Nowe pola
     private int likesCount;
-    private boolean isLiked; // Czy zalogowany user to polubił?
+
+    @JsonProperty("isLiked")
+    private boolean isLiked;
 }

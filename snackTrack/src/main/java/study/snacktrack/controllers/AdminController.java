@@ -434,4 +434,33 @@ public class AdminController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/meals/{mealId}")
+    public ResponseEntity<?> getMealDetailsForAdmin(@PathVariable int mealId) {
+        try {
+            // Używamy existing service method (zakładam, że zwraca Meal lub MealResponse)
+            return ResponseEntity.ok(mealService.getMealWithIngredients(mealId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Content not found or deleted: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/comments/{commentId}")
+    public ResponseEntity<?> getCommentDetailsForAdmin(@PathVariable int commentId) {
+        try {
+            // Musisz mieć metodę getCommentById w CommentService
+            return ResponseEntity.ok(commentService.getCommentById(commentId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Content not found or deleted: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/meals")
+    public ResponseEntity<?> getAllMeals() {
+        try {
+            return ResponseEntity.ok(mealService.getAllMeals());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

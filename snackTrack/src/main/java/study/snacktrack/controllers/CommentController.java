@@ -4,13 +4,10 @@ import java.util.List;
 
 import study.snacktrack.dto.CommentRequest;
 import study.snacktrack.dto.CommentResponse;
-import study.snacktrack.dto.ReportedCommentRequest; // Upewnij się, że masz importy
-import study.snacktrack.dto.ReportedCommentResponse;
 import study.snacktrack.entities.Comment;
 import study.snacktrack.entities.User;
 import study.snacktrack.services.CommentService;
 import study.snacktrack.services.JwtService;
-import study.snacktrack.services.ReportedCommentService;
 import study.snacktrack.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,8 +49,6 @@ public class CommentController {
             @RequestHeader("Authorization") String authHeader) {
         try {
             User user = authorizeUser(authHeader);
-            // Uwaga: tutaj też warto użyć serwisu, ale zostawiam jak masz, jeśli działa
-            // logicznie w serwisie
             Comment comment = commentService.getUserMealComment(request.getMealId(), user.getId());
             return ResponseEntity.ok(commentService.editComment(user.getId(), comment.getId(), request.getContent()));
         } catch (IllegalArgumentException e) {
@@ -84,23 +79,22 @@ public class CommentController {
         }
     }
 
-    // 🔹🔹🔹 TO JEST METODA DO NAPRAWY 🔹🔹🔹
+    // 🔹 UPDATED: Now requires Authorization header to check 'isLiked' status
     @GetMapping("/meal/{mealId}")
     public ResponseEntity<?> getAllCommentsForMeal(
             @PathVariable int mealId,
-            @RequestHeader("Authorization") String authHeader) { // 1. Dodajemy Auth Header
+            @RequestHeader("Authorization") String authHeader) {
         try {
-            // 2. Autoryzujemy usera
+            // 1. Identify user
             User user = authorizeUser(authHeader);
 
-            // 3. Przekazujemy ID usera do serwisu, żeby sprawdził isLiked
+            // 2. Pass user ID to service to populate 'isLiked' correctly
             return ResponseEntity.ok(commentService.getAllMealComments(mealId, user.getId()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    // Endpoint do lajkowania (musi tu być, jeśli nie jest w osobnym kontrolerze)
     @PostMapping("/{commentId}/like")
     public ResponseEntity<String> toggleLike(
             @PathVariable int commentId,
