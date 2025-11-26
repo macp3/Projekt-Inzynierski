@@ -21,5 +21,4 @@ public interface RegisteredAlimentationRepository extends JpaRepository<Register
     List<RegisteredAlimentation> findByUserIdAndTimestampAndMealName(
             Integer userId, LocalDate timestamp, MealNames mealName);
 
-
 }

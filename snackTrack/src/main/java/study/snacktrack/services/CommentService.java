@@ -203,7 +203,10 @@ public class CommentService {
     }
 
     public void deleteCommentAsAdmin(int commentId) {
-        Comment comment = getCommentById(commentId);
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment with ID " + commentId + " not found"));
+
         commentRepository.delete(comment);
     }
+
 }
