@@ -463,4 +463,14 @@ public class AdminController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @DeleteMapping("/comments/{commentId}/delete")
+    public ResponseEntity<?> deleteCommentAsAdmin(@PathVariable int commentId) {
+        try {
+            commentService.deleteCommentAsAdmin(commentId);
+            return ResponseEntity.ok("Comment deleted by admin.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

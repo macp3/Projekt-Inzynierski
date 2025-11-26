@@ -4,15 +4,20 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import study.snacktrack.dto.MealResponse; // Upewnij się, że masz ten import
+import study.snacktrack.dto.ApiFoodResponseDetailed;
+import study.snacktrack.dto.MealResponse;
 import study.snacktrack.dto.RegisteredAlimentationRequest;
 import study.snacktrack.dto.RegisteredAlimentationResponse;
 import study.snacktrack.entities.*;
 import study.snacktrack.entities.enums.MealNames;
 import study.snacktrack.repositories.*;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -26,8 +31,12 @@ public class RegisteredAlimentationService {
     private final RegisteredAlimentationRepository repository;
     private final JwtService jwtService;
     private final FoodService foodService;
-    // 1. DODAJEMY MEAL SERVICE
     private final MealService mealService;
+
+    private final Cache<Integer, ApiFoodResponseDetailed> apiFoodCache = Caffeine.newBuilder()
+            .maximumSize(500)
+            .expireAfterWrite(Duration.ofMinutes(10))
+            .build();
 
     public RegisteredAlimentationService(
             UserRepository userRepository,
@@ -36,7 +45,7 @@ public class RegisteredAlimentationService {
             RegisteredAlimentationRepository repository,
             JwtService jwtService,
             FoodService foodService,
-            MealService mealService) { // 2. DODAJEMY DO KONSTRUKTORA
+            MealService mealService) {
         this.userRepository = userRepository;
         this.foodRepository = foodRepository;
         this.mealRepository = mealRepository;
@@ -44,6 +53,22 @@ public class RegisteredAlimentationService {
         this.jwtService = jwtService;
         this.foodService = foodService;
         this.mealService = mealService;
+    }
+
+    private ApiFoodResponseDetailed getApiFoodWithCache(Integer apiId) {
+        if (apiId == null)
+            return null;
+        try {
+            return apiFoodCache.get(apiId, id -> {
+                try {
+                    return foodService.getFoodFromApiById(id);
+                } catch (Exception e) {
+                    return null;
+                }
+            });
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private User getUserFromToken(String authHeader) {
@@ -64,9 +89,7 @@ public class RegisteredAlimentationService {
     }
 
     public String addEntry(String authHeader, RegisteredAlimentationRequest dto, String date) {
-        // ... (Ta metoda pozostaje bez zmian) ...
         User user = getUserFromToken(authHeader);
-
         RegisteredAlimentation entry = new RegisteredAlimentation();
         entry.setUserId(user.getId());
 
@@ -79,10 +102,9 @@ public class RegisteredAlimentationService {
                     .orElseThrow(() -> new IllegalArgumentException("Wrong meal ID"));
             entry.setMeal(meal);
         } else if (dto.getMealApiId() != null) {
-            try {
-                foodService.getFoodFromApiById(dto.getMealApiId());
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Wrong api ID");
+            if (getApiFoodWithCache(dto.getMealApiId()) == null) {
+                System.out.println("Warning: Adding entry with API ID " + dto.getMealApiId()
+                        + " but API failed to resolve details.");
             }
             entry.setMealApiId(dto.getMealApiId());
         }
@@ -115,16 +137,13 @@ public class RegisteredAlimentationService {
         if (dto.getMealName() == null || !exists) {
             throw new IllegalArgumentException("There is no such meal");
         }
-
         entry.setMealName(dto.getMealName());
-
         repository.save(entry);
         return "Meal registered";
     }
 
     public List<RegisteredAlimentationResponse> getMyEntries(String authHeader, String date) {
         User user = getUserFromToken(authHeader);
-
         List<RegisteredAlimentation> myEntries = parseDate(date)
                 .map(parsedDate -> repository.findByUserIdAndTimestamp(user.getId(), parsedDate))
                 .orElseGet(() -> repository.findByUserId(user.getId()));
@@ -132,128 +151,106 @@ public class RegisteredAlimentationService {
         return myEntries.stream()
                 .map(entry -> {
                     RegisteredAlimentationResponse dto = new RegisteredAlimentationResponse(entry);
-
-                    // mealName przypisane bezpośrednio (enum)
                     if (entry.getMealName() != null) {
                         dto.setMealName(entry.getMealName());
                     } else {
-                        dto.setMealName(MealNames.snack); // fallback
+                        dto.setMealName(MealNames.snack);
                     }
-
-                    // 3. NOWA LOGIKA DLA PRZEPISÓW (MEALS)
                     if (entry.getMeal() != null) {
                         try {
-                            // Używamy MealService, który ma logikę pobierania danych z API dla składników
                             MealResponse fullMeal = mealService.getMealWithIngredients(entry.getMeal().getId());
-                            // Nadpisujemy 'pusty' obiekt Meal w DTO tym pełnym, zawierającym dane z API
                             dto.setMeal(fullMeal);
                         } catch (Exception e) {
                             System.err.println("Error fetching full meal details: " + e.getMessage());
                         }
                     }
-
-                    // Pobranie danych z Meal API jeśli essentialFood jest null (Dla pojedynczych
-                    // produktów z API)
                     if (entry.getEssentialFood() == null && entry.getMealApiId() != null) {
-                        try {
-                            dto.setMealApi(foodService.getFoodFromApiById(entry.getMealApiId()));
-                        } catch (Exception e) {
-                            System.err.println("Error fetching from API: " + e.getMessage());
-                        }
+                        dto.setMealApi(getApiFoodWithCache(entry.getMealApiId()));
                     }
-
                     return dto;
                 })
                 .toList();
     }
 
     public void deleteEntry(String authHeader, Integer id) {
-        // ... (Bez zmian)
         User user = getUserFromToken(authHeader);
-
         RegisteredAlimentation entry = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry not found"));
-
         if (!entry.getUserId().equals(user.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to delete this entry");
         }
-
         repository.delete(entry);
     }
 
     public RegisteredAlimentation updateEntry(String authHeader, Integer id, RegisteredAlimentationRequest dto) {
-        // ... (Bez zmian)
         User user = getUserFromToken(authHeader);
-
         RegisteredAlimentation entry = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry not found"));
-
         if (!entry.getUserId().equals(user.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to edit this entry");
         }
-
         if (dto.getAmount() == null && dto.getPieces() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You have to specify amount or pieces");
         }
-
         if (dto.getAmount() != null) {
-            if (dto.getAmount() <= 0) {
+            if (dto.getAmount() <= 0)
                 throw new IllegalArgumentException("Amount can't be smaller or equal 0");
-            }
             entry.setAmount(dto.getAmount());
             entry.setPieces(null);
         }
-
         if (dto.getPieces() != null) {
-            if (dto.getPieces() <= 0) {
+            if (dto.getPieces() <= 0)
                 throw new IllegalArgumentException("Pieces can't be smaller or equal 0");
-            }
             entry.setPieces(dto.getPieces());
             entry.setAmount(null);
         }
-
         return repository.save(entry);
     }
 
     @Transactional
-    public String copyMeal(String authHeader,
-            String fromDate,
-            MealNames fromMealName,
-            String toDate,
+    public String copyMeal(String authHeader, String fromDate, MealNames fromMealName, String toDate,
             MealNames toMealName) {
-        // ... (Bez zmian)
         User user = getUserFromToken(authHeader);
-
         LocalDate from = parseDate(fromDate)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid source date"));
         LocalDate to = parseDate(toDate)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid target date"));
 
-        // pobierz wszystkie wpisy dla posiłku źródłowego
+        System.out.println("COPYING: User=" + user.getId() + ", From=" + from + " (" + fromMealName + ") To=" + to
+                + " (" + toMealName + ")");
+
+        // 1. Używamy precyzyjnego zapytania z repozytorium
         List<RegisteredAlimentation> sourceEntries = repository.findByUserIdAndTimestampAndMealName(user.getId(), from,
                 fromMealName);
 
         if (sourceEntries.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No entries to copy");
+            // To nie jest błąd krytyczny, po prostu nic nie kopiujemy
+            return "No entries to copy from " + fromMealName;
         }
 
-        // skopiuj każdy wpis do nowego posiłku
+        List<RegisteredAlimentation> newEntries = new ArrayList<>();
+
+        // 2. Tworzymy czyste kopie
         for (RegisteredAlimentation entry : sourceEntries) {
             RegisteredAlimentation copy = new RegisteredAlimentation();
             copy.setUserId(user.getId());
+            // Kopiujemy referencje
             copy.setEssentialFood(entry.getEssentialFood());
             copy.setMeal(entry.getMeal());
             copy.setMealApiId(entry.getMealApiId());
+            // Kopiujemy wartości
             copy.setAmount(entry.getAmount());
             copy.setPieces(entry.getPieces());
+            // Ustawiamy nową datę i nazwę posiłku
             copy.setTimestamp(to);
             copy.setMealName(toMealName);
 
-            repository.save(copy);
+            newEntries.add(copy);
         }
 
-        return "Meal copied successfully from " + fromMealName + " " + fromDate +
-                " to " + toMealName + " " + toDate;
-    }
+        // 3. Zapisujemy wszystko naraz
+        repository.saveAll(newEntries);
 
+        return "Copied " + newEntries.size() + " items successfully";
+    }
 }
