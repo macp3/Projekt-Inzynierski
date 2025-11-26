@@ -1,4 +1,4 @@
-package study.snacktrack.ServiceTest;
+package study.snacktrack.serviceTest;
 
 import org.springframework.test.util.ReflectionTestUtils;
 import study.snacktrack.repositories.*;

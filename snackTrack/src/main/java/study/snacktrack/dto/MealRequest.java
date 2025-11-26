@@ -3,7 +3,6 @@ package study.snacktrack.dto;
 import java.util.List;
 
 public class MealRequest {
-    //wyrzucilem authorId
     private String name;
     private String description;
     private List<IngredientRequest> ingredients;
