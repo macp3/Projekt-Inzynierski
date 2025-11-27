@@ -17,8 +17,8 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- DATABASE: `snackTrackDB`
 -- --------------------------------------------------------
 
-CREATE DATABASE IF NOT EXISTS `snackTrackDB` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `snackTrackDB`;
+-- CREATE DATABASE IF NOT EXISTS `snackTrackDB` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+-- USE `snackTrackDB`;
 
 
 -- --------------------------------------------------------
