@@ -29,7 +29,9 @@ public class EmailService {
             message.setTo(to);
             message.setSubject(subject);
             message.setText(text);
+            message.setFrom("snacktrack.notification@gmail.com");
             mailSender.send(message);
+            System.out.println("E-mail wysłany pomyślnie do: " + to);
         } catch (Exception e) {
             System.err.println("BŁĄD WYSYŁANIA MAILA: " + e.getMessage());
             e.printStackTrace();
