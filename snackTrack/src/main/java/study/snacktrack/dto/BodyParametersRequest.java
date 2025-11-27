@@ -2,10 +2,6 @@ package study.snacktrack.dto;
 
 import study.snacktrack.entities.enums.Sex;
 
-/**
- * Data Transfer Object (DTO) used for carrying a user's physical parameters to the service layer.
- * This object contains all necessary data points required to calculate the user's daily nutritional limits.
- */
 public class BodyParametersRequest {
 
     private Sex sex;
@@ -17,21 +13,8 @@ public class BodyParametersRequest {
     private Float weeklyWeightChangeTempo;
     private Float goalWeight;
 
-    /**
-     * Constructs a new BodyParametersRequest object with all required physical metrics.
-     * This constructor is used when creating or updating a user's body profile in the system.
-     *
-     * @param sex                         The user's sex.
-     * @param height                      The user's height.
-     * @param weight                      The user's current weight.
-     * @param age                         The user's age.
-     * @param dailyActivityFactor         The user's factor for non-training daily activity.
-     * @param dailyActivityTrainingFactor The user's factor for training activity.
-     * @param weeklyWeightChangeTempo     The desired weekly weight change tempo.
-     * @param goalWeight                  The user's final goal weight.
-     */
     public BodyParametersRequest(Sex sex, Float height, Float weight, Integer age, Float dailyActivityFactor,
-                                 Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo, Float goalWeight) {
+            Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo, Float goalWeight) {
         this.sex = sex;
         this.height = height;
         this.weight = weight;
@@ -42,39 +25,67 @@ public class BodyParametersRequest {
         this.goalWeight = goalWeight;
     }
 
-    /**
-     * Getters and setters for the DTO fields.
-     * These methods allow external access and modification of the user's physical parameters.
-     */
     public Sex getSex() {
         return sex;
+    }
+
+    public void setSex(Sex sex) {
+        this.sex = sex;
     }
 
     public Float getHeight() {
         return height;
     }
 
+    public void setHeight(Float height) {
+        this.height = height;
+    }
+
     public Float getWeight() {
         return weight;
+    }
+
+    public void setWeight(Float weight) {
+        this.weight = weight;
     }
 
     public Integer getAge() {
         return age;
     }
 
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
     public Float getDailyActivityFactor() {
         return dailyActivityFactor;
+    }
+
+    public void setDailyActivityFactor(Float dailyActivityFactor) {
+        this.dailyActivityFactor = dailyActivityFactor;
     }
 
     public Float getDailyActivityTrainingFactor() {
         return dailyActivityTrainingFactor;
     }
 
+    public void setDailyActivityTrainingFactor(Float dailyActivityTrainingFactor) {
+        this.dailyActivityTrainingFactor = dailyActivityTrainingFactor;
+    }
+
     public Float getWeeklyWeightChangeTempo() {
         return weeklyWeightChangeTempo;
     }
 
+    public void setWeeklyWeightChangeTempo(Float weeklyWeightChangeTempo) {
+        this.weeklyWeightChangeTempo = weeklyWeightChangeTempo;
+    }
+
     public Float getGoalWeight() {
         return goalWeight;
+    }
+
+    public void setGoalWeight(Float goalWeight) {
+        this.goalWeight = goalWeight;
     }
 }

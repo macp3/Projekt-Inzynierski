@@ -5,8 +5,10 @@ import study.snacktrack.entities.enums.MealNames;
 import java.time.LocalDate;
 
 /**
- * Data Transfer Object (DTO) used for carrying information required to log a user's food consumption.
- * This structure captures which food item was consumed, the amount, the date, and the specific meal context (e.g., LUNCH).
+ * Data Transfer Object (DTO) used for carrying information required to log a
+ * user's food consumption.
+ * This structure captures which food item was consumed, the amount, the date,
+ * and the specific meal context (e.g., LUNCH).
  */
 public class RegisteredAlimentationRequest {
 
@@ -21,7 +23,8 @@ public class RegisteredAlimentationRequest {
 
     /**
      * Getters and setters for the DTO fields.
-     * These methods provide standard access and modification capabilities for the registered alimentation details.
+     * These methods provide standard access and modification capabilities for the
+     * registered alimentation details.
      */
     public Integer getEssentialId() {
         return essentialId;
@@ -33,6 +36,10 @@ public class RegisteredAlimentationRequest {
 
     public Integer getMealApiId() {
         return mealApiId;
+    }
+
+    public void setMealApiId(Integer mealApiId) {
+        this.mealApiId = mealApiId;
     }
 
     public Integer getMealId() {
