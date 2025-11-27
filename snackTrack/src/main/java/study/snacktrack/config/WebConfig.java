@@ -20,15 +20,12 @@ public class WebConfig implements WebMvcConfigurer {
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-
-        // Handler for user profile images, mapped to the Docker volume mount point.
         registry.addResourceHandler("/images/profiles/**")
-                .addResourceLocations("file:/app/uploads/profiles/")
+                .addResourceLocations("file:///app/uploads/profiles/")
                 .setCachePeriod(3600);
 
-        // Handler for meal images, mapped to the Docker volume mount point.
         registry.addResourceHandler("/images/meals/**")
-                .addResourceLocations("file:/app/uploads/meals/")
+                .addResourceLocations("file:///app/uploads/meals/")
                 .setCachePeriod(3600);
     }
 }
