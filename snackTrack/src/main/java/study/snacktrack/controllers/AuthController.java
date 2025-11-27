@@ -27,7 +27,8 @@ import study.snacktrack.services.EmailService;
 import study.snacktrack.services.JwtService;
 
 /**
- * REST controller handling user registration, account activation, and login processes.
+ * REST controller handling user registration, account activation, and login
+ * processes.
  */
 @RestController
 @RequestMapping("/auth")
@@ -44,14 +45,19 @@ public class AuthController {
     private final VerificationTokenRepository tokenRepository;
     /** Service for sending transactional emails. */
     private final EmailService emailService;
-    /** Repository for checking if the user has completed their initial body parameters setup. */
+    /**
+     * Repository for checking if the user has completed their initial body
+     * parameters setup.
+     */
     private final BodyParametersRepository bodyParametersRepository;
 
     /**
-     * Registers a new user, saves their data, generates a verification token, and sends an activation email.
+     * Registers a new user, saves their data, generates a verification token, and
+     * sends an activation email.
      *
      * @param request The RegisterRequest DTO containing user details.
-     * @return ResponseEntity with a success message or a bad request if the email is taken.
+     * @return ResponseEntity with a success message or a bad request if the email
+     *         is taken.
      */
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
@@ -74,7 +80,7 @@ public class AuthController {
         verificationToken.setExpiryDate(LocalDateTime.now().plusHours(24));
         tokenRepository.save(verificationToken);
 
-        String activationLink = "http://localhost:8080/auth/activate?token=" + token;
+        String activationLink = "https://projekt-inzynierski-production.up.railway.app/auth/activate?token=" + token;
         emailService.sendEmail(
                 user.getEmail(),
                 "Activate your SnackTrack account",
@@ -84,10 +90,12 @@ public class AuthController {
     }
 
     /**
-     * Activates a user account using a verification token provided in the URL parameter.
+     * Activates a user account using a verification token provided in the URL
+     * parameter.
      *
      * @param token The verification token string.
-     * @return ResponseEntity with a success message or a bad request if the token is invalid or expired.
+     * @return ResponseEntity with a success message or a bad request if the token
+     *         is invalid or expired.
      */
     @GetMapping("/activate")
     public ResponseEntity<String> activateAccount(@RequestParam("token") String token) {
@@ -112,7 +120,8 @@ public class AuthController {
      * Checks for inactive or banned status before issuing a JWT token.
      *
      * @param request The LoginRequest DTO containing credentials.
-     * @return ResponseEntity containing a JWT token, a first-login flag, and status information.
+     * @return ResponseEntity containing a JWT token, a first-login flag, and status
+     *         information.
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
