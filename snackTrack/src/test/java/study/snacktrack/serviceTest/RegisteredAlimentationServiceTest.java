@@ -17,6 +17,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the RegisteredAlimentationService, covering the core business logic for logging food entries, retrieving, updating, and deleting records.
+ * This class ensures that the service correctly handles authentication, validation, and data manipulation for user's daily dietary log.
+ */
 class RegisteredAlimentationServiceTest {
 
     private UserRepository userRepository;
@@ -28,6 +32,10 @@ class RegisteredAlimentationServiceTest {
     private MealService mealService;
     private RegisteredAlimentationService service;
 
+    /**
+     * Sets up mock repositories and services, and initializes the RegisteredAlimentationService instance before each test.
+     * This isolates the service logic, allowing for focused testing of interactions and business rules.
+     */
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
@@ -43,6 +51,10 @@ class RegisteredAlimentationServiceTest {
                 repository, jwtService, foodService, mealService);
     }
 
+    /**
+     * Tests the successful addition of a new food entry based on an essential food ID and amount.
+     * It verifies that the service successfully resolves the user and food, and saves the new {@code RegisteredAlimentation} entity.
+     */
     @Test
     void addEntry_shouldSaveEssentialFoodEntry() {
         User user = new User();
@@ -66,6 +78,10 @@ class RegisteredAlimentationServiceTest {
         verify(repository).save(any(RegisteredAlimentation.class));
     }
 
+    /**
+     * Tests that adding a food entry throws an exception if neither amount nor pieces are provided in the request.
+     * It verifies the service enforces the validation rule that at least one quantity metric must be present.
+     */
     @Test
     void addEntry_shouldThrowWhenNoAmountOrPieces() {
         User user = new User();
@@ -81,6 +97,10 @@ class RegisteredAlimentationServiceTest {
                 () -> service.addEntry("Bearer token", req, null));
     }
 
+    /**
+     * Tests the retrieval of all registered alimentation entries for the authenticated user.
+     * It verifies that the service fetches the entries by user ID and maps them correctly to {@code RegisteredAlimentationResponse} DTOs.
+     */
     @Test
     void getMyEntries_shouldReturnResponses() {
         User user = new User();
@@ -104,6 +124,10 @@ class RegisteredAlimentationServiceTest {
         assertEquals(MealNames.snack, result.get(0).getMealName());
     }
 
+    /**
+     * Tests the successful deletion of an alimentation entry by its owner.
+     * It verifies that the service checks for ownership and performs the delete operation if the user is authorized.
+     */
     @Test
     void deleteEntry_shouldRemoveEntryWhenOwner() {
         User user = new User();
@@ -122,6 +146,10 @@ class RegisteredAlimentationServiceTest {
         verify(repository).delete(entry);
     }
 
+    /**
+     * Tests that deleting an alimentation entry fails if the authenticated user is not the owner.
+     * It verifies that the service throws a {@code ResponseStatusException} (403 Forbidden) when unauthorized access is attempted.
+     */
     @Test
     void deleteEntry_shouldThrowWhenNotOwner() {
         User user = new User();
@@ -139,6 +167,10 @@ class RegisteredAlimentationServiceTest {
                 () -> service.deleteEntry("Bearer token", 10));
     }
 
+    /**
+     * Tests the successful update of an existing alimentation entry's amount and meal name.
+     * It verifies that the service finds the entry, updates its properties, and saves the modified entity.
+     */
     @Test
     void updateEntry_shouldUpdateAmount() {
         User user = new User();
@@ -163,6 +195,10 @@ class RegisteredAlimentationServiceTest {
         verify(repository).save(entry);
     }
 
+    /**
+     * Tests the functionality to copy all entries from one meal time/date to another.
+     * It verifies that the service fetches the source entries, clones them with new meal time and date stamps, and saves the new list.
+     */
     @Test
     void copyMeal_shouldCopyEntries() {
         User user = new User();
@@ -176,14 +212,17 @@ class RegisteredAlimentationServiceTest {
         entry.setMealName(MealNames.breakfast);
         entry.setTimestamp(LocalDate.now());
 
+        LocalDate today = LocalDate.now();
+
         when(repository.findByUserIdAndTimestampAndMealName(eq(1), any(LocalDate.class), eq(MealNames.breakfast)))
                 .thenReturn(List.of(entry));
 
         String result = service.copyMeal("Bearer token",
-                LocalDate.now().toString(), MealNames.breakfast,
-                LocalDate.now().plusDays(1).toString(), MealNames.lunch);
+                today.toString(), MealNames.breakfast,
+                today.plusDays(1).toString(), MealNames.lunch);
 
-        assertTrue(result.contains("Meal copied successfully"));
-        verify(repository, atLeastOnce()).save(any(RegisteredAlimentation.class));
+        assertTrue(result.contains("Copied 1 items successfully"));
+
+        verify(repository).saveAll(anyList());
     }
 }

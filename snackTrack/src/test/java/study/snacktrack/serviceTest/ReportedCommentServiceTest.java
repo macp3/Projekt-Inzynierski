@@ -13,25 +13,34 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the ReportedCommentService, covering the core logic for submitting, retrieving, and managing reported comments.
+ * This class ensures that the service enforces rules such as preventing users from reporting their own comments and correctly maps data to DTOs.
+ */
 class ReportedCommentServiceTest {
 
     private UserRepository userRepository;
     private CommentRepository commentRepository;
-    private ReportedMealRepository reportedMealRepository;
     private ReportedCommentRepository reportedCommentRepository;
     private ReportedCommentService service;
 
+    /**
+     * Sets up mock repositories and initializes the ReportedCommentService instance before each test.
+     * This isolates the service logic, allowing for verification of correct repository method calls and business rule enforcement.
+     */
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
         commentRepository = mock(CommentRepository.class);
-        reportedMealRepository = mock(ReportedMealRepository.class);
         reportedCommentRepository = mock(ReportedCommentRepository.class);
 
-        service = new ReportedCommentService(userRepository, null,
-                commentRepository, reportedMealRepository, reportedCommentRepository);
+        service = new ReportedCommentService(userRepository, commentRepository, reportedCommentRepository);
     }
 
+    /**
+     * Tests the successful submission of a new report for a comment.
+     * It verifies that the service saves the new {@code ReportedComment} entity and returns the correctly mapped {@code ReportedCommentResponse} DTO.
+     */
     @Test
     void reportComment_shouldSaveReport() {
         Comment comment = new Comment();
@@ -69,6 +78,10 @@ class ReportedCommentServiceTest {
         verify(reportedCommentRepository).save(any(ReportedComment.class));
     }
 
+    /**
+     * Tests that reporting a comment throws an exception if the reporting user is the author of the comment.
+     * It verifies that the service enforces the business rule preventing users from reporting their own content.
+     */
     @Test
     void reportComment_shouldThrowWhenReportingOwnComment() {
         Comment comment = new Comment();
@@ -85,6 +98,10 @@ class ReportedCommentServiceTest {
                 () -> service.reportComment(1, 3, "Spam"));
     }
 
+    /**
+     * Tests the retrieval of all reports submitted by a specific user ID.
+     * It verifies that the service fetches the list of {@code ReportedComment} entities associated with the reporting user.
+     */
     @Test
     void getAllReportsByUser_shouldReturnReports() {
         User user = new User();
@@ -105,6 +122,10 @@ class ReportedCommentServiceTest {
         assertEquals("Spam", result.get(0).getContent());
     }
 
+    /**
+     * Tests the retrieval of all reports submitted against a specific comment ID.
+     * It verifies that the service fetches the list of {@code ReportedComment} entities targeting the specified comment.
+     */
     @Test
     void getAllReportsByComment_shouldReturnReports() {
         Comment comment = new Comment();
@@ -126,6 +147,10 @@ class ReportedCommentServiceTest {
         assertEquals(2, result.get(0).getCommentId());
     }
 
+    /**
+     * Tests the retrieval of all reports existing in the database.
+     * It verifies that the service delegates the request to retrieve the complete list of reports.
+     */
     @Test
     void getAllReports_shouldReturnAll() {
         ReportedComment rc = new ReportedComment();
@@ -142,6 +167,10 @@ class ReportedCommentServiceTest {
         assertEquals("Spam", result.get(0).getContent());
     }
 
+    /**
+     * Tests the successful deletion of an existing report by its ID.
+     * It verifies that the service finds the report and performs the delete operation.
+     */
     @Test
     void deleteReport_shouldDeleteWhenExists() {
         ReportedComment rc = new ReportedComment();
@@ -154,6 +183,10 @@ class ReportedCommentServiceTest {
         verify(reportedCommentRepository).delete(rc);
     }
 
+    /**
+     * Tests that attempting to delete a non-existent report throws an exception.
+     * It verifies that the service enforces data integrity by requiring the report ID to exist.
+     */
     @Test
     void deleteReport_shouldThrowWhenNotFound() {
         when(reportedCommentRepository.findById(99)).thenReturn(Optional.empty());

@@ -9,6 +9,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * Represents a user comment posted on a meal within the application.
+ * This entity stores the comment's content, its author, the meal it relates to, and the current number of likes received.
+ */
 @Entity
 @Table(name = "comments")
 public class Comment {
@@ -29,7 +33,10 @@ public class Comment {
     @Column(columnDefinition = "integer default 0")
     private int likes = 0;
 
-    // Gettery i Settery
+    /**
+     * Getters and setters for all entity fields.
+     * These methods provide standard access and modification capabilities for the Comment entity properties.
+     */
     public int getLikes() {
         return likes;
     }

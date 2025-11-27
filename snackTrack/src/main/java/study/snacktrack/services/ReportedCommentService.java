@@ -11,27 +11,36 @@ import org.springframework.stereotype.Service;
 import study.snacktrack.entities.ReportedComment;
 import study.snacktrack.entities.User;
 import study.snacktrack.repositories.CommentRepository;
-import study.snacktrack.repositories.MealRepository;
 import study.snacktrack.repositories.ReportedCommentRepository;
-import study.snacktrack.repositories.ReportedMealRepository;
 
+/**
+ * Service responsible for managing reported comments.
+ * Provides functionality for reporting, retrieving, and deleting comment reports.
+ */
 @Service
 public class ReportedCommentService {
 
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
-    private final ReportedMealRepository reportedMealRepository;
     private final ReportedCommentRepository reportedCommentRepository;
 
-    public ReportedCommentService(UserRepository userRepository, MealRepository mealRepository,
-            CommentRepository commentRepository, ReportedMealRepository reportedMealRepository,
-            ReportedCommentRepository reportedCommentRepository) {
+    /**
+     * Constructs ReportedCommentService with required repositories.
+     */
+    public ReportedCommentService(UserRepository userRepository,
+                                  CommentRepository commentRepository,
+                                  ReportedCommentRepository reportedCommentRepository) {
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
-        this.reportedMealRepository = reportedMealRepository;
         this.reportedCommentRepository = reportedCommentRepository;
     }
 
+    /**
+     * Validates if a comment exists by ID.
+     *
+     * @param commentId comment identifier
+     * @return Comment entity if found
+     */
     private Comment validateCommentExistance(int commentId) {
         if (commentId <= 0) {
             throw new IllegalArgumentException("Comment ID must be greater than zero");
@@ -46,6 +55,14 @@ public class ReportedCommentService {
         return optionalComment.get();
     }
 
+    /**
+     * Reports a comment by a user with provided content.
+     *
+     * @param commentId comment identifier
+     * @param userId reporting user identifier
+     * @param content report content
+     * @return response DTO with report details
+     */
     public ReportedCommentResponse reportComment(int commentId, int userId, String content) {
         Comment comment = validateCommentExistance(commentId);
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -72,7 +89,12 @@ public class ReportedCommentService {
                 reportedComment.getCommentId(), reportedComment.getContent());
     }
 
-    // admin
+    /**
+     * Retrieves all reports created by a specific user.
+     *
+     * @param userId user identifier
+     * @return list of reported comments
+     */
     public List<ReportedComment> getAllReportsByUser(int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("There is no user with specified ID"));
@@ -81,7 +103,12 @@ public class ReportedCommentService {
         return reports;
     }
 
-    // admin
+    /**
+     * Retrieves all reports for a specific comment.
+     *
+     * @param commentId comment identifier
+     * @return list of reported comments
+     */
     public List<ReportedComment> getAllReportsByComment(int commentId) {
         commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Couldn't find the comment with specified ID"));
@@ -92,14 +119,18 @@ public class ReportedCommentService {
     }
 
     /**
-     * Zwraca listę WSZYSTKICH zgłoszonych komentarzy w systemie.
+     * Retrieves all reported comments in the system.
+     *
+     * @return list of reported comments
      */
     public List<ReportedComment> getAllReports() {
         return reportedCommentRepository.findAll();
     }
 
     /**
-     * Usuwa zgłoszenie komentarza.
+     * Deletes a reported comment by its report ID.
+     *
+     * @param reportId report identifier
      */
     public void deleteReport(int reportId) {
         if (reportId <= 0) {

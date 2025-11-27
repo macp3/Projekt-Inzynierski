@@ -12,13 +12,15 @@ import study.snacktrack.dto.CommentRequest;
 import study.snacktrack.services.CommentService;
 import study.snacktrack.services.JwtService;
 import study.snacktrack.services.UserService;
-
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the CommentController, ensuring proper handling of comment creation, editing, deletion, and retrieval.
+ * This class isolates the controller logic by mocking its service dependencies and validating correct request delegation and response statuses.
+ */
 class CommentControllerTest {
 
     private JwtService jwtService;
@@ -26,6 +28,10 @@ class CommentControllerTest {
     private CommentService commentService;
     private CommentController controller;
 
+    /**
+     * Sets up the necessary mock services and initializes the CommentController instance before each test.
+     * It also sets up global mock behavior to successfully extract the user ID from the authorization header, simulating authentication.
+     */
     @BeforeEach
     void setUp() {
         jwtService = mock(JwtService.class);
@@ -40,6 +46,10 @@ class CommentControllerTest {
         when(userService.getUserByEmail("user@example.com")).thenReturn(user);
     }
 
+    /**
+     * Tests the successful addition of a new comment to a meal.
+     * It verifies that the controller delegates the request to the {@code CommentService} and returns an HTTP 200 OK status.
+     */
     @Test
     void addCommentToMeal_shouldReturnOk() {
         CommentRequest req = new CommentRequest();
@@ -56,6 +66,10 @@ class CommentControllerTest {
         verify(commentService).addCommentToMeal(1, req);
     }
 
+    /**
+     * Tests the successful editing of an existing comment by its author.
+     * It verifies the correct comment ID is retrieved and the edit operation is delegated to the {@code CommentService}.
+     */
     @Test
     void editCommentByUser_shouldReturnOk() {
         CommentRequest req = new CommentRequest();
@@ -78,6 +92,10 @@ class CommentControllerTest {
         verify(commentService).editComment(1, 5, "Edited");
     }
 
+    /**
+     * Tests the successful retrieval of all comments written by the currently authenticated user.
+     * It verifies that the controller delegates to the {@code CommentService} using the authenticated user's ID and returns an HTTP 200 OK status.
+     */
     @Test
     void getAllCommentsByUser_shouldReturnList() {
         when(commentService.getAllCommentsByUser(1))
@@ -90,6 +108,10 @@ class CommentControllerTest {
         verify(commentService).getAllCommentsByUser(1);
     }
 
+    /**
+     * Tests the successful deletion of a comment by its author.
+     * It verifies that the controller returns an HTTP 200 OK status and ensures the delete operation is performed by the {@code CommentService}.
+     */
     @Test
     void deleteCommentByUser_shouldReturnOk() {
         ResponseEntity<String> response = controller.deleteCommentByUser(10, "Bearer valid-token");
@@ -99,6 +121,10 @@ class CommentControllerTest {
         verify(commentService).deleteCommentByUser(1, 10);
     }
 
+    /**
+     * Tests the successful retrieval of all comments associated with a specific meal ID.
+     * It verifies that the controller delegates the request using both the meal ID and the requesting user's ID for like status context.
+     */
     @Test
     void getAllCommentsForMeal_shouldReturnList() {
         when(commentService.getAllMealComments(10, 1))
@@ -111,6 +137,10 @@ class CommentControllerTest {
         verify(commentService).getAllMealComments(10, 1);
     }
 
+    /**
+     * Tests the successful toggling (adding or removing) of a like on a specific comment.
+     * It verifies the controller delegates the operation to the {@code CommentService} and returns an HTTP 200 OK status.
+     */
     @Test
     void toggleLike_shouldReturnOk() {
         ResponseEntity<String> response = controller.toggleLike(5, "Bearer valid-token");

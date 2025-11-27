@@ -13,25 +13,34 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the ReportedMealService, covering the core logic for submitting, retrieving, and managing meal reports.
+ * This class ensures that the service enforces business rules, like preventing self-reporting, and correctly handles data persistence and retrieval.
+ */
 class ReportedMealServiceTest {
 
     private UserRepository userRepository;
     private MealRepository mealRepository;
-    private CommentRepository commentRepository;
     private ReportedMealRepository reportedMealRepository;
     private ReportedMealService service;
 
+    /**
+     * Sets up mock repositories and initializes the ReportedMealService instance before each test.
+     * This isolates the service logic, enabling verification of correct repository interactions.
+     */
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
         mealRepository = mock(MealRepository.class);
-        commentRepository = mock(CommentRepository.class);
         reportedMealRepository = mock(ReportedMealRepository.class);
 
-        service = new ReportedMealService(userRepository, mealRepository,
-                commentRepository, reportedMealRepository);
+        service = new ReportedMealService(userRepository, mealRepository, reportedMealRepository);
     }
 
+    /**
+     * Tests the successful submission of a new report for a meal.
+     * It verifies that the service saves the new {@code ReportedMeal} entity and returns the correctly mapped {@code ReportedMealResponse} DTO.
+     */
     @Test
     void reportMeal_shouldSaveReport() {
         Meal meal = new Meal(2, "Pizza", "Cheese pizza");
@@ -61,6 +70,10 @@ class ReportedMealServiceTest {
         verify(reportedMealRepository).save(any(ReportedMeal.class));
     }
 
+    /**
+     * Tests that reporting a meal throws an exception if the reporting user is the author of the meal.
+     * It verifies that the service enforces the business rule preventing users from reporting their own content.
+     */
     @Test
     void reportMeal_shouldThrowWhenReportingOwnMeal() {
         Meal meal = new Meal(2, "Pizza", "Cheese pizza");
@@ -77,6 +90,10 @@ class ReportedMealServiceTest {
                 () -> service.reportMeal(2, 3, "Spam"));
     }
 
+    /**
+     * Tests the retrieval of all reports submitted by a specific user ID.
+     * It verifies that the service fetches the list of {@code ReportedMeal} entities associated with the reporting user.
+     */
     @Test
     void getAllReportsByUser_shouldReturnReports() {
         User user = new User();
@@ -97,6 +114,10 @@ class ReportedMealServiceTest {
         assertEquals("Spam", result.get(0).getContent());
     }
 
+    /**
+     * Tests the retrieval of all reports submitted against a specific meal ID.
+     * It verifies that the service fetches the list of {@code ReportedMeal} entities targeting the specified meal.
+     */
     @Test
     void getAllReportsByMeal_shouldReturnReports() {
         ReportedMeal rm = new ReportedMeal();
@@ -113,6 +134,10 @@ class ReportedMealServiceTest {
         assertEquals(2, result.get(0).getMealId());
     }
 
+    /**
+     * Tests the retrieval of all reports existing in the database.
+     * It verifies that the service delegates the request to retrieve the complete list of reports.
+     */
     @Test
     void getAllReports_shouldReturnAll() {
         ReportedMeal rm = new ReportedMeal();
@@ -129,6 +154,10 @@ class ReportedMealServiceTest {
         assertEquals("Spam", result.get(0).getContent());
     }
 
+    /**
+     * Tests the successful deletion of an existing report by its ID.
+     * It verifies that the service finds the report and performs the delete operation.
+     */
     @Test
     void deleteReport_shouldDeleteWhenExists() {
         ReportedMeal rm = new ReportedMeal();
@@ -141,6 +170,10 @@ class ReportedMealServiceTest {
         verify(reportedMealRepository).delete(rm);
     }
 
+    /**
+     * Tests that attempting to delete a non-existent report throws an exception.
+     * It verifies that the service enforces data integrity by requiring the report ID to exist.
+     */
     @Test
     void deleteReport_shouldThrowWhenNotFound() {
         when(reportedMealRepository.findById(99)).thenReturn(Optional.empty());
@@ -149,6 +182,10 @@ class ReportedMealServiceTest {
                 () -> service.deleteReport(99));
     }
 
+    /**
+     * Tests the functionality to delete all reports associated with a specific meal ID.
+     * It verifies that the service retrieves all relevant reports and performs a batch deletion.
+     */
     @Test
     void deleteReportsByMealId_shouldDeleteAll() {
         ReportedMeal rm = new ReportedMeal();

@@ -5,6 +5,10 @@ import java.time.LocalDate;
 import jakarta.persistence.*;
 import study.snacktrack.entities.enums.MealNames;
 
+/**
+ * Represents a single instance of food consumption logged by a user in the application.
+ * This entity tracks the user ID, the specific food item (from local database, API, or custom meal), the quantity, the date, and the meal context.
+ */
 @Entity
 @Table(name = "registered_alimentation")
 public class RegisteredAlimentation {
@@ -39,6 +43,10 @@ public class RegisteredAlimentation {
     @Column(name = "pieces")
     private Float pieces;
 
+    /**
+     * Getters and setters for all entity fields.
+     * These methods provide standard access and modification capabilities for the RegisteredAlimentation entity properties.
+     */
     public Integer getId() {
         return id;
     }

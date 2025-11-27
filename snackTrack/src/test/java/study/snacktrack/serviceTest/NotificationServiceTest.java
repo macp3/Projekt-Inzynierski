@@ -16,12 +16,20 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the NotificationService, covering the business logic for creating, fetching, and filtering notifications.
+ * This class ensures that the service correctly interacts with the repositories and applies recipient filtering based on user status.
+ */
 class NotificationServiceTest {
 
     private NotificationRepository notificationRepository;
     private UserRepository userRepository;
     private NotificationService notificationService;
 
+    /**
+     * Sets up mock repositories and initializes the NotificationService instance before each test.
+     * This isolates the service logic, allowing for verification of correct repository method calls.
+     */
     @BeforeEach
     void setUp() {
         notificationRepository = mock(NotificationRepository.class);
@@ -29,6 +37,10 @@ class NotificationServiceTest {
         notificationService = new NotificationService(notificationRepository, userRepository);
     }
 
+    /**
+     * Tests the successful creation and saving of a new notification by an administrator.
+     * It verifies that the service saves the entity and returns the created notification object.
+     */
     @Test
     void createNotification_shouldSaveAndReturnNotification() {
         Admin admin = new Admin();
@@ -55,6 +67,10 @@ class NotificationServiceTest {
         verify(notificationRepository).save(any(Notification.class));
     }
 
+    /**
+     * Tests that notification creation fails if the author (Admin) object is null.
+     * It verifies that the service throws an {@code IllegalArgumentException} to enforce the author requirement.
+     */
     @Test
     void createNotification_shouldThrowWhenAuthorIsNull() {
         NotificationRequest request = new NotificationRequest();
@@ -67,6 +83,10 @@ class NotificationServiceTest {
                 () -> notificationService.createNotification(request, null));
     }
 
+    /**
+     * Tests the retrieval of all notifications present in the database.
+     * It verifies that the service fetches the entire list of {@code Notification} entities.
+     */
     @Test
     void getAllNotifications_shouldReturnList() {
         Notification n = new Notification();
@@ -84,6 +104,10 @@ class NotificationServiceTest {
         assertEquals("N1", result.get(0).getName());
     }
 
+    /**
+     * Tests the retrieval of all notifications mapped to response DTOs.
+     * It verifies that the service converts the fetched entities into {@code NotificationResponse} objects.
+     */
     @Test
     void getAllNotificationsDetails_shouldReturnResponses() {
         Notification n = new Notification();
@@ -101,6 +125,10 @@ class NotificationServiceTest {
         assertEquals("N1", result.get(0).getName());
     }
 
+    /**
+     * Tests the retrieval of notifications filtered by a specific recipient type (e.g., premium users).
+     * It verifies that the service delegates the filtering to the repository method.
+     */
     @Test
     void getNotificationsByRecipients_shouldReturnList() {
         Notification n = new Notification();
@@ -118,6 +146,10 @@ class NotificationServiceTest {
         assertEquals(Recipients.premium, result.get(0).getRecipients());
     }
 
+    /**
+     * Tests the retrieval of notifications relevant to a specific user, considering their premium status.
+     * It verifies that the service correctly determines the necessary recipient types (all and premium) and fetches the filtered list.
+     */
     @Test
     void getNotificationsByUser_shouldReturnPremiumNotifications() {
         User user = new User();
@@ -141,6 +173,10 @@ class NotificationServiceTest {
         assertEquals("PremiumNotif", result.get(0).getName());
     }
 
+    /**
+     * Tests the retrieval of notifications scheduled to be sent on a specific date.
+     * It verifies that the service delegates the request to the repository's date-based search method.
+     */
     @Test
     void getNotificationsByDate_shouldReturnList() {
         Notification n = new Notification();

@@ -13,6 +13,10 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the DailyCheckService, focusing on the core logic for calculating daily calorie intake and updating user streaks.
+ * This class ensures that the service correctly interacts with repositories and enforces streak rules based on calorie limits.
+ */
 class DailyCheckServiceTest {
 
     private UserRepository userRepository;
@@ -22,6 +26,10 @@ class DailyCheckServiceTest {
     private FoodService foodService;
     private DailyCheckService dailyCheckService;
 
+    /**
+     * Sets up mock repositories and services, and uses ReflectionTestUtils to inject these mocks into the DailyCheckService instance.
+     * This setup is necessary for testing private fields and isolating the service logic.
+     */
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
@@ -31,7 +39,7 @@ class DailyCheckServiceTest {
         foodService = mock(FoodService.class);
 
         dailyCheckService = new DailyCheckService();
-        
+
         ReflectionTestUtils.setField(dailyCheckService, "userRepository", userRepository);
         ReflectionTestUtils.setField(dailyCheckService, "bodyParametersRepository", bodyParametersRepository);
         ReflectionTestUtils.setField(dailyCheckService, "alimentationRepository", alimentationRepository);
@@ -39,6 +47,10 @@ class DailyCheckServiceTest {
         ReflectionTestUtils.setField(dailyCheckService, "foodService", foodService);
     }
 
+    /**
+     * Tests the scenario where a user's total daily calorie intake is within their limit.
+     * It verifies that the service correctly calculates the intake and calls the {@code UserService} to increment the user's streak.
+     */
     @Test
     void checkCaloriesForAllUsers_shouldIncreaseStreakWhenWithinLimit() {
         User user = new User();
@@ -69,6 +81,10 @@ class DailyCheckServiceTest {
         verify(userService).updateStreak(1, 3);
     }
 
+    /**
+     * Tests the scenario where a user's total daily calorie intake exceeds their limit.
+     * It verifies that the service correctly identifies the breach and calls the {@code UserService} to reset the user's streak to zero.
+     */
     @Test
     void checkCaloriesForAllUsers_shouldResetStreakWhenAboveLimit() {
         User user = new User();
@@ -87,7 +103,7 @@ class DailyCheckServiceTest {
         food.setCalories(1000);
         food.setDefaultWeight(100f);
         entry.setEssentialFood(food);
-        entry.setAmount(200f); // 2000 kcal
+        entry.setAmount(200f);
 
         when(userRepository.findAll()).thenReturn(List.of(user));
         when(bodyParametersRepository.findByUserId(2)).thenReturn(Optional.of(params));
@@ -99,6 +115,10 @@ class DailyCheckServiceTest {
         verify(userService).updateStreak(2, 0);
     }
 
+    /**
+     * Tests that users without defined body parameters are correctly skipped during the calorie check process.
+     * It verifies that the streak update method in {@code UserService} is never called for such users.
+     */
     @Test
     void checkCaloriesForAllUsers_shouldSkipUserWithoutBodyParameters() {
         User user = new User();

@@ -11,20 +11,37 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Service responsible for sending push notifications using Firebase Cloud Messaging.
+ * Supports sending to specific user groups or multiple device tokens.
+ */
 @Service
 public class PushNotificationService {
 
     private final UserRepository userRepository;
     private final UserDeviceTokenRepository tokenRepository;
 
+    /**
+     * Constructs PushNotificationService with required repositories.
+     *
+     * @param userRepository repository for users
+     * @param tokenRepository repository for user device tokens
+     */
     public PushNotificationService(UserRepository userRepository, UserDeviceTokenRepository tokenRepository) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
     }
 
+    /**
+     * Sends a push notification to a specific group of users.
+     * Groups can be "premium", "non_premium", or "all".
+     *
+     * @param targetGroup target group name
+     * @param title notification title
+     * @param body notification body
+     */
     public void sendToGroup(String targetGroup, String title, String body) {
-        if (targetGroup == null || targetGroup == null || title.isBlank() || title == null || body.isBlank()
-                || body == null) {
+        if (targetGroup == null || title == null || body == null || title.isBlank() || body.isBlank()) {
             throw new IllegalArgumentException("Wrong parameters");
         }
         List<User> users = userRepository.findAll();
@@ -49,8 +66,6 @@ public class PushNotificationService {
                 .map(UserDeviceToken::getDeviceToken)
                 .filter(token -> token != null && !token.isBlank())
                 .collect(Collectors.toSet());
-
-        System.out.println(tokens);
 
         if (tokens.isEmpty()) {
             return;
@@ -83,9 +98,15 @@ public class PushNotificationService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to send notifications: " + e.getMessage());
         }
-
     }
 
+    /**
+     * Sends a multicast push notification to a list of device tokens.
+     *
+     * @param deviceTokens list of device tokens
+     * @param title notification title
+     * @param body notification body
+     */
     public void sendMulticastPush(List<String> deviceTokens, String title, String body) {
         if (deviceTokens == null || deviceTokens.isEmpty()) {
             return;
@@ -107,7 +128,7 @@ public class PushNotificationService {
                     .sendEachForMulticast(message);
 
         } catch (Exception e) {
-            System.err.println("❌ Error sending multicast push: " + e.getMessage());
+            System.err.println("Error sending multicast push: " + e.getMessage());
         }
     }
 }

@@ -24,6 +24,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the AuthController, focusing on the core user authentication flows: registration, account activation, and login.
+ * This class uses Mockito to isolate the controller logic, ensuring tests verify business rules and proper dependency interaction.
+ */
 class AuthControllerTest {
 
     private UserRepository userRepository;
@@ -35,6 +39,10 @@ class AuthControllerTest {
 
     private AuthController controller;
 
+    /**
+     * Sets up the necessary mock dependencies and initializes the AuthController instance before each test execution.
+     * This uses mock objects to control the behavior of external services and repositories, guaranteeing test isolation.
+     */
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
@@ -54,6 +62,10 @@ class AuthControllerTest {
         );
     }
 
+    /**
+     * Tests registration failure when the provided email address is already present in the database.
+     * It verifies that the controller returns an HTTP 400 Bad Request status and avoids saving any new user entity.
+     */
     @Test
     void register_shouldReturnBadRequest_whenEmailTaken() {
         RegisterRequest req = new RegisterRequest();
@@ -71,10 +83,14 @@ class AuthControllerTest {
         verify(userRepository, never()).save(any(User.class));
     }
 
+    /**
+     * Tests successful user registration when the email address is unique.
+     * It verifies that a user is saved, a verification token is created, and an email is dispatched for activation.
+     */
     @Test
     void register_shouldSaveUserAndSendEmail_whenEmailFree() {
         RegisterRequest req = new RegisterRequest();
-        req.setEmail("new@example.com");   // <- poprawione, spójne z verify
+        req.setEmail("new@example.com");
         req.setPassword("secret");
         req.setName("John");
         req.setSurname("Doe");
@@ -94,6 +110,10 @@ class AuthControllerTest {
 
     // ---------------- ACTIVATE ----------------
 
+    /**
+     * Tests account activation failure when the provided token has already expired.
+     * It verifies that the controller returns an HTTP 400 Bad Request status with the specific "Token expired" message.
+     */
     @Test
     void activateAccount_shouldReturnBadRequest_whenTokenExpired() {
         VerificationToken vt = new VerificationToken();
@@ -109,6 +129,10 @@ class AuthControllerTest {
         assertEquals("Token expired", response.getBody());
     }
 
+    /**
+     * Tests successful account activation using a valid, non-expired token.
+     * It asserts that the user's status is changed to 'active', the user is saved, and the token is deleted from the repository.
+     */
     @Test
     void activateAccount_shouldActivateUser_whenValidToken() {
         User user = new User();
@@ -130,12 +154,21 @@ class AuthControllerTest {
         verify(tokenRepository).delete(vt);
     }
 
+    /**
+     * Tests activation failure when no matching verification token is found in the repository.
+     * It asserts that the controller throws a {@code RuntimeException} indicating the token was missing.
+     */
     @Test
     void activateAccount_shouldThrow_whenTokenNotFound() {
         when(tokenRepository.findByToken("missing")).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> controller.activateAccount("missing"));
     }
+
+    /**
+     * Tests login failure when no user can be found with the provided email address.
+     * It verifies that the controller returns an HTTP 401 Unauthorized status with the "Invalid credentials" message.
+     */
     @Test
     void login_shouldReturnUnauthorized_whenUserNotFound() {
         LoginRequest req = new LoginRequest();
@@ -152,6 +185,10 @@ class AuthControllerTest {
         assertFalse(response.getBody().isShowSurvey());
     }
 
+    /**
+     * Tests login failure when the user's account has not yet been activated.
+     * It verifies that the controller returns an HTTP 403 Forbidden status with the "Account not activated" message.
+     */
     @Test
     void login_shouldReturnForbidden_whenInactive() {
         User user = new User();
@@ -172,6 +209,10 @@ class AuthControllerTest {
         assertEquals("Account not activated", response.getBody().getMessage());
     }
 
+    /**
+     * Tests successful login for an active user who has not yet submitted body parameters.
+     * It verifies that the controller returns an HTTP 200 OK status, a JWT, and sets the {@code showSurvey} flag to true.
+     */
     @Test
     void login_shouldReturnOk_withTokenAndShowSurveyTrue_whenNoBodyParams() {
         User user = new User();
@@ -193,10 +234,14 @@ class AuthControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("jwt-token", response.getBody().getToken());
-        assertTrue(response.getBody().isShowSurvey());  // <- poprawione
+        assertTrue(response.getBody().isShowSurvey());
         assertNull(response.getBody().getMessage());
     }
 
+    /**
+     * Tests successful login for an active user who has already submitted their body parameters.
+     * It verifies that the controller returns an HTTP 200 OK status, a JWT, and sets the {@code showSurvey} flag to false.
+     */
     @Test
     void login_shouldReturnOk_withTokenAndShowSurveyFalse_whenBodyParamsExist() {
         User user = new User();
@@ -218,6 +263,6 @@ class AuthControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("jwt-token-2", response.getBody().getToken());
-        assertFalse(response.getBody().isShowSurvey());  // <- poprawione
+        assertFalse(response.getBody().isShowSurvey());
     }
 }

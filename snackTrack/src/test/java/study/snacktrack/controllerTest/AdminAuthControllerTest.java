@@ -20,6 +20,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the AdminAuthController class, focusing on the administration login functionality.
+ * This class uses Mockito to isolate the controller logic from its dependencies, ensuring only the controller's behavior is tested.
+ */
 @ExtendWith(MockitoExtension.class)
 class AdminAuthControllerTest {
 
@@ -40,6 +44,10 @@ class AdminAuthControllerTest {
     private final String MOCK_EMAIL = "admin@test.pl";
     private final String MOCK_TOKEN = "mocked.jwt.token";
 
+    /**
+     * Sets up the common objects and mock data used for the login tests before each test method runs.
+     * This prepares the {@code LoginRequest} DTO and the mock {@code Admin} entity for subsequent testing scenarios.
+     */
     @BeforeEach
     void setUp() {
         loginRequest = new LoginRequest();
@@ -51,6 +59,10 @@ class AdminAuthControllerTest {
         mockAdmin.setPassword(ENCODED_PASSWORD);
     }
 
+    /**
+     * Tests a successful admin login scenario with correct credentials.
+     * It verifies that the controller returns an HTTP 200 OK status code and a valid JWT in the response body.
+     */
     @Test
     void login_Success() {
         when(adminRepository.findByEmail(MOCK_EMAIL)).thenReturn(Optional.of(mockAdmin));
@@ -67,6 +79,10 @@ class AdminAuthControllerTest {
         verify(jwtService).generateToken(MOCK_EMAIL, "ADMIN");
     }
 
+    /**
+     * Tests the scenario where the admin user requested for login is not found in the repository.
+     * It asserts that a {@code RuntimeException} is thrown with the specific message "Admin not found".
+     */
     @Test
     void login_AdminNotFound_ThrowsRuntimeException() {
         when(adminRepository.findByEmail(MOCK_EMAIL)).thenReturn(Optional.empty());
@@ -80,6 +96,10 @@ class AdminAuthControllerTest {
         verifyNoInteractions(passwordEncoder, jwtService);
     }
 
+    /**
+     * Tests the scenario where the provided password does not match the stored encoded password.
+     * It verifies that the controller returns an HTTP 401 Unauthorized status code with an "Invalid credentials" message.
+     */
     @Test
     void login_InvalidPassword_ReturnsUnauthorized() {
         when(adminRepository.findByEmail(MOCK_EMAIL)).thenReturn(Optional.of(mockAdmin));

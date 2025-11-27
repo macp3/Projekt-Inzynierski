@@ -15,6 +15,10 @@ import study.snacktrack.services.UserService;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the ReportedMealController, focusing on the functionality allowing users to report inappropriate meal entries.
+ * This class ensures that the controller correctly processes authenticated requests and delegates the reporting logic to the dedicated service.
+ */
 class ReportedMealControllerTest {
 
     private JwtService jwtService;
@@ -22,16 +26,18 @@ class ReportedMealControllerTest {
     private ReportedMealService reportedMealService;
     private ReportedMealController controller;
 
+    /**
+     * Sets up the necessary mock services and initializes the ReportedMealController instance before each test.
+     * This method also stubs the authentication process, simulating a logged-in user with ID 1 required for the reporting action.
+     */
     @BeforeEach
     void setUp() {
         jwtService = mock(JwtService.class);
         userService = mock(UserService.class);
         reportedMealService = mock(ReportedMealService.class);
 
-        // MealService i CommentService nie są używane w kontrolerze, więc przekazujemy null
-        controller = new ReportedMealController(null, jwtService, userService, null, reportedMealService);
+        controller = new ReportedMealController(jwtService, userService, reportedMealService);
 
-        // Stub autoryzacji
         when(jwtService.extractEmail("token")).thenReturn("user@example.com");
         User user = new User();
         user.setId(1);
@@ -39,6 +45,10 @@ class ReportedMealControllerTest {
         when(userService.getUserByEmail("user@example.com")).thenReturn(user);
     }
 
+    /**
+     * Tests the successful reporting of a meal by an authenticated user.
+     * It verifies that the controller delegates the report request to the {@code ReportedMealService} and returns the generated response DTO with an HTTP 200 OK status.
+     */
     @Test
     void reportMeal_shouldReturnOk() {
         ReportedMealRequest req = new ReportedMealRequest(10, "Spam meal");
@@ -53,6 +63,10 @@ class ReportedMealControllerTest {
         assertEquals(10, ((ReportedMealResponse) response.getBody()).getMealId());
     }
 
+    /**
+     * Tests the failure case during meal reporting when a business logic exception occurs (e.g., the meal ID is invalid or the meal is already reported).
+     * It verifies that the controller handles the {@code IllegalArgumentException}, returns an HTTP 400 Bad Request status, and includes the exception message in the response body.
+     */
     @Test
     void reportMeal_shouldReturnBadRequest_whenException() {
         ReportedMealRequest req = new ReportedMealRequest(10, "Spam meal");

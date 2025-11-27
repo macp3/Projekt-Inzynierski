@@ -1,54 +1,57 @@
 package study.snacktrack.controllers;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import lombok.RequiredArgsConstructor;
-import study.snacktrack.dto.*;
+import study.snacktrack.dto.BodyParametersRequest;
+import study.snacktrack.dto.BodyParametersResponse;
+import study.snacktrack.dto.LoginResponse;
+import study.snacktrack.dto.NotificationResponse;
 import study.snacktrack.entities.BodyParameters;
 import study.snacktrack.entities.Favourite;
 import study.snacktrack.entities.Meal;
-import study.snacktrack.entities.Notification;
 import study.snacktrack.entities.User;
 import study.snacktrack.repositories.BodyParametersRepository;
-import study.snacktrack.repositories.FavouriteRepository;
-import study.snacktrack.repositories.MealRepository;
 import study.snacktrack.repositories.UserRepository;
 import study.snacktrack.services.JwtService;
 import study.snacktrack.services.MealService;
 import study.snacktrack.services.NotificationService;
 import study.snacktrack.services.UserService;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Controller for managing user-specific data, including profile details,
+ * parameters, notifications, favourites, and profile image upload.
+ */
 @Controller
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
 
+    /** Service for user-related business logic. */
     private final UserService userService;
+    /** Service for JWT token handling. */
     private final JwtService jwtService;
+    /** Service for notification retrieval. */
     private final NotificationService notificationService;
+    /** Repository for User entity data access. */
     private final UserRepository userRepository;
+    /** Repository for BodyParameters entity data access. */
     private final BodyParametersRepository bodyParametersRepository;
+    /** Service for meal-related business logic (used for favourite meals). */
     private final MealService mealService;
 
-    // premium expiration musi byc nullem po dacie ktora jest w bazie
-    // dziala
+    /**
+     * Retrieves the authenticated user's profile information.
+     *
+     * @param authHeader The Authorization header for user identification.
+     * @return ResponseEntity containing the User entity or an error message.
+     */
     @GetMapping("/profile")
     public ResponseEntity<?> getProfileInfo(@RequestHeader("Authorization") String authHeader) {
         User user;
@@ -64,6 +67,12 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    /**
+     * Retrieves the ID of the authenticated user.
+     *
+     * @param authHeader The Authorization header for user identification.
+     * @return ResponseEntity containing the user's ID or an error message.
+     */
     @GetMapping("/getId")
     public ResponseEntity<?> getUserId(@RequestHeader("Authorization") String authHeader)
     {
@@ -80,25 +89,16 @@ public class UserController {
         return ResponseEntity.ok(user.getId());
     }
 
-    // funkcja wylacznie dla admina
-    /*
-     * @GetMapping("/{id}")
-     * public ResponseEntity<User> getUserInfo(@RequestHeader("Authorization")
-     * String authHeader)
-     * {
-     * String token = authHeader.replace("Bearer ", "");
-     * String email = jwtService.extractEmail(token);
-     * 
-     * User user = userService.getUserByEmail(email)
-     * .orElseThrow(() -> new RuntimeException("User not found"));
-     * return ResponseEntity.ok(user);
-     * }
+    /**
+     * Changes the password for the authenticated user.
+     *
+     * @param authHeader The Authorization header for user identification.
+     * @param password The new password.
+     * @return ResponseEntity with a success message or an error message.
      */
-
-    // dziala
     @PutMapping("/changePassword")
     public ResponseEntity<String> changePassword(@RequestHeader("Authorization") String authHeader,
-            @RequestParam String password) {
+                                                 @RequestParam String password) {
         try {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtService.extractEmail(token);
@@ -111,10 +111,16 @@ public class UserController {
         return ResponseEntity.ok("Password changed successfully");
     }
 
-    // dziala
+    /**
+     * Updates the existing body parameters for the authenticated user.
+     *
+     * @param authHeader The Authorization header for user identification.
+     * @param request The BodyParametersRequest DTO with updated parameters.
+     * @return ResponseEntity containing the updated BodyParametersResponse DTO or an error message.
+     */
     @PutMapping("/changeParameters")
     public ResponseEntity<?> changeBodyParameters(@RequestHeader("Authorization") String authHeader,
-            @RequestBody BodyParametersRequest request) {
+                                                  @RequestBody BodyParametersRequest request) {
         BodyParametersResponse response;
         try {
             String token = authHeader.replace("Bearer ", "");
@@ -134,10 +140,16 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    // dziala
+    /**
+     * Adds initial body parameters for the authenticated user.
+     *
+     * @param authHeader The Authorization header for user identification.
+     * @param request The BodyParametersRequest DTO with initial parameters.
+     * @return ResponseEntity containing the created BodyParameters entity or an error message.
+     */
     @PostMapping("/addParameters")
     public ResponseEntity<?> addBodyParameters(@RequestHeader("Authorization") String authHeader,
-            @RequestBody BodyParametersRequest request) {
+                                               @RequestBody BodyParametersRequest request) {
         BodyParameters response;
         try {
             String token = authHeader.replace("Bearer ", "");
@@ -155,6 +167,13 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Checks if the user has completed the initial body parameters survey.
+     * Returns a LoginResponse to refresh client state (including survey flag).
+     *
+     * @param authHeader The Authorization header for user identification.
+     * @return ResponseEntity containing LoginResponse with the survey status.
+     */
     @GetMapping("/refreshSurvey")
     public ResponseEntity<?> refreshSurvey(@RequestHeader("Authorization") String authHeader) {
         String token;
@@ -175,7 +194,12 @@ public class UserController {
         return ResponseEntity.ok(new LoginResponse(token, showSurvey, null));
     }
 
-    // dziala
+    /**
+     * Retrieves the current login streak count for the authenticated user.
+     *
+     * @param authHeader The Authorization header for user identification.
+     * @return ResponseEntity containing the streak count or an error message.
+     */
     @GetMapping("/myStreak")
     public ResponseEntity<?> getMyStreak(@RequestHeader("Authorization") String authHeader) {
         User user;
@@ -191,7 +215,12 @@ public class UserController {
         return ResponseEntity.ok(user.getStreak());
     }
 
-    // dziala
+    /**
+     * Retrieves a list of notifications for the authenticated user.
+     *
+     * @param authHeader The Authorization header for user identification.
+     * @return ResponseEntity containing a list of NotificationResponse DTOs or an error message.
+     */
     @GetMapping("/notifications")
     public ResponseEntity<?> getUserNotifications(
             @RequestHeader("Authorization") String authHeader) {
@@ -209,8 +238,13 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    // nie wiem jak to przetestowac - zostawiam
-    //
+    /**
+     * Saves the device token (FCM token) for the authenticated user to enable push notifications.
+     *
+     * @param authHeader The Authorization header for user identification.
+     * @param request A map containing the device token under the key "token".
+     * @return ResponseEntity with a success message or an error message.
+     */
     @PostMapping("/device-token")
     public ResponseEntity<String> saveDeviceToken(
             @RequestHeader("Authorization") String authHeader,
@@ -229,12 +263,16 @@ public class UserController {
         return ResponseEntity.ok("Device token saved");
     }
 
-    // do serwisuuuuuuuuu z logika
-    // zmienilem - przetestowac
-    // dziala
+    /**
+     * Adds a meal to the authenticated user's favourite list.
+     *
+     * @param mealId The ID of the meal to add as favourite.
+     * @param authHeader The Authorization header for user identification.
+     * @return ResponseEntity containing the saved Favourite entity or an error message.
+     */
     @PostMapping("/favourite/add")
     public ResponseEntity<?> addFavourite(@RequestParam int mealId,
-            @RequestHeader("Authorization") String authHeader) {
+                                          @RequestHeader("Authorization") String authHeader) {
         Favourite saved;
         try {
             String token = authHeader.replace("Bearer ", "");
@@ -248,12 +286,16 @@ public class UserController {
         return ResponseEntity.ok(saved);
     }
 
-    // do serwisu z logika
-    // zmienilem - przetestowac
-    // dziala
+    /**
+     * Removes a meal from the authenticated user's favourite list.
+     *
+     * @param mealId The ID of the meal to remove from favourites.
+     * @param authHeader The Authorization header for user identification.
+     * @return ResponseEntity with a success message or an error message.
+     */
     @DeleteMapping("/favourite/remove/{mealId}")
     public ResponseEntity<String> removeFavourite(@PathVariable int mealId,
-            @RequestHeader("Authorization") String authHeader) {
+                                                  @RequestHeader("Authorization") String authHeader) {
         try {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtService.extractEmail(token);
@@ -267,7 +309,12 @@ public class UserController {
         return ResponseEntity.ok("Favourite removed successfully");
     }
 
-    // dziala
+    /**
+     * Retrieves all favourite meals for the authenticated user.
+     *
+     * @param authHeader The Authorization header for user identification.
+     * @return ResponseEntity containing a list of Meal entities or an error message.
+     */
     @GetMapping("/favourite")
     public ResponseEntity<?> getMyFavouriteMeals(@RequestHeader("Authorization") String authHeader) {
         List<Meal> meals;
@@ -283,7 +330,14 @@ public class UserController {
         return ResponseEntity.ok(meals);
     }
 
-    // dziala
+    /**
+     * Uploads a new profile image for the authenticated user.
+     *
+     * @param authHeader The Authorization header for user identification.
+     * @param imageFile The MultipartFile representing the image.
+     * @return ResponseEntity with the URL of the uploaded image or an error message.
+     * @throws IOException If there is an issue handling the file upload.
+     */
     @PostMapping("/image")
     public ResponseEntity<String> uploadProfileImage(
             @RequestHeader("Authorization") String authHeader,
@@ -299,6 +353,12 @@ public class UserController {
         }
     }
 
+    /**
+     * Retrieves the latest body parameters and calculated macronutrient goals for the authenticated user.
+     *
+     * @param authHeader The Authorization header for user identification.
+     * @return ResponseEntity containing the BodyParametersResponse DTO or an error message.
+     */
     @GetMapping("/bodyParameters")
     public ResponseEntity<?> getBodyParameters(@RequestHeader("Authorization") String authHeader) {
         try {
@@ -314,8 +374,14 @@ public class UserController {
         }
     }
 
-    // Maciej: Funkcja testowa. W finalnej wersji powinna być zabezpieczona
-    // sprawdzeniem płatności
+    /**
+     * Updates the premium expiration date for the authenticated user.
+     * NOTE: This is likely a test or admin function and should be secured in a production environment.
+     *
+     * @param authHeader The Authorization header for user identification.
+     * @param expirationDate The new premium expiration date string.
+     * @return ResponseEntity with a success message or an error message.
+     */
     @PutMapping("/premium")
     public ResponseEntity<?> updatePremium(
             @RequestHeader("Authorization") String authHeader,

@@ -9,6 +9,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * Represents a user-submitted report against a specific meal (recipe) within the application.
+ * This entity is used by the moderation system to track which meal was reported, by whom, and the reason provided for the report.
+ */
 @Entity
 @Table(name = "reported_meals")
 public class ReportedMeal {
@@ -26,6 +30,10 @@ public class ReportedMeal {
     @NotNull
     private String content;
 
+    /**
+     * Getters and setters for all entity fields.
+     * These methods provide standard access and modification capabilities for the ReportedMeal entity properties.
+     */
     public int getId() {
         return id;
     }

@@ -20,6 +20,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the FoodController, covering operations related to essential (user-defined) foods and external API food sources.
+ * This class ensures that the controller correctly handles requests, interacts with necessary services, and returns appropriate HTTP responses.
+ */
 class FoodControllerTest {
 
     private FoodService foodService;
@@ -27,6 +31,10 @@ class FoodControllerTest {
     private JwtService jwtService;
     private FoodController controller;
 
+    /**
+     * Sets up mock services and initializes the FoodController instance before each test execution.
+     * This ensures test isolation by controlling the behavior of all external dependencies.
+     */
     @BeforeEach
     void setUp() {
         foodService = mock(FoodService.class);
@@ -35,6 +43,10 @@ class FoodControllerTest {
         controller = new FoodController(foodService, userService, jwtService);
     }
 
+    /**
+     * Tests the successful retrieval of all essential food items from the local database.
+     * It verifies that the controller delegates to the {@code FoodService} and returns the expected list of responses.
+     */
     @Test
     void getAllEssentials_shouldReturnList() {
         EssentialFood food = new EssentialFood();
@@ -52,6 +64,10 @@ class FoodControllerTest {
     }
 
 
+    /**
+     * Tests the retrieval of food items from the external API based on a search query.
+     * It verifies that the controller delegates the search request to the {@code FoodService} and returns the list of API-specific DTOs.
+     */
     @Test
     void getFoodFromApi_shouldReturnList() {
         when(foodService.getFoodFromApi("apple")).thenReturn(List.of(new ApiFoodResponse()));
@@ -62,6 +78,10 @@ class FoodControllerTest {
     }
 
 
+    /**
+     * Tests the failure case when attempting to retrieve food details from the external API by ID and an exception occurs (e.g., resource not found).
+     * It verifies that the controller catches the exception, returns an HTTP 400 Bad Request status, and includes the error message in the response body.
+     */
     @Test
     void getFoodFromApiById_shouldReturnBadRequest_whenException() {
         when(foodService.getFoodFromApiById(5)).thenThrow(new RuntimeException("Not found"));
@@ -72,6 +92,10 @@ class FoodControllerTest {
         assertEquals("Not found", response.getBody());
     }
 
+    /**
+     * Tests the successful addition of a new essential food item by an authenticated user.
+     * It verifies that the user is correctly identified via JWT, the request is processed by the {@code FoodService}, and an HTTP 200 OK status is returned.
+     */
     @Test
     void addEssentialFood_shouldReturnOk() {
         EssentialFoodRequest req = new EssentialFoodRequest(
@@ -92,6 +116,10 @@ class FoodControllerTest {
     }
 
 
+    /**
+     * Tests the failure case during the addition of an essential food item when a validation exception occurs in the service layer.
+     * It verifies that the controller catches the {@code IllegalArgumentException}, returns an HTTP 400 Bad Request, and displays the exception message.
+     */
     @Test
     void addEssentialFood_shouldReturnBadRequest_whenException() {
         EssentialFoodRequest req = new EssentialFoodRequest(
@@ -113,6 +141,10 @@ class FoodControllerTest {
     }
 
 
+    /**
+     * Tests the search functionality for locally defined essential food items.
+     * It verifies that the controller correctly delegates the search query and returns the matching list of {@code EssentialFood} entities.
+     */
     @Test
     void searchEssentialFood_shouldReturnList() {
         EssentialFood food = new EssentialFood();
@@ -130,6 +162,10 @@ class FoodControllerTest {
     }
 
 
+    /**
+     * Tests the unified search endpoint, which combines results from local essential foods and the external API.
+     * It verifies that the controller delegates both searches and correctly aggregates the results into a single {@code UnifiedSearchResponse} DTO.
+     */
     @Test
     void searchUnified_shouldReturnUnifiedResponse() {
         EssentialFood food = new EssentialFood();
@@ -139,7 +175,7 @@ class FoodControllerTest {
         when(foodService.searchEssentialFood("orange"))
                 .thenReturn(List.of(food));
         when(foodService.getFoodFromApi("orange"))
-                .thenReturn(List.of()); // możesz zostawić pustą listę, żeby nie testować API
+                .thenReturn(List.of());
 
         ResponseEntity<UnifiedSearchResponse> response = controller.searchUnified("orange");
 

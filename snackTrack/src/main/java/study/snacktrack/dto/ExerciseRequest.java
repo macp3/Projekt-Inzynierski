@@ -4,6 +4,10 @@ import java.util.List;
 
 import study.snacktrack.entities.Training;
 
+/**
+ * Data Transfer Object (DTO) used for carrying detailed information required to create or update an Exercise entity.
+ * This structure encapsulates all metadata and execution parameters for a new exercise definition.
+ */
 public class ExerciseRequest {
 
     private String name;
@@ -13,7 +17,18 @@ public class ExerciseRequest {
     private int numberOfSets;
     private int repetitionsPerSet;
 
-    public ExerciseRequest(String name, String description, String type, int difficulty, int numberOfSets, int repetitionsPerSet, List<Training> trainings) {
+    /**
+     * Constructs a new ExerciseRequest with all required exercise properties.
+     * This constructor is used by the service layer to validate and persist a new exercise item in the application's database.
+     *
+     * @param name The name of the exercise.
+     * @param description A brief description of the exercise.
+     * @param type The category or type of the exercise (e.g., cardio, strength).
+     * @param difficulty The rating of the exercise difficulty.
+     * @param numberOfSets The required number of sets for the exercise.
+     * @param repetitionsPerSet The required number of repetitions per set.
+     */
+    public ExerciseRequest(String name, String description, String type, int difficulty, int numberOfSets, int repetitionsPerSet) {
         this.name = name;
         this.description = description;
         this.type = type;
@@ -22,6 +37,10 @@ public class ExerciseRequest {
         this.repetitionsPerSet = repetitionsPerSet;
     }
 
+    /**
+     * Getters and setters for the DTO fields.
+     * These methods allow external access and modification of the exercise's properties and parameters.
+     */
     public String getName() {
         return name;
     }
@@ -50,23 +69,11 @@ public class ExerciseRequest {
         return difficulty;
     }
 
-    public void setDifficulty(int difficulty) {
-        this.difficulty = difficulty;
-    }
-
     public int getNumberOfSets() {
         return numberOfSets;
     }
 
-    public void setNumberOfSets(int numberOfSets) {
-        this.numberOfSets = numberOfSets;
-    }
-
     public int getRepetitionsPerSet() {
         return repetitionsPerSet;
-    }
-
-    public void setRepetitionsPerSet(int repetitionsPerSet) {
-        this.repetitionsPerSet = repetitionsPerSet;
     }
 }

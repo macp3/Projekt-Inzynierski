@@ -12,16 +12,33 @@ import study.snacktrack.services.JwtService;
 
 import java.util.List;
 
+/**
+ * REST controller for generating content (shopping lists, diet plans)
+ * using the Gemini AI service.
+ */
 @RestController
 @RequestMapping("/ai")
 @RequiredArgsConstructor
 public class AiController {
 
+    /**
+     * API key for accessing the Gemini service, injected from properties.
+     */
     @Value("${gemini.api.key}")
     private String apiKey;
 
+    /**
+     * Service for validating and extracting information from JWT tokens.
+     */
     private final JwtService jwtService;
 
+    /**
+     * Generates a personalized shopping list based on user preferences and instructions.
+     *
+     * @param authHeader The Authorization header containing the JWT token.
+     * @param request The request containing product context and the user prompt.
+     * @return ResponseEntity with the generated JSON shopping list or an error message.
+     */
     @PostMapping("/shopping-list/generate")
     public ResponseEntity<String> generateShoppingList(
             @RequestHeader("Authorization") String authHeader,
@@ -44,6 +61,13 @@ public class AiController {
         }
     }
 
+    /**
+     * Generates a 1-day diet plan based on user instructions and goals.
+     *
+     * @param authHeader The Authorization header containing the JWT token.
+     * @param request The request containing the user prompt/instruction.
+     * @return ResponseEntity with the generated JSON diet plan or an error message.
+     */
     @PostMapping("/diet/generate")
     public ResponseEntity<String> generateDietPlan(
             @RequestHeader("Authorization") String authHeader,
@@ -65,6 +89,14 @@ public class AiController {
         }
     }
 
+    /**
+     * Constructs the specific prompt string for the shopping list generation model.
+     * Includes context, user instruction, and mandatory JSON output rules.
+     *
+     * @param products A list of products from the user's context.
+     * @param instruction The specific instruction from the user.
+     * @return The complete prompt string for the Gemini model.
+     */
     private String buildShoppingPrompt(List<String> products, String instruction) {
         StringBuilder sb = new StringBuilder();
         sb.append("You are a smart shopping assistant.\n");
@@ -90,6 +122,13 @@ public class AiController {
         return sb.toString();
     }
 
+    /**
+     * Constructs the specific prompt string for the diet plan generation model.
+     * Includes the user's goal/preference and critical JSON output rules.
+     *
+     * @param instruction The specific goal or preference from the user.
+     * @return The complete prompt string for the Gemini model.
+     */
     private String buildDietPrompt(String instruction) {
         StringBuilder sb = new StringBuilder();
         sb.append("You are a professional dietician.\n");
@@ -113,6 +152,13 @@ public class AiController {
         return sb.toString();
     }
 
+    /**
+     * Cleans the raw response from the Gemini model by stripping non-JSON characters
+     * and ensuring only the core JSON array (starting with '[' and ending with ']') is returned.
+     *
+     * @param text The raw text response from the Gemini API.
+     * @return The cleaned, pure JSON array string.
+     */
     private String cleanGeminiResponse(String text) {
         if (text == null)
             return "[]";
@@ -127,6 +173,14 @@ public class AiController {
         return text;
     }
 
+    /**
+     * Calls the Gemini model asynchronously with a specified prompt.
+     * Configures the model to return a JSON response.
+     *
+     * @param prompt The complete prompt string to send to the AI model.
+     * @return The raw text response from the Gemini API.
+     * @throws RuntimeException if the AI service is unavailable.
+     */
     public String callGeminiJson(String prompt) {
         GenerateContentConfig config = GenerateContentConfig.builder()
                 .responseMimeType("application/json")

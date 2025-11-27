@@ -10,26 +10,35 @@ import study.snacktrack.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import study.snacktrack.entities.User;
-import study.snacktrack.repositories.CommentRepository;
 import study.snacktrack.repositories.MealRepository;
 import study.snacktrack.repositories.ReportedMealRepository;
 
+/**
+ * Service responsible for managing reported meals.
+ * Provides functionality for reporting, retrieving, and deleting meal reports.
+ */
 @Service
 public class ReportedMealService {
 
     private final UserRepository userRepository;
     private final MealRepository mealRepository;
-    private final CommentRepository commentRepository;
     private final ReportedMealRepository reportedMealRepository;
 
-    public ReportedMealService(UserRepository userRepository, MealRepository mealRepository,
-            CommentRepository commentRepository, ReportedMealRepository reportedMealRepository) {
+    /**
+     * Constructs ReportedMealService with required repositories.
+     */
+    public ReportedMealService(UserRepository userRepository, MealRepository mealRepository, ReportedMealRepository reportedMealRepository) {
         this.userRepository = userRepository;
         this.mealRepository = mealRepository;
-        this.commentRepository = commentRepository;
         this.reportedMealRepository = reportedMealRepository;
     }
 
+    /**
+     * Validates if a meal exists by ID.
+     *
+     * @param mealId meal identifier
+     * @return Meal entity if found
+     */
     private Meal validateMealExistance(int mealId) {
         if (mealId <= 0) {
             throw new IllegalArgumentException("Meal ID must be greater than zero");
@@ -44,6 +53,14 @@ public class ReportedMealService {
         return optionalMeal.get();
     }
 
+    /**
+     * Reports a meal by a user with provided content.
+     *
+     * @param mealId meal identifier
+     * @param userId reporting user identifier
+     * @param content report content
+     * @return response DTO with report details
+     */
     public ReportedMealResponse reportMeal(int mealId, int userId, String content) {
         Meal meal = validateMealExistance(mealId);
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -69,7 +86,12 @@ public class ReportedMealService {
                 reportedMeal.getContent());
     }
 
-    // admin
+    /**
+     * Retrieves all reports created by a specific user.
+     *
+     * @param userId user identifier
+     * @return list of reported meals
+     */
     public List<ReportedMeal> getAllReportsByUser(int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("There is no user with specified ID"));
@@ -78,7 +100,12 @@ public class ReportedMealService {
         return rm;
     }
 
-    // admin
+    /**
+     * Retrieves all reports for a specific meal.
+     *
+     * @param mealId meal identifier
+     * @return list of reported meals
+     */
     public List<ReportedMeal> getAllReportsByMeal(int mealId) {
         List<ReportedMeal> rm = reportedMealRepository.findByMealId(mealId)
                 .orElseThrow(() -> new IllegalArgumentException("This user have not reported any meal yet"));
@@ -86,15 +113,18 @@ public class ReportedMealService {
     }
 
     /**
-     * Zwraca listę WSZYSTKICH zgłoszonych posiłków w systemie.
+     * Retrieves all reported meals in the system.
+     *
+     * @return list of reported meals
      */
     public List<ReportedMeal> getAllReports() {
-        // findAll() jest wbudowaną metodą JpaRepository
         return reportedMealRepository.findAll();
     }
 
     /**
-     * Usuwa zgłoszenie (np. po rozpatrzeniu przez admina).
+     * Deletes a reported meal by its report ID.
+     *
+     * @param reportId report identifier
      */
     public void deleteReport(int reportId) {
         if (reportId <= 0) {
@@ -108,10 +138,11 @@ public class ReportedMealService {
     }
 
     /**
-     * Usuwa zgłoszenie PO ID POSIŁKU (przydatne przy usuwaniu posiłku).
-     * Uwaga: To jest opcjonalne, bo masz ON DELETE CASCADE w bazie,
-     * więc usunięcie posiłku automatycznie usunie zgłoszenia!
-     * Ale warto mieć w kodzie dla porządku.
+     * Deletes all reports for a specific meal.
+     * Useful when a meal is removed, although ON DELETE CASCADE in the database
+     * may already handle this automatically.
+     *
+     * @param mealId meal identifier
      */
     public void deleteReportsByMealId(int mealId) {
         List<ReportedMeal> reports = reportedMealRepository.findByMealId(mealId).orElse(List.of());

@@ -7,15 +7,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
@@ -23,6 +18,10 @@ import study.snacktrack.dto.*;
 import study.snacktrack.entities.*;
 import study.snacktrack.repositories.*;
 
+/**
+ * Service responsible for managing meals and their ingredients.
+ * Provides functionality for creating, editing, deleting, and retrieving meals.
+ */
 @Service
 public class MealService {
 
@@ -34,19 +33,25 @@ public class MealService {
     private final IngredientRepository ingredientRepository;
     private final FoodRepository foodRepository;
     private final FoodService foodService;
-    private final FavouriteRepository favouriteRepository;
 
+    /**
+     * Constructs MealService with required repositories and services.
+     */
     public MealService(UserRepository userRepository, FoodRepository foodRepository, MealRepository mealRepository,
-            IngredientRepository ingredientRepository, FoodService foodService,
-            FavouriteRepository favouriteRepository) {
+                       IngredientRepository ingredientRepository, FoodService foodService) {
         this.userRepository = userRepository;
         this.mealRepository = mealRepository;
         this.ingredientRepository = ingredientRepository;
         this.foodRepository = foodRepository;
         this.foodService = foodService;
-        this.favouriteRepository = favouriteRepository;
     }
 
+    /**
+     * Validates if a meal exists by ID.
+     *
+     * @param mealId meal identifier
+     * @return Meal entity if found
+     */
     private Meal validateMealExistance(int mealId) {
         if (mealId <= 0) {
             throw new IllegalArgumentException("Meal ID must be greater than zero");
@@ -61,7 +66,13 @@ public class MealService {
         return optionalMeal.get();
     }
 
-    // o to jest giga kociol - naucz sie :)
+    /**
+     * Creates a new meal with ingredients.
+     *
+     * @param request meal request data
+     * @param userId author identifier
+     * @return created meal ID
+     */
     @Transactional
     public Integer createMeal(MealRequest request, int userId) {
         if (userId <= 0) {
@@ -74,7 +85,6 @@ public class MealService {
 
         if (request.getName() == null || request.getName().isBlank()) {
             throw new IllegalArgumentException("Meal's name must not be empty");
-
         }
 
         if (request.getDescription() == null || request.getDescription().isBlank()) {
@@ -90,7 +100,6 @@ public class MealService {
         for (IngredientRequest ir : request.getIngredients()) {
             EssentialFood essentialFood = null;
             Integer essentialApiId = null;
-
             Float amount = null;
             Float pieces = null;
 
@@ -119,9 +128,16 @@ public class MealService {
         return meal.getId();
     }
 
+    /**
+     * Uploads or replaces a meal image.
+     *
+     * @param mealId meal identifier
+     * @param imageFile image file
+     * @param userId author identifier
+     * @return relative path to uploaded image
+     */
     @Transactional
     public String uploadMealImage(int mealId, MultipartFile imageFile, Integer userId) throws IOException {
-
         Meal meal = validateMealExistance(mealId);
 
         if (!userId.equals(meal.getAuthorId())) {
@@ -132,21 +148,17 @@ public class MealService {
             throw new IllegalArgumentException("Image file cannot be empty");
         }
 
-        // docker path: /app/uploads/meals
         Path uploadPath = Paths.get("/app/uploads/meals");
 
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        // always same file for same meal (no duplicates)
         String fileName = "meal_" + mealId + ".jpg";
         Path filePath = uploadPath.resolve(fileName);
 
-        // overwrite existing file
         Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        // add timestamp for cache refresh
         long ts = System.currentTimeMillis();
         String relativePath = "/images/meals/" + fileName + "?t=" + ts;
 
@@ -156,6 +168,12 @@ public class MealService {
         return relativePath;
     }
 
+    /**
+     * Retrieves a meal with its ingredients.
+     *
+     * @param mealId meal identifier
+     * @return meal response with ingredients
+     */
     public MealResponse getMealWithIngredients(int mealId) {
         Meal meal = mealRepository.findById(mealId)
                 .orElseThrow(() -> new RuntimeException("Meal not found"));
@@ -170,7 +188,6 @@ public class MealService {
                     dto.setPieces(ingredient.getPieces());
 
                     if (ingredient.getEssentialApiId() != null) {
-                        System.out.println(foodService.getFoodFromApiById(ingredient.getEssentialApiId()));
                         dto.setEssentialApi(foodService.getFoodFromApiById(ingredient.getEssentialApiId()));
                     } else if (ingredient.getEssentialFood() != null) {
                         dto.setEssentialFood(new EssentialFoodResponse(ingredient.getEssentialFood()));
@@ -191,11 +208,14 @@ public class MealService {
         return response;
     }
 
-    // edit meal
-    // jezeli w request nie sa podane pojedyncze pola to po prostu ich nie zmienia
-    // (zostawia stare) - jezeli nie chcemy edytowac meal name to nie dodajemy do
-    // requesta w jsonie "name": *to samo*
-    // aktualizacja pol jezeli podano: zrobione
+    /**
+     * Edits an existing meal by its author.
+     *
+     * @param mealId meal identifier
+     * @param request updated meal data
+     * @param userId author identifier
+     * @return confirmation message
+     */
     public String editMealByUser(int mealId, MealRequest request, int userId) {
         Meal meal = validateMealExistance(mealId);
         if (!userRepository.existsById(userId)) {
@@ -203,10 +223,6 @@ public class MealService {
         }
 
         if (meal.getAuthorId() != userId) {
-            throw new IllegalArgumentException("You can't edit this meal");
-        }
-
-        if (userId != meal.getAuthorId()) {
             throw new IllegalArgumentException("You are not allowed to edit this meal");
         }
 
@@ -264,7 +280,13 @@ public class MealService {
         return "Meal updated successfully";
     }
 
-    // delete meal
+    /**
+     * Deletes a meal created by a specific user.
+     *
+     * @param mealId meal identifier
+     * @param userId user identifier
+     * @return confirmation message
+     */
     public String deleteMealByUser(int mealId, int userId) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
@@ -282,23 +304,51 @@ public class MealService {
         return "Meal successfully deleted";
     }
 
+    /**
+     * Retrieves all meals from repository.
+     *
+     * @return list of all meals
+     */
     public List<Meal> getAllMeals() {
         return mealRepository.findAll();
     }
 
+    /**
+     * Retrieves all meals created by a specific user.
+     *
+     * @param userId user identifier
+     * @return list of meals created by user
+     */
     public List<Meal> getMealsByUser(int userId) {
         return mealRepository.findByAuthorId(userId);
     }
 
+    /**
+     * Searches meals by name.
+     *
+     * @param name meal name query
+     * @return list of matching meals
+     */
     public List<Meal> searchMealsByName(String name) {
         return mealRepository.findByNameContainingIgnoreCase(name);
     }
 
+    /**
+     * Retrieves a meal by its ID.
+     *
+     * @param mealId meal identifier
+     * @return Meal entity
+     */
     public Meal getMealById(int mealId) {
         return mealRepository.findById(mealId)
                 .orElseThrow(() -> new IllegalArgumentException("This meal doesn't exist"));
     }
 
+    /**
+     * Deletes a meal as an administrator.
+     *
+     * @param mealId meal identifier
+     */
     public void deleteMealAsAdmin(int mealId) {
         Meal meal = mealRepository.findById(mealId)
                 .orElseThrow(() -> new IllegalArgumentException("Meal not found"));

@@ -2,6 +2,7 @@ package study.snacktrack.controllerTest.integrationTest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.transaction.annotation.Transactional;
 import study.snacktrack.entities.User;
 import study.snacktrack.entities.EssentialFood;
 import study.snacktrack.repositories.UserRepository;
@@ -22,12 +24,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.hamcrest.Matchers.*;
 
 /**
- * Integration tests for the RegisteredAlimentationController endpoints.
- * This class uses a real database and mock web environment to test the full stack
- * from controller to repository.
+ * Integration tests for the RegisteredAlimentationController endpoints, focusing on the logging of food consumption.
+ * This class uses a real database and mock web environment to test the full stack from controller to repository, ensuring persistence logic is correct.
  */
 @SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 @AutoConfigureMockMvc
 public class RegisteredAlimentationIntegrationTest {
 
@@ -50,6 +52,10 @@ public class RegisteredAlimentationIntegrationTest {
     private int realFoodId;
     private int realUserId;
 
+    /**
+     * Sets up the necessary pre-conditions for the integration tests by creating a persistent user and an essential food item.
+     * This prepares the database with required foreign key entities and generates an authorization token for the user.
+     */
     @BeforeEach
     void setup() {
         userRepository.deleteAll();
@@ -77,8 +83,8 @@ public class RegisteredAlimentationIntegrationTest {
     }
 
     /**
-     * Tests the complete flow: adding a food entry, fetching the entry to get its ID,
-     * deleting the entry, and verifying that the entry is gone.
+     * Tests the complete cycle of adding a new food log entry, fetching the entry to determine its ID, deleting the entry, and final verification of deletion.
+     * This ensures the CRUD operations for registered alimentation function correctly and are properly secured.
      * @throws Exception if any MVC operation fails
      */
     @Test
@@ -87,7 +93,6 @@ public class RegisteredAlimentationIntegrationTest {
         String requestDate = "2024-01-20";
         String mealName = "breakfast";
 
-        // Step 1: Add a new entry
         String addEntryRequest = String.format(
                 "{\"essentialId\":%d, \"amount\":200.0, \"mealName\":\"%s\"}",
                 realFoodId, mealName
@@ -100,7 +105,6 @@ public class RegisteredAlimentationIntegrationTest {
                         .param("date", requestDate))
                 .andExpect(status().isOk());
 
-        // Step 2: Fetch entries to retrieve the database-assigned ID
         String getResponse = mockMvc.perform(get("/registered/my")
                         .header("Authorization", validToken)
                         .param("date", requestDate))
@@ -116,12 +120,10 @@ public class RegisteredAlimentationIntegrationTest {
 
         System.out.println("Found entry ID for deletion: " + entryIdToDelete);
 
-        // Step 3: Delete the entry using the retrieved ID
         mockMvc.perform(delete("/registered/delete/" + entryIdToDelete)
                         .header("Authorization", validToken))
                 .andExpect(status().isNoContent());
 
-        // Step 4: Verify the entry has been deleted
         mockMvc.perform(get("/registered/my")
                         .header("Authorization", validToken)
                         .param("date", requestDate))

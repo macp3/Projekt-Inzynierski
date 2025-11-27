@@ -18,6 +18,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the TrainingController, verifying endpoints related to viewing, assigning, and removing user training plans.
+ * This class isolates the controller logic using Mockito, ensuring correct authentication handling and service method delegation.
+ */
 class TrainingControllerTest {
 
     private UserService userService;
@@ -25,6 +29,10 @@ class TrainingControllerTest {
     private TrainingService trainingService;
     private TrainingController controller;
 
+    /**
+     * Sets up the necessary mock services and initializes the TrainingController instance before each test execution.
+     * This method also stubs the authentication process to simulate a logged-in user with ID 1 for authorized requests.
+     */
     @BeforeEach
     void setUp() {
         userService = mock(UserService.class);
@@ -33,7 +41,6 @@ class TrainingControllerTest {
 
         controller = new TrainingController(userService, jwtService, trainingService);
 
-        // Stub autoryzacji
         when(jwtService.extractEmail("token")).thenReturn("user@example.com");
         User user = new User();
         user.setId(1);
@@ -41,6 +48,10 @@ class TrainingControllerTest {
         when(userService.getUserByEmail("user@example.com")).thenReturn(user);
     }
 
+    /**
+     * Tests the successful retrieval of all available training plans.
+     * It verifies that the controller delegates the request to the {@code TrainingService} and returns a list of {@code TrainingInfo} entities with an HTTP 200 OK status.
+     */
     @Test
     void getAllTrainings_shouldReturnOk() {
         TrainingInfo info = new TrainingInfo();
@@ -57,6 +68,10 @@ class TrainingControllerTest {
         assertEquals(1, ((List<?>) response.getBody()).size());
     }
 
+    /**
+     * Tests the successful retrieval of detailed information for a single exercise by ID.
+     * It verifies that the controller delegates the request to the {@code TrainingService} and returns the specific {@code Exercise} entity with an HTTP 200 OK status.
+     */
     @Test
     void getExerciseDetails_shouldReturnOk() {
         Exercise ex = new Exercise();
@@ -71,6 +86,10 @@ class TrainingControllerTest {
         assertEquals("Push-up", ((Exercise) response.getBody()).getName());
     }
 
+    /**
+     * Tests the successful retrieval of detailed information for a single training plan by ID.
+     * It verifies that the controller delegates the request and returns the complex {@code TrainingDetailsResponse} DTO.
+     */
     @Test
     void getTrainingDetails_shouldReturnOk() {
         TrainingDetailsResponse resp = new TrainingDetailsResponse();
@@ -87,6 +106,10 @@ class TrainingControllerTest {
         assertEquals("Strength", ((TrainingDetailsResponse) response.getBody()).getTrainingInfo().getName());
     }
 
+    /**
+     * Tests the successful retrieval of the basic training plan currently assigned to the authenticated user.
+     * It verifies that the controller uses the authenticated user's ID to fetch the simple {@code TrainingInfo} entity.
+     */
     @Test
     void getUserTraining_shouldReturnOk() {
         TrainingInfo info = new TrainingInfo();
@@ -101,6 +124,10 @@ class TrainingControllerTest {
         assertEquals("Yoga", ((TrainingInfo) response.getBody()).getName());
     }
 
+    /**
+     * Tests the successful retrieval of the currently assigned training plan with full exercise details.
+     * It verifies that the controller chains calls to fetch the user's assigned training and then its complete details.
+     */
     @Test
     void getUserTrainingWithDetails_shouldReturnOk() {
         TrainingInfo info = new TrainingInfo();
@@ -119,6 +146,10 @@ class TrainingControllerTest {
         assertEquals("Pilates", ((TrainingDetailsResponse) response.getBody()).getTrainingInfo().getName());
     }
 
+    /**
+     * Tests the successful assignment of a training plan to the authenticated user.
+     * It verifies that the controller delegates the assignment request using the correct user and training IDs.
+     */
     @Test
     void assignTraining_shouldReturnOk() {
         doNothing().when(trainingService).assignTrainingToUser(1, 40);
@@ -129,6 +160,10 @@ class TrainingControllerTest {
         assertEquals("Training successfully assigned to user", response.getBody());
     }
 
+    /**
+     * Tests the successful removal of the current training plan from the authenticated user.
+     * It verifies that the controller delegates the deprivation request using the authenticated user's ID.
+     */
     @Test
     void depriveTrainingFromUser_shouldReturnOk() {
         doNothing().when(trainingService).depriveTrainingFromUser(1);

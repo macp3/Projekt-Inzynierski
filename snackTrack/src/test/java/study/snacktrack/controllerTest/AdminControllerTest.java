@@ -34,6 +34,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the AdminController, focusing on administrative functionalities like user management, statistics retrieval, and training plan operations.
+ * This class uses Mockito to isolate the controller logic from its dependencies, verifying proper delegation to the service and repository layers.
+ */
 @ExtendWith(MockitoExtension.class)
 class AdminControllerTest {
 
@@ -63,6 +67,10 @@ class AdminControllerTest {
     private User mockUser;
     private Admin mockAdmin;
 
+    /**
+     * Sets up the common mock entities required for testing the controller methods before each test execution.
+     * This prepares a mock {@code User} and a mock {@code Admin} with specific identifiers and statuses.
+     */
     @BeforeEach
     void setUp() {
         mockUser = new User();
@@ -74,6 +82,10 @@ class AdminControllerTest {
         mockAdmin.setEmail(MOCK_EMAIL);
     }
 
+    /**
+     * Tests the retrieval of dashboard statistics.
+     * It verifies that the controller calls the respective repository count methods and returns an HTTP 200 OK status with the aggregated data.
+     */
     @Test
     void getDashboardStats_ReturnsCorrectStats() {
         when(userRepository.count()).thenReturn(100L);
@@ -91,6 +103,10 @@ class AdminControllerTest {
         verify(userRepository).count();
     }
 
+    /**
+     * Tests the retrieval of a single user's information by ID.
+     * It ensures the controller delegates to the {@code UserService} and returns the user entity with an HTTP 200 OK status.
+     */
     @Test
     void getUserInfo_UserExists_ReturnsUser() {
         when(userService.getUserById(MOCK_USER_ID)).thenReturn(mockUser);
@@ -101,6 +117,10 @@ class AdminControllerTest {
         verify(userService).getUserById(MOCK_USER_ID);
     }
 
+    /**
+     * Tests the successful toggling of a user's ban status.
+     * It verifies that the controller delegates the ban operation to the {@code UserService} and confirms success with an HTTP 200 OK status.
+     */
     @Test
     void toggleUserBan_Success_ReturnsOk() {
         doNothing().when(userService).toggleUserBan(MOCK_USER_ID);
@@ -111,6 +131,10 @@ class AdminControllerTest {
         verify(userService).toggleUserBan(MOCK_USER_ID);
     }
 
+    /**
+     * Tests the retrieval of all users in a paginated list format.
+     * It verifies that the controller calls the {@code UserService} for the correct page and returns the result with an HTTP 200 OK status.
+     */
     @Test
     void getAllUsers_ReturnsPaginatedList() {
         Page<User> mockPage = new PageImpl<>(Collections.singletonList(mockUser));
@@ -122,11 +146,15 @@ class AdminControllerTest {
         assertEquals(mockPage, response.getBody());
     }
 
+    /**
+     * Tests the successful addition of a new training plan by an administrator.
+     * It verifies the authorization token is parsed, the admin is found, and the creation is delegated to the {@code TrainingService}.
+     */
     @Test
     void addTraining_Success_ReturnsOk() {
         TrainingRequest.TreningInfo info = new TrainingRequest.TreningInfo();
         info.setName("Test Training");
-        info.setDescription("Opis testowy");
+        info.setDescription("Test description");
 
         TrainingRequest mockRequest = new TrainingRequest();
         mockRequest.setTreningInfo(info);
@@ -146,6 +174,10 @@ class AdminControllerTest {
         verify(trainingService).createTraining(eq(mockRequest), eq(mockAdmin.getId()));
     }
 
+    /**
+     * Tests the successful deletion of an existing training plan by its ID.
+     * It verifies that the controller delegates the delete operation to the {@code TrainingService} and confirms success with an HTTP 200 OK status.
+     */
     @Test
     void deleteTraining_Success_ReturnsOk() {
         int trainingId = 5;

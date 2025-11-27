@@ -11,6 +11,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the CommentService, covering core business logic related to creating, editing, liking, and deleting comments.
+ * This class ensures that the service methods correctly interact with repositories and enforce business rules.
+ */
 class CommentServiceTest {
 
     private UserRepository userRepository;
@@ -19,6 +23,10 @@ class CommentServiceTest {
     private CommentLikeRepository commentLikeRepository;
     private CommentService commentService;
 
+    /**
+     * Sets up mock repositories and initializes the CommentService instance before each test.
+     * This isolates the service logic, allowing for verification of correct repository method calls.
+     */
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
@@ -30,6 +38,10 @@ class CommentServiceTest {
                 userRepository, mealRepository, commentRepository, commentLikeRepository);
     }
 
+    /**
+     * Tests the successful addition of a new comment to a meal.
+     * It verifies that the service saves the new comment entity and returns the correctly mapped {@code CommentResponse} DTO.
+     */
     @Test
     void addCommentToMeal_shouldSaveAndReturnResponse() {
         User user = new User();
@@ -65,6 +77,11 @@ class CommentServiceTest {
 
         verify(commentRepository).save(any(Comment.class));
     }
+
+    /**
+     * Tests the successful update of an existing comment's content.
+     * It verifies that the service updates the entity, saves the changes, and correctly maps the result to a {@code CommentResponse}.
+     */
     @Test
     void editComment_shouldUpdateContentAndReturnResponse() {
         User user = new User();
@@ -92,6 +109,10 @@ class CommentServiceTest {
         verify(commentRepository).save(comment);
     }
 
+    /**
+     * Tests the logic for adding a new like when the user has not liked the comment previously.
+     * It verifies that the like count is incremented and a new {@code CommentLike} entity is saved.
+     */
     @Test
     void toggleLike_shouldAddLikeWhenNotExists() {
         Comment comment = new Comment();
@@ -108,6 +129,10 @@ class CommentServiceTest {
         verify(commentRepository).save(comment);
     }
 
+    /**
+     * Tests the logic for removing an existing like when the user has already liked the comment.
+     * It verifies that the like count is decremented and the existing {@code CommentLike} entity is deleted.
+     */
     @Test
     void toggleLike_shouldRemoveLikeWhenExists() {
         Comment comment = new Comment();
@@ -126,6 +151,10 @@ class CommentServiceTest {
         verify(commentRepository).save(comment);
     }
 
+    /**
+     * Tests the successful deletion of a comment by its author, identified by meal ID and author ID.
+     * It verifies that the service finds the correct comment and performs the delete operation.
+     */
     @Test
     void deleteCommentByUser_shouldDeleteWhenAuthorized() {
         Comment comment = new Comment();

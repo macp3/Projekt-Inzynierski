@@ -12,12 +12,20 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the FoodService, covering CRUD operations for essential (local) food entities and validation rules for new food entries.
+ * This class ensures that the service methods correctly interact with the local repository and enforce business constraints.
+ */
 class FoodServiceTest {
 
     private FoodRepository foodRepository;
     private FatSecretAuthService authService;
     private FoodService foodService;
 
+    /**
+     * Sets up mock repositories and initializes the FoodService instance before each test.
+     * This isolates the service logic, allowing for verification of correct repository method calls.
+     */
     @BeforeEach
     void setUp() {
         foodRepository = mock(FoodRepository.class);
@@ -25,6 +33,10 @@ class FoodServiceTest {
         foodService = new FoodService(foodRepository, authService);
     }
 
+    /**
+     * Tests the successful retrieval of all essential food items.
+     * It verifies that the service fetches all entities from the repository and correctly maps them to {@code EssentialFoodResponse} DTOs.
+     */
     @Test
     void getAllEssentials_shouldReturnResponses() {
         EssentialFood food = new EssentialFood(
@@ -41,6 +53,10 @@ class FoodServiceTest {
         assertEquals(52, result.get(0).getCalories());
     }
 
+    /**
+     * Tests the successful addition of a new essential food item when the input is valid and the name is unique.
+     * It verifies that the service saves the new food entity to the repository and returns a success message.
+     */
     @Test
     void addEssentialFood_shouldSaveFoodWhenValid() {
         User user = new User();
@@ -59,6 +75,10 @@ class FoodServiceTest {
         verify(foodRepository).save(any(EssentialFood.class));
     }
 
+    /**
+     * Tests that adding an essential food item throws an exception if food with the same name already exists.
+     * It verifies the service enforces the uniqueness constraint on the food name, ignoring case.
+     */
     @Test
     void addEssentialFood_shouldThrowWhenNameExists() {
         User user = new User();
@@ -75,6 +95,10 @@ class FoodServiceTest {
                 () -> foodService.addEssentialFood(request, user));
     }
 
+    /**
+     * Tests that adding an essential food item throws an exception if the calorie count is invalid (zero or less).
+     * It verifies the service enforces the business rule that calorie values must be positive.
+     */
     @Test
     void addEssentialFood_shouldThrowWhenCaloriesInvalid() {
         User user = new User();
@@ -91,6 +115,10 @@ class FoodServiceTest {
                 () -> foodService.addEssentialFood(request, user));
     }
 
+    /**
+     * Tests the search functionality for essential food items by name.
+     * It verifies that the service correctly delegates the search query to the repository and returns the list of matching entities.
+     */
     @Test
     void searchEssentialFood_shouldDelegateToRepository() {
         EssentialFood food = new EssentialFood(

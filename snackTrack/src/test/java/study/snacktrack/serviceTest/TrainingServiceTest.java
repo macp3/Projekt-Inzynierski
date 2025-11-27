@@ -13,6 +13,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the TrainingService, covering the management of training plans, including adding exercises, assigning plans to users, and retrieving details.
+ * This class ensures that the service methods correctly interact with multiple repositories and enforce assignment logic.
+ */
 class TrainingServiceTest {
 
     private TrainingService service;
@@ -22,8 +26,11 @@ class TrainingServiceTest {
     private ExerciseRepository exerciseRepository;
     private AdminRepository adminRepository;
     private UserRepository userRepository;
-    private JwtService jwtService;
 
+    /**
+     * Sets up mock repositories and initializes the TrainingService instance before each test.
+     * This ensures the service is tested in isolation from the actual database layers.
+     */
     @BeforeEach
     void setUp() {
         trainingRepository = mock(TrainingRepository.class);
@@ -32,12 +39,15 @@ class TrainingServiceTest {
         exerciseRepository = mock(ExerciseRepository.class);
         adminRepository = mock(AdminRepository.class);
         userRepository = mock(UserRepository.class);
-        jwtService = mock(JwtService.class);
 
-        service = new TrainingService(jwtService, userRepository, trainingRepository,
+        service = new TrainingService(userRepository, trainingRepository,
                 trainingInfoRepository, userTrainingRepository, exerciseRepository, adminRepository);
     }
 
+    /**
+     * Tests the successful addition of an exercise to an existing training plan by an authorized admin.
+     * It verifies that the service checks for existing entries and persists a new {@code Training} record.
+     */
     @Test
     void addExerciseToTraining_shouldSaveWhenValid() {
         Admin admin = new Admin();
@@ -61,6 +71,10 @@ class TrainingServiceTest {
         assertEquals(5, response.getTrainingInfo().getId());
     }
 
+    /**
+     * Tests the successful removal of all entries for a specific exercise within a training plan.
+     * It verifies that the service fetches all relevant {@code Training} records and deletes them in a batch.
+     */
     @Test
     void deleteAllExercisesByIdFromTraining_shouldDelete() {
         TrainingInfo info = new TrainingInfo();
@@ -81,6 +95,10 @@ class TrainingServiceTest {
         verify(trainingRepository).deleteAll(List.of(training));
     }
 
+    /**
+     * Tests the successful assignment of a training plan to a user.
+     * It verifies that the service creates and saves a new {@code UserTraining} assignment record.
+     */
     @Test
     void assignTrainingToUser_shouldSaveAssignment() {
         User user = new User();
@@ -98,6 +116,10 @@ class TrainingServiceTest {
         verify(userTrainingRepository).save(any(UserTraining.class));
     }
 
+    /**
+     * Tests the process of depriving a user of their current training assignment.
+     * It verifies that the service fetches all current {@code UserTraining} records for the user and performs a batch deletion.
+     */
     @Test
     void depriveTrainingFromUser_shouldDeleteAssignments() {
         User user = new User();
@@ -114,6 +136,10 @@ class TrainingServiceTest {
         verify(userTrainingRepository).deleteAll(List.of(ut));
     }
 
+    /**
+     * Tests the retrieval of detailed information about a specific training plan, including its exercises.
+     * It verifies that the service correctly fetches {@code TrainingInfo} and all associated {@code Training} records, mapping them to the final DTO.
+     */
     @Test
     void getTrainingDetails_shouldReturnExercises() {
         TrainingInfo info = new TrainingInfo();

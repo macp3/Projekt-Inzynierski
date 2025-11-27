@@ -17,11 +17,12 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+/**
+ * Service responsible for managing registered alimentation entries.
+ * Provides functionality for adding, retrieving, updating, deleting, and copying meal entries.
+ */
 @Service
 public class RegisteredAlimentationService {
 
@@ -38,6 +39,9 @@ public class RegisteredAlimentationService {
             .expireAfterWrite(Duration.ofMinutes(10))
             .build();
 
+    /**
+     * Constructs RegisteredAlimentationService with required repositories and services.
+     */
     public RegisteredAlimentationService(
             UserRepository userRepository,
             FoodRepository foodRepository,
@@ -55,6 +59,12 @@ public class RegisteredAlimentationService {
         this.mealService = mealService;
     }
 
+    /**
+     * Retrieves food details from API with caching.
+     *
+     * @param apiId API food identifier
+     * @return detailed food response or null
+     */
     private ApiFoodResponseDetailed getApiFoodWithCache(Integer apiId) {
         if (apiId == null)
             return null;
@@ -71,6 +81,12 @@ public class RegisteredAlimentationService {
         }
     }
 
+    /**
+     * Extracts user from JWT token.
+     *
+     * @param authHeader authorization header
+     * @return User entity
+     */
     private User getUserFromToken(String authHeader) {
         String token = authHeader.replace("Bearer ", "");
         String email = jwtService.extractEmail(token);
@@ -78,6 +94,12 @@ public class RegisteredAlimentationService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
     }
 
+    /**
+     * Parses date string into LocalDate.
+     *
+     * @param date date string
+     * @return optional LocalDate
+     */
     private Optional<LocalDate> parseDate(String date) {
         if (date == null || date.isEmpty())
             return Optional.empty();
@@ -88,6 +110,14 @@ public class RegisteredAlimentationService {
         }
     }
 
+    /**
+     * Adds a new alimentation entry.
+     *
+     * @param authHeader authorization header
+     * @param dto alimentation request data
+     * @param date optional date string
+     * @return confirmation message
+     */
     public String addEntry(String authHeader, RegisteredAlimentationRequest dto, String date) {
         User user = getUserFromToken(authHeader);
         RegisteredAlimentation entry = new RegisteredAlimentation();
@@ -142,6 +172,13 @@ public class RegisteredAlimentationService {
         return "Meal registered";
     }
 
+    /**
+     * Retrieves alimentation entries for current user.
+     *
+     * @param authHeader authorization header
+     * @param date optional date string
+     * @return list of alimentation responses
+     */
     public List<RegisteredAlimentationResponse> getMyEntries(String authHeader, String date) {
         User user = getUserFromToken(authHeader);
         List<RegisteredAlimentation> myEntries = parseDate(date)
@@ -172,6 +209,12 @@ public class RegisteredAlimentationService {
                 .toList();
     }
 
+    /**
+     * Deletes alimentation entry by ID.
+     *
+     * @param authHeader authorization header
+     * @param id entry identifier
+     */
     public void deleteEntry(String authHeader, Integer id) {
         User user = getUserFromToken(authHeader);
         RegisteredAlimentation entry = repository.findById(id)
@@ -182,6 +225,14 @@ public class RegisteredAlimentationService {
         repository.delete(entry);
     }
 
+    /**
+     * Updates alimentation entry by ID.
+     *
+     * @param authHeader authorization header
+     * @param id entry identifier
+     * @param dto updated request data
+     * @return updated entry
+     */
     public RegisteredAlimentation updateEntry(String authHeader, Integer id, RegisteredAlimentationRequest dto) {
         User user = getUserFromToken(authHeader);
         RegisteredAlimentation entry = repository.findById(id)
@@ -207,9 +258,19 @@ public class RegisteredAlimentationService {
         return repository.save(entry);
     }
 
+    /**
+     * Copies meal entries from one date and meal name to another.
+     *
+     * @param authHeader authorization header
+     * @param fromDate source date string
+     * @param fromMealName source meal name
+     * @param toDate target date string
+     * @param toMealName target meal name
+     * @return confirmation message
+     */
     @Transactional
     public String copyMeal(String authHeader, String fromDate, MealNames fromMealName, String toDate,
-            MealNames toMealName) {
+                           MealNames toMealName) {
         User user = getUserFromToken(authHeader);
         LocalDate from = parseDate(fromDate)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid source date"));
@@ -219,36 +280,32 @@ public class RegisteredAlimentationService {
         System.out.println("COPYING: User=" + user.getId() + ", From=" + from + " (" + fromMealName + ") To=" + to
                 + " (" + toMealName + ")");
 
-        // 1. Używamy precyzyjnego zapytania z repozytorium
+        // Retrieve source entries
         List<RegisteredAlimentation> sourceEntries = repository.findByUserIdAndTimestampAndMealName(user.getId(), from,
                 fromMealName);
 
         if (sourceEntries.isEmpty()) {
-            // To nie jest błąd krytyczny, po prostu nic nie kopiujemy
             return "No entries to copy from " + fromMealName;
         }
 
         List<RegisteredAlimentation> newEntries = new ArrayList<>();
 
-        // 2. Tworzymy czyste kopie
+        // Create copies of source entries
         for (RegisteredAlimentation entry : sourceEntries) {
             RegisteredAlimentation copy = new RegisteredAlimentation();
             copy.setUserId(user.getId());
-            // Kopiujemy referencje
             copy.setEssentialFood(entry.getEssentialFood());
             copy.setMeal(entry.getMeal());
             copy.setMealApiId(entry.getMealApiId());
-            // Kopiujemy wartości
             copy.setAmount(entry.getAmount());
             copy.setPieces(entry.getPieces());
-            // Ustawiamy nową datę i nazwę posiłku
             copy.setTimestamp(to);
             copy.setMealName(toMealName);
 
             newEntries.add(copy);
         }
 
-        // 3. Zapisujemy wszystko naraz
+        // Save all new entries
         repository.saveAll(newEntries);
 
         return "Copied " + newEntries.size() + " items successfully";
