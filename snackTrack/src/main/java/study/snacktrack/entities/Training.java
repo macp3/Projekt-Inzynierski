@@ -1,16 +1,12 @@
 package study.snacktrack.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import jakarta.persistence.*;
 
 /**
- * Represents a single scheduled exercise within a comprehensive training plan, detailing the structure of the routine.
- * This entity links a specific exercise to a particular training plan ID, its creator, and the sequential day it should be performed.
+ * Represents a single scheduled exercise within a comprehensive training plan,
+ * detailing the structure of the routine.
+ * This entity links a specific exercise to a particular training plan ID, its
+ * creator, and the sequential day it should be performed.
  */
 @Entity
 @Table(name = "trainings")
@@ -36,11 +32,10 @@ public class Training {
     @JoinColumn(name = "training_id", insertable = false, updatable = false)
     private TrainingInfo trainingInfo;
 
-
-
     /**
      * Getters and setters for all entity fields.
-     * These methods provide standard access and modification capabilities for the Training entity properties.
+     * These methods provide standard access and modification capabilities for the
+     * Training entity properties.
      */
     public Integer getId() {
         return id;
@@ -50,8 +45,16 @@ public class Training {
         this.id = id;
     }
 
+    public Integer getTrainingId() {
+        return trainingId;
+    }
+
     public void setTrainingId(Integer trainingId) {
         this.trainingId = trainingId;
+    }
+
+    public Integer getAuthorId() {
+        return authorId;
     }
 
     public void setAuthorId(Integer authorId) {

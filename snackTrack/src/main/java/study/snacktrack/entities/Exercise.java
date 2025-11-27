@@ -7,10 +7,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-/**
- * Represents a single exercise definition stored in the fitness plan database.
- * This entity details the exercise's name, description, type, difficulty rating, and execution parameters like sets and repetitions.
- */
 @Entity
 @Table(name = "exercises")
 public class Exercise {
@@ -37,10 +33,7 @@ public class Exercise {
     @Column(name = "repetitions_per_set", nullable = false)
     private Integer repetitionsPerSet;
 
-    /**
-     * Getters and setters for all entity fields.
-     * These methods provide standard access and modification capabilities for the Exercise entity properties.
-     */
+    // Gettery i settery
     public Integer getId() {
         return id;
     }
@@ -73,11 +66,24 @@ public class Exercise {
         this.type = type;
     }
 
+    public Integer getDifficulty() {
+        return difficulty;
+    }
+
     public void setDifficulty(Integer difficulty) {
         this.difficulty = difficulty;
     }
+
+    public Integer getNumberOfSets() {
+        return numberOfSets;
+    }
+
     public void setNumberOfSets(Integer numberOfSets) {
         this.numberOfSets = numberOfSets;
+    }
+
+    public Integer getRepetitionsPerSet() {
+        return repetitionsPerSet;
     }
 
     public void setRepetitionsPerSet(Integer repetitionsPerSet) {

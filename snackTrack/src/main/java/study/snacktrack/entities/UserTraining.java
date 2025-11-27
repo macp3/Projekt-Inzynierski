@@ -6,8 +6,10 @@ import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Represents a record of a specific user being assigned or starting a particular training program on a given date.
- * This entity uses a composite key based on user ID and training ID to link the user to the plan and tracks the timestamp of assignment.
+ * Represents a record of a specific user being assigned or starting a
+ * particular training program on a given date.
+ * This entity uses a composite key based on user ID and training ID to link the
+ * user to the plan and tracks the timestamp of assignment.
  */
 @Entity
 @Table(name = "user_trainings")
@@ -15,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 public class UserTraining {
 
     @Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)
+    // @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     @NotNull
     private int userId;
@@ -30,10 +32,10 @@ public class UserTraining {
     @JoinColumn(name = "training_id", insertable = false, updatable = false)
     private TrainingInfo trainingInfo;
 
-
     /**
      * Getters and setters for all entity fields.
-     * These methods provide standard access and modification capabilities for the UserTraining entity properties.
+     * These methods provide standard access and modification capabilities for the
+     * UserTraining entity properties.
      */
     public int getUserId() {
         return userId;
@@ -49,6 +51,11 @@ public class UserTraining {
 
     public void setTrainingId(int trainingId) {
         this.trainingId = trainingId;
+    }
+
+    @NotNull
+    public LocalDate getTimestamp() {
+        return timestamp;
     }
 
     public void setTimestamp(@NotNull LocalDate timestamp) {
