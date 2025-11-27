@@ -63,13 +63,27 @@ public class SecurityConfig {
      *
      * @return The configured CorsConfigurationSource.
      */
+    // W pliku SecurityConfig.java
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", frontendUrl));
+
+        // ⚠️ ZMIANA: Używamy patterns zamiast sztywnych origins.
+        // To rozwiązuje problemy z http/https i ewentualnymi ukośnikami.
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:3000",
+                "https://*.railway.app" // To pokryje Twoją domenę backendu i frontendu
+        ));
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+
+        // Zezwól na wszystkie nagłówki, w tym Authorization
         configuration.setAllowedHeaders(List.of("*"));
+
+        // Zezwól na ciasteczka/credentials
         configuration.setAllowCredentials(true);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
