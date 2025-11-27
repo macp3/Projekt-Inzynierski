@@ -8,6 +8,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.*;
 
+/**
+ * Represents a single scheduled exercise within a comprehensive training plan, detailing the structure of the routine.
+ * This entity links a specific exercise to a particular training plan ID, its creator, and the sequential day it should be performed.
+ */
 @Entity
 @Table(name = "trainings")
 public class Training {
@@ -28,14 +32,16 @@ public class Training {
     @Column(name = "day_of_exercise", nullable = false)
     private Integer dayOfExercise;
 
-    //ewentualnie do wypierdolenia
     @ManyToOne
     @JoinColumn(name = "training_id", insertable = false, updatable = false)
     private TrainingInfo trainingInfo;
 
 
 
-    // Gettery i settery
+    /**
+     * Getters and setters for all entity fields.
+     * These methods provide standard access and modification capabilities for the Training entity properties.
+     */
     public Integer getId() {
         return id;
     }
@@ -44,16 +50,8 @@ public class Training {
         this.id = id;
     }
 
-    public Integer getTrainingId() {
-        return trainingId;
-    }
-
     public void setTrainingId(Integer trainingId) {
         this.trainingId = trainingId;
-    }
-
-    public Integer getAuthorId() {
-        return authorId;
     }
 
     public void setAuthorId(Integer authorId) {

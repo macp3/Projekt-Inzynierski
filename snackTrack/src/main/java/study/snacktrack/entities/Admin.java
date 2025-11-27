@@ -9,6 +9,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * Represents an administrator account within the application, used for managing content and users.
+ * This entity maps to the "admins" table in the database and stores necessary credentials for privileged access.
+ */
 @Entity
 @Table(name = "admins")
 public class Admin {
@@ -27,6 +31,10 @@ public class Admin {
     @Column(nullable = false, length = 200)
     private String password;
 
+    /**
+     * Getters and setters for all entity fields.
+     * These methods provide standard access and modification capabilities for the Admin entity properties.
+     */
     @NotNull
     public String getLogin() {
         return login;
@@ -56,5 +64,9 @@ public class Admin {
 
     public int getId() {
         return id;
+    }
+    public void setId(Integer id)
+    {
+        this.id = id;
     }
 }

@@ -1,5 +1,20 @@
 package study.snacktrack.services;
 
+import jakarta.transaction.Transactional;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import study.snacktrack.dto.ApiFoodResponse;
+import study.snacktrack.dto.ApiFoodResponseDetailed;
+import study.snacktrack.dto.EssentialFoodRequest;
+import study.snacktrack.dto.EssentialFoodResponse;
+import study.snacktrack.entities.EssentialFood;
+import study.snacktrack.entities.User;
+import study.snacktrack.repositories.FoodRepository;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -10,22 +25,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import jakarta.transaction.Transactional;
-import study.snacktrack.dto.ApiFoodResponseDetailed;
-import study.snacktrack.dto.EssentialFoodRequest;
-import study.snacktrack.dto.EssentialFoodResponse;
-import study.snacktrack.entities.EssentialFood;
-import study.snacktrack.repositories.FoodRepository;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import study.snacktrack.dto.ApiFoodResponse;
-import study.snacktrack.entities.User;
-
+/**
+ * Service responsible for managing food data.
+ * Provides access to FatSecret API and local food repository.
+ */
 @Service
 public class FoodService {
 
@@ -35,12 +38,25 @@ public class FoodService {
 
     private final FoodRepository foodRepository;
 
+    /**
+     * Constructs FoodService with repository and authentication service.
+     *
+     * @param foodRepository repository for essential foods
+     * @param authService service for FatSecret authentication
+     */
     public FoodService(FoodRepository foodRepository, FatSecretAuthService authService) {
         this.restTemplate = new RestTemplate();
         this.foodRepository = foodRepository;
         this.authService = authService;
     }
 
+    /**
+     * Safely parses integer values.
+     *
+     * @param value input object
+     * @param defaultValue fallback value
+     * @return parsed integer or default
+     */
     private int parseIntSafe(Object value, int defaultValue) {
         if (value == null) {
             return defaultValue;
@@ -55,6 +71,13 @@ public class FoodService {
         }
     }
 
+    /**
+     * Safely parses float values.
+     *
+     * @param value input object
+     * @param defaultValue fallback value
+     * @return parsed float or default
+     */
     private float parseFloatSafe(Object value, float defaultValue) {
         if (value == null) {
             return defaultValue;
@@ -69,18 +92,27 @@ public class FoodService {
         }
     }
 
-    public List<EssentialFoodResponse> getAllEssentials()
-    {
+    /**
+     * Retrieves all essential foods from repository.
+     *
+     * @return list of essential food responses
+     */
+    public List<EssentialFoodResponse> getAllEssentials() {
         List<EssentialFood> essentials = foodRepository.findAll();
         List<EssentialFoodResponse> response = new ArrayList<>();
-        for(EssentialFood e: essentials)
-        {
+        for (EssentialFood e : essentials) {
             EssentialFoodResponse r = new EssentialFoodResponse(e);
             response.add(r);
         }
         return response;
     }
 
+    /**
+     * Searches food items in FatSecret API.
+     *
+     * @param query search expression
+     * @return list of food responses
+     */
     public List<ApiFoodResponse> getFoodFromApi(String query) {
         String apiFoodDatabaseKey = authService.getAccessToken();
         String url = String.format(
@@ -124,6 +156,12 @@ public class FoodService {
         }).collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves detailed food information from FatSecret API by ID.
+     *
+     * @param foodId identifier of the food
+     * @return detailed food response
+     */
     public ApiFoodResponseDetailed getFoodFromApiById(long foodId) {
         String apiFoodDatabaseKey = authService.getAccessToken();
         String url = String.format(
@@ -138,7 +176,7 @@ public class FoodService {
         Map<String, Object> response = responseEntity.getBody();
 
         if (response == null || !response.containsKey("food")) {
-            throw new RuntimeException("Brak danych dla food_id: " + foodId);
+            throw new RuntimeException("No data for food_id: " + foodId);
         }
 
         Map<String, Object> food = (Map<String, Object>) response.get("food");
@@ -165,6 +203,13 @@ public class FoodService {
         return dto;
     }
 
+    /**
+     * Extracts nutrient value from description string.
+     *
+     * @param description food description
+     * @param nutrientName nutrient name
+     * @return nutrient value or 0
+     */
     private double parseNutrient(String description, String nutrientName) {
         Pattern pattern = Pattern.compile(nutrientName + ":\\s*([0-9.]+)");
         Matcher matcher = pattern.matcher(description);
@@ -174,6 +219,12 @@ public class FoodService {
         return 0;
     }
 
+    /**
+     * Extracts quantity information from description string.
+     *
+     * @param description food description
+     * @return quantity string or null
+     */
     private String parseQuantity(String description) {
         if (description == null || description.isBlank()) {
             return null;
@@ -185,6 +236,13 @@ public class FoodService {
         return description.trim();
     }
 
+    /**
+     * Adds a new essential food to repository after validation.
+     *
+     * @param request food request data
+     * @param currentUser user adding the food
+     * @return confirmation message
+     */
     @Transactional
     public String addEssentialFood(EssentialFoodRequest request, User currentUser) {
 
@@ -235,6 +293,12 @@ public class FoodService {
         return "Food has been added to database";
     }
 
+    /**
+     * Searches essential foods in repository by name.
+     *
+     * @param query search string
+     * @return list of matching essential foods
+     */
     public List<EssentialFood> searchEssentialFood(String query) {
         return foodRepository.findByNameContainingIgnoreCase(query);
     }

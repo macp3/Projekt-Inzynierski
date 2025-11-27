@@ -4,6 +4,10 @@ import java.time.LocalDate;
 
 import study.snacktrack.entities.enums.Recipients;
 
+/**
+ * Data Transfer Object (DTO) used for carrying information required to create a new scheduled notification.
+ * This structure includes the notification's content, the target audience, and the desired sending date.
+ */
 public class NotificationRequest {
 
     private String name;
@@ -11,6 +15,10 @@ public class NotificationRequest {
     private Recipients recipients;
     private LocalDate sendingTime;
 
+    /**
+     * Getters and setters for the DTO fields.
+     * These methods provide standard access and modification capabilities for the notification's properties.
+     */
     public String getName() {
         return name;
     }

@@ -1,18 +1,17 @@
 package study.snacktrack.services;
 
-import java.util.Base64;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Base64;
+import java.util.Map;
+
+/**
+ * Service responsible for handling authentication with FatSecret API.
+ * Manages access tokens and refreshes them when expired.
+ */
 @Service
 public class FatSecretAuthService {
 
@@ -25,6 +24,12 @@ public class FatSecretAuthService {
     private String accessToken;
     private long tokenExpirationTime = 0;
 
+    /**
+     * Returns a valid access token.
+     * Refreshes the token if it is missing or expired.
+     *
+     * @return FatSecret API access token
+     */
     public synchronized String getAccessToken() {
         long now = System.currentTimeMillis();
 
@@ -35,6 +40,10 @@ public class FatSecretAuthService {
         return accessToken;
     }
 
+    /**
+     * Requests a new access token from FatSecret API.
+     * Updates the token and its expiration time.
+     */
     private void refreshToken() {
         String url = "https://oauth.fatsecret.com/connect/token";
 

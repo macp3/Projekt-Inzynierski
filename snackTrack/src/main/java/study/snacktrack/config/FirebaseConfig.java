@@ -11,9 +11,18 @@ import java.io.InputStream;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Configures and initializes the Firebase Admin SDK.
+ */
 @Configuration
 public class FirebaseConfig {
 
+    /**
+     * Initializes the FirebaseApp using the service account key.
+     * Only runs if the app is not already initialized.
+     *
+     * @throws IOException If the service account file cannot be read.
+     */
     @PostConstruct
     public void initializeFirebase() throws IOException {
         InputStream serviceAccount = getClass()

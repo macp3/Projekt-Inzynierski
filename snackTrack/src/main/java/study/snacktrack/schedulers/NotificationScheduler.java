@@ -12,6 +12,10 @@ import study.snacktrack.entities.User;
 import study.snacktrack.services.NotificationService;
 import study.snacktrack.services.PushNotificationService;
 
+/**
+ * A scheduled component responsible for executing time-based tasks, specifically sending push notifications.
+ * It uses Spring's @Scheduled annotation to run notification delivery at a fixed time each day.
+ */
 @Component
 public class NotificationScheduler {
 
@@ -19,13 +23,20 @@ public class NotificationScheduler {
     private final UserService userService;
     private final PushNotificationService pushService;
 
+    /**
+     * Constructs the NotificationScheduler with necessary service dependencies.
+     */
     public NotificationScheduler(NotificationService notificationService, UserService userService,
-            PushNotificationService pushService) {
+                                 PushNotificationService pushService) {
         this.notificationService = notificationService;
         this.userService = userService;
         this.pushService = pushService;
     }
 
+    /**
+     * Executes daily to retrieve and send scheduled notifications to the appropriate user groups.
+     * This method runs every day at 12:00 PM (noon) based on the cron expression "0 0 12 * * *".
+     */
     @Scheduled(cron = "0 0 12 * * *")
     public void sendScheduledNotifications() {
         LocalDate today = LocalDate.now();

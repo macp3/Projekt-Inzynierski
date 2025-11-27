@@ -15,6 +15,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+/**
+ * Represents a specific component food item used within a larger Meal entity.
+ * This entity links a meal to a food source (internal database or external API) and records the quantity used.
+ */
 @Entity
 @Table(name = "ingredients")
 public class Ingredient {
@@ -38,10 +42,16 @@ public class Ingredient {
     @Nullable
     private Float pieces;
 
-    public Ingredient() {
-
-    }
-
+    /**
+     * Constructs a new Ingredient entity linking a meal to a food source and recording the consumed quantity.
+     * This constructor is typically used when assembling a new meal recipe in the application.
+     *
+     * @param meal The Meal entity this ingredient belongs to.
+     * @param essentialFood The internal food entity used as the source, if applicable.
+     * @param essentialApiId The ID of the external API food source, if applicable.
+     * @param amount The numerical quantity of the ingredient used (e.g., in grams or milliliters).
+     * @param pieces The number of separate pieces or units used.
+     */
     public Ingredient(Meal meal, EssentialFood essentialFood, @Nullable Integer essentialApiId, Float amount, Float pieces) {
         this.meal = meal;
         this.essentialFood = essentialFood;
@@ -50,6 +60,10 @@ public class Ingredient {
         this.pieces = pieces;
     }
 
+    /**
+     * Getters and setters for all entity fields.
+     * These methods provide standard access and modification capabilities for the Ingredient entity properties.
+     */
     public int getId() {
         return id;
     }
@@ -70,19 +84,10 @@ public class Ingredient {
         return essentialFood;
     }
 
-    public void setEssentialFood(EssentialFood essentialFood) {
-        this.essentialFood = essentialFood;
-    }
-
     @Nullable
     public Integer getEssentialApiId() {
         return essentialApiId;
     }
-
-    public void setEssentialApiId(@Nullable Integer essentialApiId) {
-        this.essentialApiId = essentialApiId;
-    }
-
     public Float getAmount() {
         return amount;
     }

@@ -1,13 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package study.snacktrack.dto;
 
 import study.snacktrack.entities.enums.MealNames;
 
 import java.time.LocalDate;
 
+/**
+ * Data Transfer Object (DTO) used for carrying information required to log a user's food consumption.
+ * This structure captures which food item was consumed, the amount, the date, and the specific meal context (e.g., LUNCH).
+ */
 public class RegisteredAlimentationRequest {
 
     private Integer essentialId;
@@ -19,6 +19,10 @@ public class RegisteredAlimentationRequest {
     private Float amount;
     private Float pieces;
 
+    /**
+     * Getters and setters for the DTO fields.
+     * These methods provide standard access and modification capabilities for the registered alimentation details.
+     */
     public Integer getEssentialId() {
         return essentialId;
     }
@@ -29,10 +33,6 @@ public class RegisteredAlimentationRequest {
 
     public Integer getMealApiId() {
         return mealApiId;
-    }
-
-    public void setMealApiId(Integer mealApiId) {
-        this.mealApiId = mealApiId;
     }
 
     public Integer getMealId() {

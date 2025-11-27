@@ -14,15 +14,37 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * REST controller for handling administrative authentication processes.
+ * Provides endpoints for administrative login.
+ */
 @RestController
 @RequestMapping("/admin-auth")
 @RequiredArgsConstructor
 public class AdminAuthController {
 
+    /**
+     * Repository for accessing Admin user data.
+     */
     private final AdminRepository adminRepository;
+
+    /**
+     * Utility for encoding and verifying passwords.
+     */
     private final PasswordEncoder passwordEncoder;
+
+    /**
+     * Service for generating JWT (JSON Web Token) tokens.
+     */
     private final JwtService jwtService;
 
+    /**
+     * Handles the administrator login request.
+     * Authenticates the admin using email and password, and returns a JWT token upon success.
+     *
+     * @param request The LoginRequest containing the admin's email and password.
+     * @return ResponseEntity containing the JWT token if successful, or UNAUTHORIZED status.
+     */
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginRequest request) {
         Admin admin = adminRepository.findByEmail(request.getEmail())

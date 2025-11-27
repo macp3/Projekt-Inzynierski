@@ -18,61 +18,63 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Spring Security configuration for the application.
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    /**
+     * Custom filter for JWT token validation.
+     */
     private final JwtAuthFilter jwtAuthFilter;
 
+    /**
+     * Defines the security filter chain.
+     *
+     * @param http The HttpSecurity configuration object.
+     * @return The built SecurityFilterChain.
+     * @throws Exception If configuration errors occur.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // 1. Wyłączenie CSRF (poprawne dla REST API)
                 .csrf(AbstractHttpConfigurer::disable)
-
-                // 2. 🔥 KLUCZOWA ZMIANA: Włączenie CORS w Security
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/admin-auth/**").permitAll()
-                        .requestMatchers("/images/**", "/uploads/**").permitAll()
-
-                        // Opcja OPTIONS jest potrzebna, aby przeglądarka mogła "zapytać" o uprawnienia
-                        // przed wysłaniem tokena
+                        .requestMatchers("/auth/**", "/admin-auth/**", "/images/**", "/uploads/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().hasRole("USER"))
-
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // 3. 🔥 Definicja reguł CORS dla Spring Security
+    /**
+     * Configures global Cross-Origin Resource Sharing (CORS) rules.
+     *
+     * @return The configured CorsConfigurationSource.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // Zezwól na frontend Reacta (localhost:3000)
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-
-        // Zezwól na wszystkie metody HTTP
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-
-        // Zezwól na wszystkie nagłówki (w tym Authorization!)
-        configuration.setAllowedHeaders(List.of("*")); // Lub jawnie: "Authorization", "Content-Type", "Cache-Control"
-
-        // Zezwól na ciasteczka/credentials (jeśli używasz)
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 
+    /**
+     * Provides the BCrypt PasswordEncoder bean.
+     *
+     * @return The configured PasswordEncoder.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

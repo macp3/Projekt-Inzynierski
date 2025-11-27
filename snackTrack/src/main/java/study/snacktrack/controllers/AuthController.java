@@ -26,18 +26,33 @@ import study.snacktrack.repositories.VerificationTokenRepository;
 import study.snacktrack.services.EmailService;
 import study.snacktrack.services.JwtService;
 
+/**
+ * REST controller handling user registration, account activation, and login processes.
+ */
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
+    /** Repository for accessing User entity data. */
     private final UserRepository userRepository;
+    /** Utility for encoding and verifying passwords. */
     private final PasswordEncoder passwordEncoder;
+    /** Service for generating JWT tokens. */
     private final JwtService jwtService;
+    /** Repository for managing account verification tokens. */
     private final VerificationTokenRepository tokenRepository;
+    /** Service for sending transactional emails. */
     private final EmailService emailService;
+    /** Repository for checking if the user has completed their initial body parameters setup. */
     private final BodyParametersRepository bodyParametersRepository;
 
+    /**
+     * Registers a new user, saves their data, generates a verification token, and sends an activation email.
+     *
+     * @param request The RegisterRequest DTO containing user details.
+     * @return ResponseEntity with a success message or a bad request if the email is taken.
+     */
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -68,6 +83,12 @@ public class AuthController {
         return ResponseEntity.ok("User registered successfully! Check your email for activation link.");
     }
 
+    /**
+     * Activates a user account using a verification token provided in the URL parameter.
+     *
+     * @param token The verification token string.
+     * @return ResponseEntity with a success message or a bad request if the token is invalid or expired.
+     */
     @GetMapping("/activate")
     public ResponseEntity<String> activateAccount(@RequestParam("token") String token) {
         VerificationToken verificationToken = tokenRepository.findByToken(token)
@@ -86,6 +107,13 @@ public class AuthController {
         return ResponseEntity.ok("Account activated successfully!");
     }
 
+    /**
+     * Authenticates a user using email and password.
+     * Checks for inactive or banned status before issuing a JWT token.
+     *
+     * @param request The LoginRequest DTO containing credentials.
+     * @return ResponseEntity containing a JWT token, a first-login flag, and status information.
+     */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())

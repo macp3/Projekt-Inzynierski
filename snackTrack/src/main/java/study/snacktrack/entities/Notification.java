@@ -17,6 +17,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+/**
+ * Represents a scheduled administrative notification or announcement intended for specific user groups.
+ * This entity stores the message content, the defined target audience, the scheduled sending time, and the administrative author.
+ */
 @Entity
 @Table(name = "notifications")
 public class Notification {
@@ -39,6 +43,10 @@ public class Notification {
     @Column(name = "sending_time")
     private LocalDate sendingTime;
 
+    /**
+     * Getters and setters for all entity fields.
+     * These methods provide standard access and modification capabilities for the Notification entity properties.
+     */
     @NotNull
     public String getName() {
         return name;

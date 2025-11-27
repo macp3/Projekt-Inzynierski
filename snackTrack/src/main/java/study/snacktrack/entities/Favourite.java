@@ -10,6 +10,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * Represents a record linking a user to a meal they have marked as a favorite.
+ * This entity tracks the user's preferred meals, allowing for quick retrieval and personalized recommendations.
+ */
 @Entity
 @Table(name = "favourite")
 public class Favourite {
@@ -25,6 +29,10 @@ public class Favourite {
     @Nullable
     private int mealId;
 
+    /**
+     * Getters and setters for all entity fields.
+     * These methods provide standard access and modification capabilities for the Favourite entity properties.
+     */
     public int getId() {
         return id;
     }

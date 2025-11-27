@@ -11,6 +11,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * Represents a basic, essential food item stored in the application's internal database.
+ * This entity contains the nutritional breakdown (macros and calories) and descriptive details for one specific food source.
+ */
 @Entity
 @Table(name = "essential_food")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -43,9 +47,29 @@ public class EssentialFood {
     @Column(name = "brand_name")
     private String brandName;
 
+    /**
+     * Default constructor required by JPA and Hibernate for entity instantiation.
+     * This empty constructor ensures the ORM framework can correctly load and manage the entity lifecycle.
+     */
     public EssentialFood() {
     }
 
+    /**
+     * Constructs a new EssentialFood entity with all necessary nutritional and descriptive details.
+     * This parameterized constructor is typically used when saving a new user-defined food item to the database.
+     *
+     * @param id The unique ID of the food item.
+     * @param name The unique name of the food item.
+     * @param authorId The ID of the user who created this food item record.
+     * @param description A brief description of the food item.
+     * @param calories The caloric content per serving.
+     * @param protein The protein content per serving.
+     * @param fat The fat content per serving.
+     * @param carbohydrates The carbohydrate content per serving.
+     * @param servingSizeUnit The unit of measurement for the serving size.
+     * @param defaultWeight The default weight of the serving size.
+     * @param brandName The brand name of the food product.
+     */
     public EssentialFood(int id, @NotNull String name, int authorId, @NotNull String description, float calories, float protein, float fat, float carbohydrates, String servingSizeUnit, float defaultWeight, String brandName) {
         this.id = id;
         this.name = name;
@@ -60,6 +84,10 @@ public class EssentialFood {
         this.brandName = brandName;
     }
 
+    /**
+     * Getters and setters for all entity fields.
+     * These methods provide standard access and modification capabilities for the EssentialFood entity properties.
+     */
     public int getId() {
         return id;
     }
@@ -75,10 +103,6 @@ public class EssentialFood {
 
     public void setName(@NotNull String name) {
         this.name = name;
-    }
-
-    public int getAuthorId() {
-        return authorId;
     }
 
     public void setAuthorId(int authorId) {

@@ -10,6 +10,10 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * Represents the detailed physical metrics, goals, and calculated nutritional limits for a single user.
+ * This entity is linked directly to the User table via the primary key and is crucial for calculating personalized dietary recommendations.
+ */
 @Entity
 @Table(name = "body_parameters")
 public class BodyParameters {
@@ -52,6 +56,10 @@ public class BodyParameters {
     @NotNull
     private Float carbohydratesLimit;
 
+    /**
+     * Getters and setters for all entity fields.
+     * These methods provide standard access and modification capabilities for the user's body parameters and calculated limits.
+     */
     @NotNull
     public Integer getUserId() {
         return userId;

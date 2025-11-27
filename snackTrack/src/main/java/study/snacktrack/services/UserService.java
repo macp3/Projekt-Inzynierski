@@ -29,6 +29,10 @@ import study.snacktrack.entities.enums.Sex;
 import study.snacktrack.entities.enums.Status;
 import study.snacktrack.repositories.*;
 
+/**
+ * Service responsible for managing user accounts and related data.
+ * This includes handling user details, body parameters, device tokens, and favorite meals.
+ */
 @Service
 public class UserService {
 
@@ -43,9 +47,12 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * Constructs UserService with all necessary repositories and dependencies.
+     */
     public UserService(UserRepository userRepository, BodyParametersRepository bodyParametersRepository,
-            UserDeviceTokenRepository deviceTokenRepository, FavouriteRepository favouriteRepository,
-            MealRepository mealRepository) {
+                       UserDeviceTokenRepository deviceTokenRepository, FavouriteRepository favouriteRepository,
+                       MealRepository mealRepository) {
         this.userRepository = userRepository;
         this.bodyParametersRepository = bodyParametersRepository;
         this.deviceTokenRepository = deviceTokenRepository;
@@ -53,9 +60,14 @@ public class UserService {
         this.mealRepository = mealRepository;
     }
 
-    // nie dziala XDDD
-    // tera sie nie moge zalogoiwac
-    // jednak dziala ale user3 stracony
+    /**
+     * Changes a user's password.
+     *
+     * @param userId the ID of the user
+     * @param password the new password string
+     * @return the updated User entity
+     * @throws IllegalArgumentException if the password is empty or identical to the old one.
+     */
     public User changePassword(int userId, String password) {
         User user = getUserById(userId);
 
@@ -72,10 +84,21 @@ public class UserService {
         return user;
     }
 
-    // do rozbudowania:
-    // po drugie pole estimated_time zeby nie przekraczac deficytu/nadwyzki 1000kcal
-    // (bo to niezdrowe)
-    // TAK DZIALA FITATU
+    /**
+     * Updates an existing user's body parameters and recalculates nutritional limits.
+     *
+     * @param userId the ID of the user
+     * @param sex the user's sex
+     * @param height the user's height
+     * @param weight the user's weight
+     * @param age the user's age
+     * @param dailyActivityFactor the user's daily activity factor
+     * @param dailyActivityTrainingFactor the user's daily activity training factor
+     * @param weeklyWeightChangeTempo the desired weekly weight change tempo
+     * @param goalWeight the desired goal weight
+     * @return a DTO containing the updated body parameters and calculated limits
+     * @throws IllegalArgumentException if the user is not found or validation fails.
+     */
     @Transactional
     public BodyParametersResponse changeBodyParameters(
             Integer userId,
@@ -198,10 +221,25 @@ public class UserService {
         return response;
     }
 
+    /**
+     * Adds new initial body parameters for a user and calculates initial nutritional limits.
+     *
+     * @param userId the ID of the user
+     * @param sex the user's sex
+     * @param height the user's height
+     * @param weight the user's weight
+     * @param age the user's age
+     * @param dailyActivityFactor the user's daily activity factor
+     * @param dailyActivityTrainingFactor the user's daily activity training factor
+     * @param weeklyWeightChangeTempo the desired weekly weight change tempo
+     * @param goalWeight the desired goal weight
+     * @return the newly created BodyParameters entity
+     * @throws IllegalArgumentException if any required parameter is null or fails validation.
+     */
     @Transactional
     public BodyParameters addBodyParameters(Integer userId, Sex sex, Float height, Float weight, Integer age,
-            Float dailyActivityFactor, Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo,
-            Float goalWeight) {
+                                            Float dailyActivityFactor, Float dailyActivityTrainingFactor, Float weeklyWeightChangeTempo,
+                                            Float goalWeight) {
         if (sex == null)
             throw new IllegalArgumentException("Sex must not be null");
         if (sex != Sex.female && sex != Sex.male)
@@ -275,9 +313,15 @@ public class UserService {
         return bodyParametersRepository.save(bodyParameters);
     }
 
-    // admin
+    /**
+     * Updates a user's streak value (admin only).
+     *
+     * @param userId the ID of the user
+     * @param streak the new streak value
+     * @return true if the update was successful
+     * @throws IllegalArgumentException if the user is not found.
+     */
     public boolean updateStreak(int userId, int streak) {
-
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             throw new IllegalArgumentException("User not found");
@@ -288,7 +332,14 @@ public class UserService {
         return true;
     }
 
-    // admin
+    /**
+     * Updates a user's status (admin only).
+     *
+     * @param userId the ID of the user
+     * @param status the new Status (e.g., active, banned)
+     * @return the updated User entity
+     * @throws IllegalArgumentException if the user is not found.
+     */
     public User updateStatus(int userId, Status status) {
         User user = getUserById(userId);
         user.setStatus(status);
@@ -297,7 +348,14 @@ public class UserService {
         return user;
     }
 
-    // admin
+    /**
+     * Updates the premium expiration date for a user (admin only).
+     *
+     * @param userId the ID of the user
+     * @param dateString the new expiration date in "YYYY-MM-DD" format
+     * @return the updated User entity
+     * @throws IllegalArgumentException if the user is not active, the date format is incorrect, or the date is in the past.
+     */
     @Transactional
     public User updatePremiumExpiration(int userId, String dateString) {
         User user = getUserById(userId);
@@ -322,21 +380,45 @@ public class UserService {
         return user;
     }
 
-    // admin
+    /**
+     * Deletes a user account (admin only).
+     *
+     * @param userId the ID of the user to delete
+     * @throws IllegalArgumentException if the user is not found.
+     */
     public void deleteUser(int userId) {
         User user = getUserById(userId);
         userRepository.delete(user);
         System.out.println("User deleted successfully");
     }
 
+    /**
+     * Retrieves a user by their ID.
+     *
+     * @param id the ID of the user
+     * @return the User entity
+     * @throws IllegalArgumentException if the user is not found.
+     */
     public User getUserById(int id) {
         return userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
+    /**
+     * Retrieves a list of all users in the system.
+     *
+     * @return a list of all User entities
+     */
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
+    /**
+     * Retrieves a user's body parameters and calculated limits as a response DTO.
+     *
+     * @param userId the ID of the user
+     * @return the BodyParametersResponse DTO
+     * @throws IllegalArgumentException if body parameters are not found for the user.
+     */
     public BodyParametersResponse getUserBodyParametersResponse(int userId) {
         BodyParameters bp = bodyParametersRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("There are no body parameters for this user"));
@@ -357,10 +439,23 @@ public class UserService {
                 bp.getCarbohydratesLimit());
     }
 
+    /**
+     * Retrieves a user by their email address.
+     *
+     * @param email the email address of the user
+     * @return the User entity
+     * @throws IllegalArgumentException if the user is not found.
+     */
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
+    /**
+     * Saves or updates a user's push notification device token.
+     *
+     * @param userId the ID of the user
+     * @param deviceToken the push notification token string
+     */
     public void saveDeviceToken(int userId, String deviceToken) {
         List<UserDeviceToken> tokens = deviceTokenRepository.findByUserId(userId);
 
@@ -374,6 +469,12 @@ public class UserService {
         }
     }
 
+    /**
+     * Retrieves all device tokens associated with a specific user.
+     *
+     * @param userId the ID of the user
+     * @return a list of device token strings
+     */
     public List<String> getDeviceTokens(int userId) {
         return deviceTokenRepository.findByUserId(userId)
                 .stream()
@@ -381,6 +482,13 @@ public class UserService {
                 .toList();
     }
 
+    /**
+     * Retrieves a list of users based on their premium status.
+     *
+     * @param recipients the recipient type ("premium", "non_premium", or "all")
+     * @return a list of User entities matching the criteria
+     * @throws IllegalArgumentException if an invalid recipient type is provided.
+     */
     public List<User> getUsersByRecipientType(String recipients) {
         switch (recipients) {
             case "premium" -> {
@@ -393,10 +501,19 @@ public class UserService {
                 return userRepository.findAll();
             }
             default ->
-                throw new IllegalArgumentException("Invalid recipient type: " + recipients);
+                    throw new IllegalArgumentException("Invalid recipient type: " + recipients);
         }
     }
 
+    /**
+     * Uploads a new profile image for a user and updates the image URL.
+     *
+     * @param userId the ID of the user
+     * @param imageFile the MultipartFile containing the image data
+     * @return the relative path to the saved image, including a timestamp query parameter
+     * @throws IOException if file handling fails
+     * @throws IllegalArgumentException if the image file is empty or the user is not found.
+     */
     @Transactional
     public String uploadProfileImage(int userId, MultipartFile imageFile) throws IOException {
         if (imageFile == null || imageFile.isEmpty()) {
@@ -426,6 +543,12 @@ public class UserService {
         return relativePath;
     }
 
+    /**
+     * Retrieves a list of all meals that a specific user has marked as favorite.
+     *
+     * @param userId the ID of the user
+     * @return a list of favorite Meal entities
+     */
     public List<Meal> getMyFavouriteMeals(int userId) {
         List<Favourite> favourites = favouriteRepository.findByUserId(userId);
 
@@ -440,6 +563,14 @@ public class UserService {
         return meals;
     }
 
+    /**
+     * Adds a meal to a user's list of favorites.
+     *
+     * @param mealId the ID of the meal to favorite
+     * @param userId the ID of the user
+     * @return the newly created Favourite entity
+     * @throws IllegalArgumentException if the meal is already in favorites or the user is not found.
+     */
     public Favourite addFavourite(int mealId, int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -456,6 +587,13 @@ public class UserService {
         return saved;
     }
 
+    /**
+     * Removes a specific meal from a user's list of favorites.
+     *
+     * @param mealId the ID of the meal to remove
+     * @param userId the ID of the user
+     * @throws IllegalArgumentException if the user or the favorite entry is not found.
+     */
     public void removeFavourite(int mealId, int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -466,23 +604,32 @@ public class UserService {
         favouriteRepository.delete(favourite);
     }
 
+    /**
+     * Toggles a user's status between active and banned (admin only).
+     *
+     * @param userId the ID of the user
+     * @throws IllegalArgumentException if the user is not found.
+     */
     public void toggleUserBan(int userId) {
-        User user = getUserById(userId); // Ta metoda już istnieje w Twoim serwisie
-
-        // Zakładam, że Twój Enum w Javie (study.snacktrack.entities.enums.Status)
-        // ma wartości odpowiadające bazie danych (active, banned).
+        User user = getUserById(userId);
 
         if (user.getStatus() == Status.banned) {
-            // Jeśli zbanowany -> Odblokuj (Active)
             user.setStatus(Status.active);
         } else {
-            // Jeśli aktywny (lub inactive) -> Zbanuj
             user.setStatus(Status.banned);
         }
 
         userRepository.save(user);
     }
 
+    /**
+     * Retrieves a paginated list of users, with optional filtering by query string.
+     *
+     * @param page the page number to retrieve (0-indexed)
+     * @param size the number of users per page
+     * @param query an optional query string to filter users by (e.g., name or email)
+     * @return a Page of User entities
+     */
     public Page<User> getUsersPage(int page, int size, String query) {
         Pageable pageable = PageRequest.of(page, size);
 

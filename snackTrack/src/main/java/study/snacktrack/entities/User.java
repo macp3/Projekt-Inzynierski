@@ -15,6 +15,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * Represents a standard user account registered within the application.
+ * This entity stores the user's identification details, credentials, account status, and information related to premium membership and activity streaks.
+ */
 @Entity
 @Table(name = "users")
 public class User {
@@ -45,6 +49,10 @@ public class User {
     @NotNull
     private int streak;
 
+    /**
+     * Getters and setters for all entity fields.
+     * These methods provide standard access and modification capabilities for the User entity properties.
+     */
     public int getId() {
         return id;
     }

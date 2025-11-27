@@ -1,39 +1,47 @@
 package study.snacktrack.controllers;
 
-import java.util.List;
-
-import study.snacktrack.dto.TrainingDetailsResponse;
-import study.snacktrack.services.JwtService;
-import study.snacktrack.services.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
+import study.snacktrack.dto.TrainingDetailsResponse;
 import study.snacktrack.entities.Exercise;
 import study.snacktrack.entities.TrainingInfo;
 import study.snacktrack.entities.User;
+import study.snacktrack.services.JwtService;
 import study.snacktrack.services.TrainingService;
+import study.snacktrack.services.UserService;
 
+import java.util.List;
+
+/**
+ * REST controller for handling training and exercise operations related to users,
+ * including viewing available trainings, assigning/depriving user trainings,
+ * and retrieving details.
+ */
 @RestController
 @RequestMapping("/trainings")
 public class TrainingController {
 
+    /** Service for user data access and retrieval. */
     private final UserService userService;
+    /** Service for JWT token handling. */
     private final JwtService jwtService;
+    /** Service for training and exercise business logic. */
     private final TrainingService trainingService;
 
+    /**
+     * Constructs the TrainingController with required dependencies.
+     */
     public TrainingController(UserService userService, JwtService jwtService, TrainingService trainingService) {
         this.userService = userService;
         this.jwtService = jwtService;
         this.trainingService = trainingService;
     }
 
-    //dziala
+    /**
+     * Retrieves a list of all available training programs.
+     *
+     * @return ResponseEntity containing a list of TrainingInfo entities or an error message.
+     */
     @GetMapping("")
     public ResponseEntity<?> getAllTrainings()
     {
@@ -49,7 +57,12 @@ public class TrainingController {
         return ResponseEntity.ok(trainings);
     }
 
-    //dziala
+    /**
+     * Retrieves detailed information about a specific exercise by its ID.
+     *
+     * @param exerciseId The ID of the exercise.
+     * @return ResponseEntity containing the Exercise entity or an error message.
+     */
     @GetMapping("/exercises/{exerciseId}/details")
     public ResponseEntity<?> getExerciseDetails(@PathVariable int exerciseId)
     {
@@ -65,7 +78,12 @@ public class TrainingController {
         return ResponseEntity.ok(exercise);
     }
 
-    //dziala
+    /**
+     * Retrieves detailed information about a specific training program by its ID.
+     *
+     * @param id The ID of the training program.
+     * @return ResponseEntity containing the TrainingDetailsResponse DTO or an error message.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<?> getTrainingDetails(@PathVariable int id)
     {
@@ -82,10 +100,12 @@ public class TrainingController {
         return ResponseEntity.ok(response);
     }
 
-    //zrobilem assign i potem wywolalem to i nie dziala
-    //juz dziala
-    //dziala nawet po usunieciu treningu z bazy
-    //dziala
+    /**
+     * Retrieves the basic TrainingInfo entity currently assigned to the authenticated user.
+     *
+     * @param authHeader The Authorization header for user identification.
+     * @return ResponseEntity containing the assigned TrainingInfo or an error message if none is assigned.
+     */
     @GetMapping("/my")
     public ResponseEntity<?> getUserTraining(@RequestHeader("Authorization") String authHeader)
     {
@@ -105,7 +125,13 @@ public class TrainingController {
         return ResponseEntity.ok(info);
     }
 
-    //dziala
+    /**
+     * Retrieves detailed information (including exercises) about the training program
+     * currently assigned to the authenticated user.
+     *
+     * @param authHeader The Authorization header for user identification.
+     * @return ResponseEntity containing the TrainingDetailsResponse DTO or an error message.
+     */
     @GetMapping("/my/details")
     public ResponseEntity<?> getUserTrainingWithDetails(@RequestHeader("Authorization") String authHeader)
     {
@@ -126,7 +152,13 @@ public class TrainingController {
         return ResponseEntity.ok(response);
     }
 
-    //dziala
+    /**
+     * Assigns a specific training program to the authenticated user.
+     *
+     * @param trainingId The ID of the training program to assign.
+     * @param authHeader The Authorization header for user identification.
+     * @return ResponseEntity with a success message or a bad request error.
+     */
     @PostMapping("/assign/{trainingId}")
     public ResponseEntity<String> assignTraining(@PathVariable int trainingId, @RequestHeader("Authorization") String authHeader)
     {
@@ -145,7 +177,12 @@ public class TrainingController {
         return ResponseEntity.ok("Training successfully assigned to user");
     }
 
-    //dziala
+    /**
+     * Removes the currently assigned training program from the authenticated user.
+     *
+     * @param authHeader The Authorization header for user identification.
+     * @return ResponseEntity with a success message or a bad request error.
+     */
     @DeleteMapping("/my/deprive")
     public ResponseEntity<String> depriveTrainingFromUser(@RequestHeader("Authorization") String authHeader)
     {

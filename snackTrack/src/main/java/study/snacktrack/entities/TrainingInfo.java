@@ -5,6 +5,10 @@ import jakarta.persistence.*;
 
 import java.util.List;
 
+/**
+ * Represents the high-level descriptive information for a complete training program or routine.
+ * This entity serves as the header for a workout plan, containing its name, a detailed description, and the total intended duration.
+ */
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "trainings_info")
@@ -23,17 +27,18 @@ public class TrainingInfo {
     @Column(name = "duration_time", nullable = false)
     private Integer durationTime;
 
-    //ewentualnie do wyrzucenia xd
     @OneToMany(mappedBy = "trainingInfo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Training> trainings;
 
-    //to tez
     @OneToMany(mappedBy = "trainingInfo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserTraining> userTrainings;
 
 
 
-    // Gettery i settery
+    /**
+     * Getters and setters for all entity fields.
+     * These methods provide standard access and modification capabilities for the TrainingInfo entity properties.
+     */
     public Integer getId() {
         return id;
     }
