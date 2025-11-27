@@ -24,7 +24,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- --------------------------------------------------------
 -- TABLE: admins
 -- --------------------------------------------------------
-CREATE TABLE `admins` (
+CREATE TABLE IF NOT EXISTS `admins` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `login` varchar(40) NOT NULL UNIQUE,
   `email` varchar(40) NOT NULL UNIQUE,
@@ -35,7 +35,7 @@ CREATE TABLE `admins` (
 -- --------------------------------------------------------
 -- TABLE: users
 -- --------------------------------------------------------
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(30) NOT NULL,
   `surname` varchar(30) NOT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE `users` (
 -- --------------------------------------------------------
 -- TABLE: body_parameters
 -- --------------------------------------------------------
-CREATE TABLE `body_parameters` (
+CREATE TABLE IF NOT EXISTS `body_parameters` (
   `user_id` int(11) NOT NULL,
   `sex` enum('male','female') NOT NULL,
   `height` float NOT NULL,
@@ -72,7 +72,7 @@ CREATE TABLE `body_parameters` (
 -- --------------------------------------------------------
 -- TABLE: badges
 -- --------------------------------------------------------
-CREATE TABLE `badges` (
+CREATE TABLE IF NOT EXISTS `badges` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `badge` varchar(30) DEFAULT NULL,
@@ -84,7 +84,7 @@ CREATE TABLE `badges` (
 -- --------------------------------------------------------
 -- TABLE: essential_food
 -- --------------------------------------------------------
-CREATE TABLE `essential_food` (
+CREATE TABLE IF NOT EXISTS `essential_food` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL UNIQUE,
   `author_id` int(11) NOT NULL,
@@ -103,7 +103,7 @@ CREATE TABLE `essential_food` (
 -- --------------------------------------------------------
 -- TABLE: meals
 -- --------------------------------------------------------
-CREATE TABLE `meals` (
+CREATE TABLE IF NOT EXISTS `meals` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `author_id` int(11) NOT NULL,
   `name` varchar(50) NOT NULL,
@@ -117,7 +117,7 @@ CREATE TABLE `meals` (
 -- --------------------------------------------------------
 -- TABLE: ingredients
 -- --------------------------------------------------------
-CREATE TABLE `ingredients` (
+CREATE TABLE IF NOT EXISTS `ingredients` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `meal_id` int(11) DEFAULT NULL,
   `essential_id` int(11) DEFAULT NULL,
@@ -132,7 +132,7 @@ CREATE TABLE `ingredients` (
 -- --------------------------------------------------------
 -- TABLE: comments
 -- --------------------------------------------------------
-CREATE TABLE `comments` (
+CREATE TABLE IF NOT EXISTS `comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `author_id` int(11) NOT NULL,
   `content` varchar(1023) NOT NULL,
@@ -144,7 +144,7 @@ CREATE TABLE `comments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-CREATE TABLE `comment_likes` (
+CREATE TABLE IF NOT EXISTS `comment_likes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `comment_id` int(11) NOT NULL,
@@ -157,7 +157,7 @@ CREATE TABLE `comment_likes` (
 -- --------------------------------------------------------
 -- TABLE: favourite
 -- --------------------------------------------------------
-CREATE TABLE `favourite` (
+CREATE TABLE IF NOT EXISTS `favourite` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `meal_id` int(11) DEFAULT NULL,
@@ -169,7 +169,7 @@ CREATE TABLE `favourite` (
 -- --------------------------------------------------------
 -- TABLE: notifications
 -- --------------------------------------------------------
-CREATE TABLE `notifications` (
+CREATE TABLE IF NOT EXISTS `notifications` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `author_id` int(11) NOT NULL,
   `name` varchar(30) NOT NULL,
@@ -183,7 +183,7 @@ CREATE TABLE `notifications` (
 -- --------------------------------------------------------
 -- TABLE: registered_alimentation
 -- --------------------------------------------------------
-CREATE TABLE `registered_alimentation` (
+CREATE TABLE IF NOT EXISTS `registered_alimentation` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `essential_id` int(11) DEFAULT NULL,
@@ -202,7 +202,7 @@ CREATE TABLE `registered_alimentation` (
 -- --------------------------------------------------------
 -- TABLE: reported_comments
 -- --------------------------------------------------------
-CREATE TABLE `reported_comments` (
+CREATE TABLE IF NOT EXISTS `reported_comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `reporting_id` int(11) NOT NULL,
   `comment_id` int(11) NOT NULL,
@@ -215,7 +215,7 @@ CREATE TABLE `reported_comments` (
 -- --------------------------------------------------------
 -- TABLE: reported_meals
 -- --------------------------------------------------------
-CREATE TABLE `reported_meals` (
+CREATE TABLE IF NOT EXISTS `reported_meals` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `reporting_id` int(11) NOT NULL,
   `meal_id` int(11) NOT NULL,
@@ -228,7 +228,7 @@ CREATE TABLE `reported_meals` (
 -- --------------------------------------------------------
 -- TABLE: exercises
 -- --------------------------------------------------------
-CREATE TABLE `exercises` (
+CREATE TABLE IF NOT EXISTS `exercises` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `description` varchar(100) NOT NULL,
@@ -242,7 +242,7 @@ CREATE TABLE `exercises` (
 -- --------------------------------------------------------
 -- TABLE: trainings_info
 -- --------------------------------------------------------
-CREATE TABLE `trainings_info` (
+CREATE TABLE IF NOT EXISTS `trainings_info` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `description` varchar(255) NOT NULL,
@@ -253,7 +253,7 @@ CREATE TABLE `trainings_info` (
 -- --------------------------------------------------------
 -- TABLE: trainings
 -- --------------------------------------------------------
-CREATE TABLE `trainings` (
+CREATE TABLE IF NOT EXISTS `trainings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `training_id` int(11) NOT NULL,
   `author_id` int(11) NOT NULL,
@@ -268,7 +268,7 @@ CREATE TABLE `trainings` (
 -- --------------------------------------------------------
 -- TABLE: user_trainings
 -- --------------------------------------------------------
-CREATE TABLE `user_trainings` (
+CREATE TABLE IF NOT EXISTS `user_trainings` (
   `user_id` int(11) NOT NULL,
   `training_id` int(11) NOT NULL,
   `timestamp` date NOT NULL,
@@ -277,19 +277,19 @@ CREATE TABLE `user_trainings` (
   CONSTRAINT `user_trainings_ibfk_2` FOREIGN KEY (`training_id`) REFERENCES `trainings_info`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE user_device_tokens (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    device_token VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE IF NOT EXISTS `user_device_tokens` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `device_token` VARCHAR(255) NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE verification_token (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  token VARCHAR(255) NOT NULL,
-  expiry_date DATETIME NOT NULL,
-  user_id INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `verification_token` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `token` VARCHAR(255) NOT NULL,
+  `expiry_date` DATETIME NOT NULL,
+  `user_id` INT NOT NULL,
   CONSTRAINT fk_verification_token_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
