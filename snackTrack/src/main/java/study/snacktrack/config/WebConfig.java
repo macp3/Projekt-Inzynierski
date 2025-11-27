@@ -31,19 +31,4 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:/app/uploads/meals/")
                 .setCachePeriod(3600);
     }
-
-    /**
-     * Configures global CORS (Cross-Origin Resource Sharing) mappings.
-     * Allows requests from the specified frontend origin (http://localhost:3000) for all paths.
-     *
-     * @param registry The registry for adding CORS mappings.
-     */
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true);
-    }
 }
