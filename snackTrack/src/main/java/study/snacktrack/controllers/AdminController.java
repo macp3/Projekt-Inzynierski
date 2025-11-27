@@ -36,34 +36,21 @@ import study.snacktrack.services.UserService;
 @RequestMapping("/admin")
 public class AdminController {
 
-    // --- FIELDS ---
-    /** Repository for Admin entity access. */
+
     private final AdminRepository adminRepository;
-    /** Service for user related business logic. */
     private final UserService userService;
-    /** Service for reported meal management. */
     private final ReportedMealService reportedMealService;
-    /** Service for reported comment management. */
     private final ReportedCommentService reportedCommentService;
-    /** Service for comment related operations. */
     private final CommentService commentService;
-    /** Service for JWT token handling. */
     private final JwtService jwtService;
-    /** Service for training and exercise business logic. */
     private final TrainingService trainingService;
-    /** Service for application notifications. */
     private final NotificationService notificationService;
-    /** Repository for User entity access. */
     private final UserRepository userRepository;
 
-    /** Repository for Exercise entity access. */
     private final ExerciseRepository exerciseRepository;
-    /** Repository for TrainingInfo entity access. */
     private final TrainingInfoRepository trainingInfoRepository;
-    /** Service for meal related operations, used here for admin deletion. */
     private final MealService mealService;
 
-    // --- CONSTRUCTOR ---
     /**
      * Constructs the AdminController with all necessary dependencies.
      */
@@ -94,10 +81,6 @@ public class AdminController {
         this.trainingInfoRepository = trainingInfoRepository;
     }
 
-    // ========================================================================
-    // DASHBOARD & STATS
-    // ========================================================================
-
     /**
      * Retrieves key statistics for the administration dashboard.
      * Includes counts for users (total, active, banned, premium), trainings, and
@@ -123,10 +106,6 @@ public class AdminController {
                 totalTrainings,
                 totalExercises));
     }
-
-    // ========================================================================
-    // USERS
-    // ========================================================================
 
     /**
      * Retrieves detailed information for a specific user.
@@ -196,12 +175,6 @@ public class AdminController {
         }
     }
 
-    // ========================================================================
-    // REPORTS & MODERATION (MEALS & COMMENTS)
-    // ========================================================================
-
-    // --- MEAL REPORTS ---
-
     /**
      * Retrieves all reported meals for moderation.
      *
@@ -231,8 +204,6 @@ public class AdminController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-    // --- COMMENT REPORTS ---
 
     /**
      * Retrieves all reported comments for moderation.
@@ -264,8 +235,6 @@ public class AdminController {
         }
     }
 
-    // --- CONTENT DELETION (ADMIN GOD MODE) ---
-
     /**
      * Permanently deletes a meal by its ID (Admin functionality).
      *
@@ -281,10 +250,6 @@ public class AdminController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-    // ========================================================================
-    // TRAININGS & EXERCISES
-    // ========================================================================
 
     /**
      * Retrieves all available training programs.
@@ -515,10 +480,6 @@ public class AdminController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-    // ========================================================================
-    // NOTIFICATIONS
-    // ========================================================================
 
     /**
      * Service for handling push notifications (FCM).
