@@ -3,8 +3,10 @@ package study.snacktrack.dto;
 import study.snacktrack.entities.EssentialFood;
 
 /**
- * Data Transfer Object (DTO) used for carrying complete nutritional and descriptive details of an EssentialFood entity.
- * This structure is typically returned to the client when a food item is retrieved from the internal database.
+ * Data Transfer Object (DTO) used for carrying complete nutritional and
+ * descriptive details of an EssentialFood entity.
+ * This structure is typically returned to the client when a food item is
+ * retrieved from the internal database.
  */
 public class EssentialFoodResponse {
 
@@ -20,8 +22,10 @@ public class EssentialFoodResponse {
     private String servingSizeUnit;
 
     /**
-     * Constructs a new EssentialFoodResponse object by mapping data from a persistent EssentialFood entity.
-     * This constructor simplifies the conversion process from the database model to the external data structure.
+     * Constructs a new EssentialFoodResponse object by mapping data from a
+     * persistent EssentialFood entity.
+     * This constructor simplifies the conversion process from the database model to
+     * the external data structure.
      *
      * @param food The EssentialFood entity to map data from.
      */
@@ -30,6 +34,7 @@ public class EssentialFoodResponse {
         this.name = food.getName();
         this.description = food.getDescription();
         this.calories = food.getCalories();
+
         this.protein = food.getProtein();
         this.fat = food.getFat();
         this.carbohydrates = food.getCarbohydrates();
@@ -38,10 +43,6 @@ public class EssentialFoodResponse {
         this.servingSizeUnit = food.getServingSizeUnit();
     }
 
-    /**
-     * Getters and setters for the DTO fields.
-     * These methods allow external access and modification of the food item's detailed properties.
-     */
     public int getId() {
         return id;
     }
@@ -68,5 +69,57 @@ public class EssentialFoodResponse {
 
     public float getCalories() {
         return calories;
+    }
+
+    public void setCalories(float calories) {
+        this.calories = calories;
+    }
+
+    public float getProtein() {
+        return protein;
+    }
+
+    public void setProtein(float protein) {
+        this.protein = protein;
+    }
+
+    public float getFat() {
+        return fat;
+    }
+
+    public void setFat(float fat) {
+        this.fat = fat;
+    }
+
+    public float getCarbohydrates() {
+        return carbohydrates;
+    }
+
+    public void setCarbohydrates(float carbohydrates) {
+        this.carbohydrates = carbohydrates;
+    }
+
+    public String getBrandName() {
+        return brandName;
+    }
+
+    public void setBrandName(String brandName) {
+        this.brandName = brandName;
+    }
+
+    public float getDefaultWeight() {
+        return defaultWeight;
+    }
+
+    public void setDefaultWeight(float defaultWeight) {
+        this.defaultWeight = defaultWeight;
+    }
+
+    public String getServingSizeUnit() {
+        return servingSizeUnit;
+    }
+
+    public void setServingSizeUnit(String servingSizeUnit) {
+        this.servingSizeUnit = servingSizeUnit;
     }
 }

@@ -99,18 +99,9 @@ public class AdminController {
     // ========================================================================
 
     /**
-     * Simple endpoint to confirm admin access.
-     *
-     * @return A welcome message.
-     */
-    @GetMapping("/dashboard")
-    public String getDashboard() {
-        return "Hello, ADMIN!";
-    }
-
-    /**
      * Retrieves key statistics for the administration dashboard.
-     * Includes counts for users (total, active, banned, premium), trainings, and exercises.
+     * Includes counts for users (total, active, banned, premium), trainings, and
+     * exercises.
      *
      * @return ResponseEntity containing the dashboard statistics DTO.
      */
@@ -155,7 +146,7 @@ public class AdminController {
     /**
      * Updates the premium subscription expiration date for a user.
      *
-     * @param userId The ID of the user to update.
+     * @param userId     The ID of the user to update.
      * @param dateString The new expiration date as a string.
      * @return ResponseEntity with the updated user info or an error message.
      */
@@ -187,8 +178,8 @@ public class AdminController {
     /**
      * Returns a paginated list of all users, optionally filtered by a query string.
      *
-     * @param page The requested page number (default 0).
-     * @param size The number of records per page (default 25).
+     * @param page  The requested page number (default 0).
+     * @param size  The number of records per page (default 25).
      * @param query Optional search query for filtering users.
      * @return ResponseEntity containing the paginated user list.
      */
@@ -328,13 +319,13 @@ public class AdminController {
      * Creates a new training program.
      * Requires Admin authentication via Authorization header.
      *
-     * @param request The TrainingRequest DTO containing training data.
+     * @param request    The TrainingRequest DTO containing training data.
      * @param authHeader The Authorization header containing the JWT token.
      * @return ResponseEntity with success message or an error message.
      */
     @PostMapping("/trainings/add")
     public ResponseEntity<String> addTraining(@RequestBody TrainingRequest request,
-                                              @RequestHeader("Authorization") String authHeader) {
+            @RequestHeader("Authorization") String authHeader) {
         try {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtService.extractEmail(token);
@@ -353,13 +344,13 @@ public class AdminController {
      * Requires Admin authentication via Authorization header.
      *
      * @param trainingId The ID of the training to edit.
-     * @param request The TrainingRequest DTO containing updated data.
+     * @param request    The TrainingRequest DTO containing updated data.
      * @param authHeader The Authorization header containing the JWT token.
      * @return ResponseEntity with success message or an error message.
      */
     @PutMapping("/trainings/{trainingId}/edit")
     public ResponseEntity<String> editTraining(@PathVariable int trainingId, @RequestBody TrainingRequest request,
-                                               @RequestHeader("Authorization") String authHeader) {
+            @RequestHeader("Authorization") String authHeader) {
         try {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtService.extractEmail(token);
@@ -377,13 +368,14 @@ public class AdminController {
      * Adds an exercise to a specific training program on a specific day.
      * Requires Admin authentication via Authorization header.
      *
-     * @param request The AddExerciseToTrainingRequest DTO.
+     * @param request    The AddExerciseToTrainingRequest DTO.
      * @param authHeader The Authorization header containing the JWT token.
-     * @return ResponseEntity with the updated training structure or an error message.
+     * @return ResponseEntity with the updated training structure or an error
+     *         message.
      */
     @PostMapping("/trainings/addExercise")
     public ResponseEntity<?> addExerciseToTraining(@RequestBody AddExerciseToTrainingRequest request,
-                                                   @RequestHeader("Authorization") String authHeader) {
+            @RequestHeader("Authorization") String authHeader) {
         try {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtService.extractEmail(token);
@@ -406,11 +398,12 @@ public class AdminController {
      *
      * @param trainingId The ID of the training program.
      * @param exerciseId The ID of the exercise to delete.
-     * @return ResponseEntity with the updated training structure or an error message.
+     * @return ResponseEntity with the updated training structure or an error
+     *         message.
      */
     @DeleteMapping("/trainings/{trainingId}/delete/{exerciseId}")
     public ResponseEntity<?> deleteAllExercisesByIdFromTraining(@PathVariable int trainingId,
-                                                                @PathVariable int exerciseId) {
+            @PathVariable int exerciseId) {
         try {
             var response = trainingService.deleteAllExercisesByIdFromTraining(trainingId, exerciseId);
             return ResponseEntity.ok(response);
@@ -420,16 +413,18 @@ public class AdminController {
     }
 
     /**
-     * Deletes a specific instance of an exercise defined by its ID and day from a training program.
+     * Deletes a specific instance of an exercise defined by its ID and day from a
+     * training program.
      *
-     * @param trainingId The ID of the training program.
-     * @param exerciseId The ID of the exercise to delete.
+     * @param trainingId    The ID of the training program.
+     * @param exerciseId    The ID of the exercise to delete.
      * @param dayOfExercise The day the exercise occurs on.
-     * @return ResponseEntity with the updated training structure or an error message.
+     * @return ResponseEntity with the updated training structure or an error
+     *         message.
      */
     @DeleteMapping("/trainings/{trainingId}/delete/{exerciseId}/{dayOfExercise}")
     public ResponseEntity<?> deleteExerciseByIdAndDayFromTraining(@PathVariable int trainingId,
-                                                                  @PathVariable int exerciseId, @PathVariable int dayOfExercise) {
+            @PathVariable int exerciseId, @PathVariable int dayOfExercise) {
         try {
             var response = trainingService.deleteExerciseByIdAndDayFromTraining(trainingId, exerciseId, dayOfExercise);
             return ResponseEntity.ok(response);
@@ -535,13 +530,13 @@ public class AdminController {
      * Creates a new persistent notification in the database.
      * Requires Admin authentication via Authorization header.
      *
-     * @param request The NotificationRequest DTO.
+     * @param request    The NotificationRequest DTO.
      * @param authHeader The Authorization header containing the JWT token.
      * @return ResponseEntity with success message or an error message.
      */
     @PostMapping("/notifications/add")
     public ResponseEntity<String> createNotification(@RequestBody NotificationRequest request,
-                                                     @RequestHeader("Authorization") String authHeader) {
+            @RequestHeader("Authorization") String authHeader) {
         try {
             String token = authHeader.replace("Bearer ", "");
             String email = jwtService.extractEmail(token);
@@ -585,7 +580,7 @@ public class AdminController {
      */
     @GetMapping("/notifications/filter")
     public ResponseEntity<?> getNotificationsByRecipients(@RequestHeader("Authorization") String authHeader,
-                                                          @RequestParam Recipients recipients) {
+            @RequestParam Recipients recipients) {
         try {
             String token = authHeader.replace("Bearer ", "");
             jwtService.extractEmail(token);
@@ -599,7 +594,8 @@ public class AdminController {
     /**
      * Sends a push notification immediately to a specified user group via FCM.
      *
-     * @param payload Map containing 'group', 'title', and 'body' for the notification.
+     * @param payload Map containing 'group', 'title', and 'body' for the
+     *                notification.
      * @return ResponseEntity with success message or an error message.
      */
     @PostMapping("/sendNotification")
@@ -617,7 +613,8 @@ public class AdminController {
     }
 
     /**
-     * Retrieves detailed information about a specific meal for administrative review.
+     * Retrieves detailed information about a specific meal for administrative
+     * review.
      *
      * @param mealId The ID of the meal.
      * @return ResponseEntity containing meal details or an error message.
@@ -632,7 +629,8 @@ public class AdminController {
     }
 
     /**
-     * Retrieves detailed information about a specific comment for administrative review.
+     * Retrieves detailed information about a specific comment for administrative
+     * review.
      *
      * @param commentId The ID of the comment.
      * @return ResponseEntity containing comment details or an error message.
