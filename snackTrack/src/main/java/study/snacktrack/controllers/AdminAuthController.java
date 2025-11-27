@@ -23,19 +23,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AdminAuthController {
 
-    /**
-     * Repository for accessing Admin user data.
-     */
     private final AdminRepository adminRepository;
-
-    /**
-     * Utility for encoding and verifying passwords.
-     */
     private final PasswordEncoder passwordEncoder;
-
-    /**
-     * Service for generating JWT (JSON Web Token) tokens.
-     */
     private final JwtService jwtService;
 
     /**
