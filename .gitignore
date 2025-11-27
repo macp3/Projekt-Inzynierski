@@ -10,7 +10,7 @@ target/
 !**/src/test/**/target/
 
 .env
-!**/src/main/resource/firebase/
+!**/src/main/resources/firebase/
 
 ### STS ###
 .apt_generated
