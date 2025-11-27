@@ -24,10 +24,15 @@ public class EmailService {
      */
     @Async
     public void sendEmail(String to, String subject, String text) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(text);
-        mailSender.send(message);
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(text);
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.err.println("BŁĄD WYSYŁANIA MAILA: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
