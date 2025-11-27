@@ -5,9 +5,12 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import jakarta.annotation.PostConstruct;
 
@@ -17,6 +20,9 @@ import jakarta.annotation.PostConstruct;
 @Configuration
 public class FirebaseConfig {
 
+    @Value("${FIREBASE_CONFIG_JSON}")
+    private String firebaseConfigJson;
+
     /**
      * Initializes the FirebaseApp using the service account key.
      * Only runs if the app is not already initialized.
@@ -25,15 +31,22 @@ public class FirebaseConfig {
      */
     @PostConstruct
     public void initializeFirebase() throws IOException {
-        InputStream serviceAccount = getClass()
-                .getResourceAsStream("/firebase/serviceAccountKey.json");
+        try {
+            if (firebaseConfigJson == null || firebaseConfigJson.isBlank()) {
+                return;
+            }
 
-        FirebaseOptions options = FirebaseOptions.builder()
-                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                .build();
+            InputStream serviceAccount = new ByteArrayInputStream(firebaseConfigJson.getBytes(StandardCharsets.UTF_8));
 
-        if (FirebaseApp.getApps().isEmpty()) {
-            FirebaseApp.initializeApp(options);
+            FirebaseOptions options = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .build();
+
+            if (FirebaseApp.getApps().isEmpty()) {
+                FirebaseApp.initializeApp(options);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
