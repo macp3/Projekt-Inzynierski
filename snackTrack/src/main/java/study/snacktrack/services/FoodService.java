@@ -42,7 +42,7 @@ public class FoodService {
      * Constructs FoodService with repository and authentication service.
      *
      * @param foodRepository repository for essential foods
-     * @param authService service for FatSecret authentication
+     * @param authService    service for FatSecret authentication
      */
     public FoodService(FoodRepository foodRepository, FatSecretAuthService authService) {
         this.restTemplate = new RestTemplate();
@@ -53,7 +53,7 @@ public class FoodService {
     /**
      * Safely parses integer values.
      *
-     * @param value input object
+     * @param value        input object
      * @param defaultValue fallback value
      * @return parsed integer or default
      */
@@ -74,7 +74,7 @@ public class FoodService {
     /**
      * Safely parses float values.
      *
-     * @param value input object
+     * @param value        input object
      * @param defaultValue fallback value
      * @return parsed float or default
      */
@@ -126,6 +126,10 @@ public class FoodService {
 
         ResponseEntity<Map> responseEntity = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
         Map<String, Object> response = responseEntity.getBody();
+
+        if (response != null && response.containsKey("error")) {
+            System.err.println("FATSECRET API ERROR: " + response.get("error"));
+        }
 
         if (response == null || !response.containsKey("foods")) {
             return Collections.emptyList();
@@ -206,7 +210,7 @@ public class FoodService {
     /**
      * Extracts nutrient value from description string.
      *
-     * @param description food description
+     * @param description  food description
      * @param nutrientName nutrient name
      * @return nutrient value or 0
      */
@@ -239,7 +243,7 @@ public class FoodService {
     /**
      * Adds a new essential food to repository after validation.
      *
-     * @param request food request data
+     * @param request     food request data
      * @param currentUser user adding the food
      * @return confirmation message
      */
